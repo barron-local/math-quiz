@@ -16,7 +16,12 @@ type QuizState = 'name-input' | 'playing' | 'completed'
 
 export default function App() {
   const [gameState, setGameState] = useState<QuizState>('name-input')
-  const [kidName, setKidName] = useState('')
+  const [kidName, setKidName] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('math_quiz_kid_name') || ''
+    }
+    return ''
+  })
   // Quiz configuration states
   const [questionCountChoice, setQuestionCountChoice] = useState<10 | 20 | 30 | 'custom'>(10)
   const [customQuestionCount, setCustomQuestionCount] = useState('')
@@ -215,6 +220,9 @@ export default function App() {
     if (e) e.preventDefault()
     const nameToUse = kidName.trim() || 'คนเก่ง'
     setKidName(nameToUse)
+    if (typeof window !== 'undefined' && kidName.trim()) {
+      localStorage.setItem('math_quiz_kid_name', kidName.trim())
+    }
 
     // Calculate effective total questions
     const activeTotal = questionCountChoice === 'custom'
