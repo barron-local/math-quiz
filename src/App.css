@@ -1274,3 +1274,79 @@
   100% { opacity: 1; }
 }
 
+/* ===================================================
+   Special Lifeline Item: 50-50 (ตัด 2 ชอยส์)
+   =================================================== */
+.lifeline-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.lifeline-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--notion-blue);
+  background-color: var(--notion-blue-bg);
+  border: 1.5px solid var(--notion-blue);
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--shadow-subtle);
+  user-select: none;
+}
+
+.lifeline-btn:hover:not(:disabled) {
+  background-color: var(--notion-blue);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 10px rgba(35, 131, 226, 0.3);
+}
+
+.lifeline-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.lifeline-btn:disabled,
+.lifeline-btn.lifeline-used {
+  background-color: var(--notion-hover);
+  border-color: var(--notion-border);
+  color: var(--notion-text-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+  transform: none;
+}
+
+.lifeline-count-badge {
+  background-color: var(--notion-blue);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+  margin-left: 2px;
+}
+
+.lifeline-btn.lifeline-used .lifeline-count-badge {
+  background-color: var(--notion-text-light);
+}
+
+/* Choice eliminated / faded state */
+.choice-btn.choice-eliminated {
+  opacity: 0.25;
+  text-decoration: line-through;
+  pointer-events: none;
+  background-color: var(--notion-hover);
+  border-color: var(--notion-border);
+  color: var(--notion-text-light);
+  box-shadow: none;
+  transform: scale(0.96);
+  filter: grayscale(1);
+}
+
+

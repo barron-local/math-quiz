@@ -58,6 +58,8 @@ export default function App() {
   const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
   const [isPoked, setIsPoked] = useState(false)
   const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => new Set())
+  const [hasUsedLifeline, setHasUsedLifeline] = useState(false)
+  const [eliminatedChoices, setEliminatedChoices] = useState<number[]>([])
   const QUESTION_TIME_SECONDS = 60 // 1 minute per question
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_SECONDS)
   const hasWarnedTimeRef = useRef(false)
@@ -219,6 +221,7 @@ export default function App() {
         setIsAnswered(false)
         setIsCalculating(false)
         setHasEvaluated(false)
+        setEliminatedChoices([])
         setCurrentFeedback(null)
         setMascotMood('think')
       } else {
@@ -253,6 +256,8 @@ export default function App() {
     setIsAnswered(false)
     setIsCalculating(false)
     setHasEvaluated(false)
+    setHasUsedLifeline(false)
+    setEliminatedChoices([])
     setCurrentFeedback(null)
     setShowConfetti(false)
     setMascotMood('think')
@@ -307,6 +312,7 @@ export default function App() {
           setIsAnswered(false)
           setIsCalculating(false)
           setHasEvaluated(false)
+          setEliminatedChoices([])
           setCurrentFeedback(null)
           setMascotMood('think')
         } else {
@@ -314,6 +320,28 @@ export default function App() {
         }
       }, 1600)
     }, 850)
+  }
+
+  // Handle special booster lifeline (50-50: cut 2 incorrect choices, usable once per round)
+  const handleUseLifeline = () => {
+    if (hasUsedLifeline || isAnswered || !currentQuestion || eliminatedChoices.length > 0) return
+
+    // Find all incorrect choices in current question
+    const incorrectChoices = currentQuestion.choices.filter(
+      (c) => c !== currentQuestion.correctAnswer
+    )
+
+    // Pick 2 random incorrect choices to eliminate
+    const shuffledIncorrect = [...incorrectChoices].sort(() => Math.random() - 0.5)
+    const toEliminate = shuffledIncorrect.slice(0, 2)
+
+    setEliminatedChoices(toEliminate)
+    setHasUsedLifeline(true)
+    setMascotMood('cheer')
+
+    if (isVoiceEnabled) {
+      speakThaiText('ใช้ตัวช่วยตัดสองข้อแล้วนะคนเก่ง เหลือสองข้อให้เลือกแล้วจ้า!')
+    }
   }
 
   // Change kid name / reset
@@ -325,6 +353,8 @@ export default function App() {
     setIsAnswered(false)
     setIsCalculating(false)
     setHasEvaluated(false)
+    setHasUsedLifeline(false)
+    setEliminatedChoices([])
     setCurrentFeedback(null)
     setShowConfetti(false)
     setMascotMood('happy')
@@ -737,6 +767,26 @@ export default function App() {
               </div>
             )}
 
+            {/* Special Booster: 50-50 Lifeline Button (Cut 2 incorrect choices, usable 1 time per round) */}
+            <div className="lifeline-bar">
+              <button
+                type="button"
+                className={`lifeline-btn ${hasUsedLifeline ? 'lifeline-used' : 'pulse-btn'}`}
+                disabled={hasUsedLifeline || isAnswered}
+                onClick={handleUseLifeline}
+                title={hasUsedLifeline ? 'ใช้สิทธิ์ตัวช่วยตัด 2 ชอยส์ในรอบนี้ไปแล้ว' : 'กดเพื่อตัดตัวเลือกที่ผิดออก 2 ข้อ (ใช้ได้ 1 ครั้งต่อรอบ)'}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                </svg>
+                <span>ตัวช่วยตัด 2 ตัวเลือก</span>
+                <span className="lifeline-count-badge">
+                  {hasUsedLifeline ? '0/1' : '1/1'}
+                </span>
+              </button>
+            </div>
+
             {/* Read aloud / replay button for kids (Only shown when voice is enabled) */}
             {isVoiceEnabled && (
               <button
@@ -756,7 +806,11 @@ export default function App() {
 
           <div className="choices-grid">
             {currentQuestion.choices.map((choice, index) => {
+              const isEliminated = eliminatedChoices.includes(choice)
               let choiceClass = 'choice-btn'
+              if (isEliminated) {
+                choiceClass += ' choice-eliminated'
+              }
               if (isAnswered) {
                 if (isCalculating && choice === selectedAnswer) {
                   choiceClass += ' selected-calculating'
@@ -774,7 +828,7 @@ export default function App() {
                   key={`${currentQuestion.id}-${index}-${choice}`}
                   type="button"
                   className={choiceClass}
-                  disabled={isAnswered}
+                  disabled={isAnswered || isEliminated}
                   onClick={() => handleSelectChoice(choice)}
                 >
                   {choice}
