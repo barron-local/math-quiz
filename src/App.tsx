@@ -303,7 +303,7 @@ export default function App() {
         setHasEvaluated(false)
         setEliminatedChoices([])
         setCurrentFeedback(null)
-        setMascotMood('think')
+        setMascotMood('happy')
       } else {
         setGameState('completed')
       }
@@ -340,7 +340,7 @@ export default function App() {
     setEliminatedChoices([])
     setCurrentFeedback(null)
     setShowConfetti(false)
-    setMascotMood('think')
+    setMascotMood('happy')
     setGameState('playing')
   }
 
@@ -353,7 +353,7 @@ export default function App() {
     setIsAnswered(true)
     setIsCalculating(true)
     setHasEvaluated(false)
-    setMascotMood('think')
+    setMascotMood('happy')
 
     // Phase 2: After 850ms of calculation animation, evaluate and reveal the result (green or red)
     setTimeout(() => {
@@ -394,7 +394,7 @@ export default function App() {
           setHasEvaluated(false)
           setEliminatedChoices([])
           setCurrentFeedback(null)
-          setMascotMood('think')
+          setMascotMood('happy')
         } else {
           setGameState('completed')
         }
