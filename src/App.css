@@ -1579,19 +1579,11 @@
   }
 }
 
-.num-highlight-pulse circle {
-  animation: highlightGlow 1.8s ease-in-out infinite alternate;
-}
-
-@keyframes highlightGlow {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.45;
-  }
-  100% {
-    transform: scale(1.06);
-    opacity: 0.85;
-  }
+/* Number highlight circles (Static, clean Notion indicator - no movement) */
+.num-highlight-pulse circle,
+.num-highlight-static circle {
+  animation: none !important;
+  transform: none !important;
 }
 
 /* Math Card Actions Row (Center-aligned bottom controls) */

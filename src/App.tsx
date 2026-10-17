@@ -1014,7 +1014,7 @@ export default function App() {
 
                     {/* Main Formula Row (y=100) */}
                     {/* Num1 */}
-                    <g className={demoStep === 1 ? 'num-highlight-pulse' : ''}>
+                    <g className={demoStep === 1 ? 'num-highlight-static' : ''}>
                       {demoStep === 1 && (
                         <circle cx="45" cy="88" r="28" fill="var(--notion-blue-bg)" opacity="0.65" />
                       )}
@@ -1037,7 +1037,7 @@ export default function App() {
                     </text>
 
                     {/* Num2 */}
-                    <g className={demoStep === 1 ? 'num-highlight-pulse' : ''}>
+                    <g className={demoStep === 1 ? 'num-highlight-static' : ''}>
                       {demoStep === 1 && (
                         <circle cx="135" cy="88" r="28" fill="var(--notion-blue-bg)" opacity="0.65" />
                       )}
@@ -1060,7 +1060,7 @@ export default function App() {
                     </text>
 
                     {/* Num3 */}
-                    <g className={demoStep === 2 ? 'num-highlight-pulse' : ''}>
+                    <g className={demoStep === 2 ? 'num-highlight-static' : ''}>
                       {demoStep === 2 && (
                         <circle cx="225" cy="88" r="28" fill="var(--notion-green-bg)" opacity="0.65" />
                       )}
