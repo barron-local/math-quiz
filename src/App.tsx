@@ -1112,14 +1112,8 @@ export default function App() {
               <span className="badge badge-tag">สแกนเพื่อเข้าเล่น</span>
             </div>
             <div className="modal-body">
-              {/* Playful Kid-Friendly QR Photo Frame with KidMascot */}
+              {/* Clean QR Photo Frame */}
               <div className="qr-photo-frame-container">
-                {/* Official Cute Mascot peeking naturally over the frame */}
-                <div className="qr-peeking-mascot" aria-hidden="true">
-                  <KidMascot mood="happy" size={72} />
-                </div>
-
-                {/* Clean QR Display */}
                 <div className="qr-image-wrapper">
                   <img
                     src="/qrcode/qrcode.png"

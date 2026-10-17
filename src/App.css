@@ -224,11 +224,11 @@
   text-align: center;
 }
 
-/* Playful Kid-Friendly Clean QR Photo Frame */
+/* Clean Kid-Friendly QR Photo Frame */
 .qr-photo-frame-container {
   position: relative;
   display: inline-block;
-  margin: 30px auto 14px; /* Room for the cute mascot on top */
+  margin: 8px auto 16px;
   padding: 10px;
   background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #fce7f3 100%);
   border: 3px solid #60a5fa;
@@ -245,21 +245,6 @@
 
 .qr-photo-frame-container:hover {
   transform: scale(1.02);
-}
-
-/* Official KidMascot sitting happily over the Frame */
-.qr-peeking-mascot {
-  position: absolute;
-  top: -42px;
-  left: 12px;
-  z-index: 10;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.16));
-  animation: peekingBob 3s ease-in-out infinite alternate;
-}
-
-@keyframes peekingBob {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
 }
 
 .qr-image-wrapper {
