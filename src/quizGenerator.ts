@@ -52,9 +52,10 @@ export function generateQuestion(
     if (problemType === 'add-3') {
       operator = '+'
       operator2 = '+'
-      num1 = getRandomInt(1, 9)
-      num2 = getRandomInt(1, 9)
-      num3 = getRandomInt(1, 9)
+      // Kid-friendly easier 3-number addition: numbers 1 to 5, total sum capped at 15
+      num1 = getRandomInt(1, 5)
+      num2 = getRandomInt(1, 5)
+      num3 = getRandomInt(1, 4)
       correctAnswer = num1 + num2 + num3
       key = `${num1}+${num2}+${num3}`
     } else {
