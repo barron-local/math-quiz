@@ -188,6 +188,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  padding: 0;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -198,6 +200,13 @@
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 10;
   box-shadow: var(--shadow-subtle);
+  box-sizing: border-box;
+}
+
+.modal-corner-close-btn svg {
+  display: block;
+  margin: auto;
+  pointer-events: none;
 }
 
 .modal-corner-close-btn:hover {
