@@ -1,26 +1,40 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { generateQuestion, type Question } from './quizGenerator'
+import { KidMascot } from './components/KidMascot'
+import {
+  getRandomCorrectMessage,
+  getRandomEncouragingMessage,
+  getCompletionMessage,
+} from './encouragements'
 import './App.css'
 
-type QuizState = 'start' | 'playing' | 'completed'
+type QuizState = 'name-input' | 'playing' | 'completed'
 
 const TOTAL_QUESTIONS = 10
 
 export default function App() {
-  const [gameState, setGameState] = useState<QuizState>('start')
+  const [gameState, setGameState] = useState<QuizState>('name-input')
+  const [kidName, setKidName] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
   const [score, setScore] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
+  const [currentFeedback, setCurrentFeedback] = useState<{ isCorrect: boolean; text: string } | null>(null)
+  const [mascotMood, setMascotMood] = useState<'happy' | 'celebrate' | 'cheer' | 'think'>('happy')
 
   // Start new game
-  const handleStart = () => {
+  const handleStart = (e?: FormEvent) => {
+    if (e) e.preventDefault()
+    const nameToUse = kidName.trim() || 'คนเก่ง'
+    setKidName(nameToUse)
     setScore(0)
     setCurrentIndex(1)
     setCurrentQuestion(generateQuestion(1))
     setSelectedAnswer(null)
     setIsAnswered(false)
+    setCurrentFeedback(null)
+    setMascotMood('think')
     setGameState('playing')
   }
 
@@ -34,6 +48,17 @@ export default function App() {
     const isCorrect = choice === currentQuestion.correctAnswer
     if (isCorrect) {
       setScore((prev) => prev + 1)
+      setCurrentFeedback({
+        isCorrect: true,
+        text: getRandomCorrectMessage(kidName),
+      })
+      setMascotMood('celebrate')
+    } else {
+      setCurrentFeedback({
+        isCorrect: false,
+        text: getRandomEncouragingMessage(kidName),
+      })
+      setMascotMood('cheer')
     }
 
     // Auto proceed to next question or finished screen
@@ -44,42 +69,74 @@ export default function App() {
         setCurrentQuestion(generateQuestion(nextIndex))
         setSelectedAnswer(null)
         setIsAnswered(false)
+        setCurrentFeedback(null)
+        setMascotMood('think')
       } else {
         setGameState('completed')
       }
-    }, 850)
+    }, 1200)
+  }
+
+  // Change kid name / reset
+  const handleReset = () => {
+    setScore(0)
+    setCurrentIndex(0)
+    setCurrentQuestion(null)
+    setSelectedAnswer(null)
+    setIsAnswered(false)
+    setCurrentFeedback(null)
+    setMascotMood('happy')
+    setGameState('name-input')
   }
 
   return (
     <main className="notion-container">
-      {/* State: START SCREEN */}
-      {gameState === 'start' && (
-        <section aria-label="Start screen">
-          <div className="title-tag">คณิตศาสตร์ประถม</div>
+      {/* State 1: NAME INPUT & WELCOME */}
+      {gameState === 'name-input' && (
+        <section aria-label="Welcome and name input" className="screen-center">
+          <div className="mascot-wrapper bounce-in">
+            <KidMascot mood="happy" size={120} />
+          </div>
+          <div className="title-tag">แบบฝึกหัดคณิตคิดเร็ว</div>
           <h1 className="page-title">Math Quiz</h1>
-          <p className="page-subtitle">ฝึกคิดเลขเร็ว บวกและลบ 10 ข้อ</p>
+          <p className="page-subtitle">ยินดีต้อนรับเพื่อนคนเก่ง มาฝึกคิดเลขเร็วกันนะ!</p>
 
-          <button
-            type="button"
-            className="notion-btn-primary"
-            onClick={handleStart}
-            autoFocus
-          >
-            เริ่มทำแบบฝึกหัด (Start)
-          </button>
+          <form onSubmit={handleStart} className="name-form">
+            <label htmlFor="kidNameInput" className="name-label">
+              พิมพ์ชื่อเล่นของหนูตรงนี้เลยครับ
+            </label>
+            <input
+              id="kidNameInput"
+              type="text"
+              className="name-input"
+              placeholder="เช่น น้องต้นกล้า, มะนาว"
+              value={kidName}
+              onChange={(e) => setKidName(e.target.value)}
+              maxLength={20}
+              autoFocus
+            />
+            <button type="submit" className="notion-btn-primary">
+              เริ่มทำแบบฝึกหัด (Start)
+            </button>
+          </form>
         </section>
       )}
 
-      {/* State: PLAYING */}
+      {/* State 2: PLAYING QUESTION */}
       {gameState === 'playing' && currentQuestion && (
         <section aria-label="Quiz question">
           <div className="quiz-top-bar">
-            <span className="badge badge-tag">
-              ข้อที่ {currentIndex} / {TOTAL_QUESTIONS}
-            </span>
-            <span className="badge badge-score">
-              คะแนน: {score}
-            </span>
+            <div className="kid-greeting">
+              สวัสดีน้อง <span className="highlight-name">{kidName}</span>
+            </div>
+            <div className="stats-badges">
+              <span className="badge badge-tag">
+                ข้อที่ {currentIndex} / {TOTAL_QUESTIONS}
+              </span>
+              <span className="badge badge-score">
+                คะแนน: {score}
+              </span>
+            </div>
           </div>
 
           {/* Progress Indicator */}
@@ -88,6 +145,20 @@ export default function App() {
               className="progress-bar-fill"
               style={{ width: `${(currentIndex / TOTAL_QUESTIONS) * 100}%` }}
             />
+          </div>
+
+          {/* Character and Speech feedback bubble */}
+          <div className="mascot-status-area">
+            <div className="mascot-mini">
+              <KidMascot mood={mascotMood} size={76} />
+            </div>
+            <div className={`mascot-speech-bubble ${currentFeedback ? (currentFeedback.isCorrect ? 'bubble-correct' : 'bubble-try') : ''}`}>
+              {currentFeedback ? (
+                <span>{currentFeedback.text}</span>
+              ) : (
+                <span>ข้อนี้ตอบเท่าไหร่ดีนะน้อง{kidName}? ค่อยๆ คิดนะ!</span>
+              )}
+            </div>
           </div>
 
           <div className="math-card">
@@ -125,43 +196,57 @@ export default function App() {
             })}
           </div>
 
+          {/* Explicit solution hint after answer */}
           <div className="feedback-bar">
-            {isAnswered && (
-              selectedAnswer === currentQuestion.correctAnswer ? (
-                <span className="feedback-text correct">ถูกต้อง</span>
-              ) : (
-                <span className="feedback-text incorrect">
-                  คำตอบคือ {currentQuestion.correctAnswer}
-                </span>
-              )
+            {isAnswered && !currentFeedback?.isCorrect && (
+              <span className="feedback-answer-hint">
+                คำตอบที่ถูกต้องคือ {currentQuestion.correctAnswer}
+              </span>
             )}
           </div>
         </section>
       )}
 
-      {/* State: COMPLETED */}
-      {gameState === 'completed' && (
-        <section aria-label="Results">
-          <div className="title-tag">ผลการทดสอบ</div>
-          <h1 className="page-title">สรุปคะแนน</h1>
-
-          <div className="result-card">
-            <div className="result-score">
-              {score} / {TOTAL_QUESTIONS}
+      {/* State 3: COMPLETED RESULTS */}
+      {gameState === 'completed' && (() => {
+        const resultMsg = getCompletionMessage(kidName, score, TOTAL_QUESTIONS)
+        return (
+          <section aria-label="Results" className="screen-center">
+            <div className="mascot-wrapper celebrate-bounce">
+              <KidMascot mood={resultMsg.mood} size={130} />
             </div>
-            <p className="result-label">คะแนนรวม</p>
 
-            <button
-              type="button"
-              className="notion-btn-primary"
-              onClick={handleStart}
-              autoFocus
-            >
-              ทำใหม่อีกครั้ง
-            </button>
-          </div>
-        </section>
-      )}
+            <div className="title-tag">ผลการทำแบบฝึกหัด</div>
+            <h1 className="page-title">{resultMsg.headline}</h1>
+
+            <div className="result-card">
+              <div className="result-score">
+                {score} / {TOTAL_QUESTIONS}
+              </div>
+              <p className="result-label">คะแนนรวมของน้อง{kidName}</p>
+              <p className="result-subtext">{resultMsg.subtext}</p>
+
+              <div className="result-actions">
+                <button
+                  type="button"
+                  className="notion-btn-primary"
+                  onClick={() => handleStart()}
+                  autoFocus
+                >
+                  เล่นใหม่อีกรอบ (Play Again)
+                </button>
+                <button
+                  type="button"
+                  className="notion-btn-secondary"
+                  onClick={handleReset}
+                >
+                  เปลี่ยนชื่อผู้เล่น
+                </button>
+              </div>
+            </div>
+          </section>
+        )
+      })()}
     </main>
   )
 }
