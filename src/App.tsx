@@ -77,9 +77,25 @@ export default function App() {
     return false
   })
   const [showQrModal, setShowQrModal] = useState(false)
+  const [copiedLink, setCopiedLink] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [isAppInstalled, setIsAppInstalled] = useState(false)
+
+  const handleCopyLink = () => {
+    const url = 'https://math-quiz-two-livid.vercel.app/'
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopiedLink(true)
+        setTimeout(() => setCopiedLink(false), 2000)
+      }).catch(() => {
+        // Fallback
+        prompt('คัดลอกลิงก์:', url)
+      })
+    } else {
+      prompt('คัดลอกลิงก์:', url)
+    }
+  }
 
   // Listen for beforeinstallprompt event for PWA installation
   useEffect(() => {
@@ -1097,9 +1113,31 @@ export default function App() {
                 alt="QR Code สำหรับเข้าเล่น Math Quiz"
                 className="qr-image"
               />
-              <p className="qr-link-text">
-                https://math-quiz-two-livid.vercel.app/
-              </p>
+              <div className="qr-actions-row">
+                <button
+                  type="button"
+                  className={`qr-copy-btn ${copiedLink ? 'copied' : ''}`}
+                  onClick={handleCopyLink}
+                >
+                  {copiedLink ? (
+                    <>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>คัดลอกลิงก์สำเร็จแล้ว!</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                      <span>คัดลอกลิงก์ (Copy URL)</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               <p className="qr-hint">
                 เปิดกล้องมือถือหรือแท็บเล็ตแล้วสแกนเพื่อเข้าเล่นได้ทันที!
               </p>
