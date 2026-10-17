@@ -458,7 +458,7 @@ export default function App() {
         () => setIsSpeaking(true),
         () => {
           setIsSpeaking(false)
-          // Short pause (700ms) after Step 1 before moving to the next step
+          // Snappy transition (350ms) after Step 1 before moving to Step 2
           const t1 = setTimeout(() => {
             // Step 2: Animate adding intermediate sum with num3
             setDemoStep(2)
@@ -470,7 +470,7 @@ export default function App() {
               () => setIsSpeaking(true),
               () => {
                 setIsSpeaking(false)
-                // Short pause (700ms) after Step 2 before revealing final answer
+                // Snappy transition (350ms) after Step 2 before revealing final answer
                 const t2 = setTimeout(() => {
                   setDemoStep(3)
                   setMascotMood('cheer')
@@ -482,20 +482,23 @@ export default function App() {
                     () => {
                       setIsSpeaking(false)
                       setIsDemoRunning(false)
-                    }
+                    },
+                    1.18
                   )
-                }, 700)
+                }, 350)
                 demoTimeoutRefs.current.push(t2)
-              }
+              },
+              1.18
             )
-          }, 700)
+          }, 350)
           demoTimeoutRefs.current.push(t1)
-        }
+        },
+        1.18
       )
     }
 
-    // Small initial pause (400ms) before voice begins so child can focus on highlighted pair
-    const initialT = setTimeout(speakStep1, 400)
+    // Quick initial pause (180ms) before voice begins
+    const initialT = setTimeout(speakStep1, 180)
     demoTimeoutRefs.current.push(initialT)
   }
 

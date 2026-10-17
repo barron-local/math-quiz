@@ -307,7 +307,7 @@ export function speakThaiText(
     }
 
     currentAudio = audio
-    audio.playbackRate = typeof customRate === 'number' ? customRate : 1.08
+    audio.playbackRate = typeof customRate === 'number' ? customRate : 1.15
 
     audio.onplay = () => {
       if (!hasStarted) {
@@ -422,13 +422,13 @@ export function getAddition3StepSpeech(
   const step1SumWord = formatThaiNumber(step1Sum)
   const finalSum = step1Sum + num3
   const finalSumWord = formatThaiNumber(finalSum)
-  const nameSuffix = kidName ? `น้อง${kidName}` : 'คนเก่ง'
+  const displayName = kidName ? `น้อง${kidName}` : 'คนเก่ง'
 
   if (step === 1) {
-    return `ขั้นที่หนึ่งจ้า เรามาจับคู่สองตัวแรกกันก่อนนะ นำ ${n1} บวกกับ ${n2} ได้ผลบวกเท่ากับ ${step1SumWord} จ้า`
+    return `ขั้นที่หนึ่ง จับคู่ ${n1} บวก ${n2} ได้ ${step1SumWord} จ้า`
   }
   if (step === 2) {
-    return `ขั้นที่สองจ้า นำ ${step1SumWord} ที่เราบวกได้ตะกี้ ไปบวกเพิ่มกับตัวเลขที่สาม คือบวกอีก ${n3} นะจ๊ะ`
+    return `ขั้นที่สอง นำ ${step1SumWord} บวกอีก ${n3} จ้า`
   }
-  return `ดังนั้น ${n1} บวก ${n2} บวก ${n3} ได้คำตอบเท่ากับ ${finalSumWord} จ้า! จำวิธีคิดทีละคู่นี้ไว้นะน้อง${nameSuffix} เก่งมากๆ เลย!`
+  return `คำตอบคือ ${finalSumWord} จ้า ${displayName}เก่งมากเลย!`
 }
