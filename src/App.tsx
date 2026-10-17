@@ -28,6 +28,8 @@ export default function App() {
   const [score, setScore] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
+  const [isCalculating, setIsCalculating] = useState(false)
+  const [hasEvaluated, setHasEvaluated] = useState(false)
   const [currentFeedback, setCurrentFeedback] = useState<{ isCorrect: boolean; text: string } | null>(null)
   const [mascotMood, setMascotMood] = useState<'happy' | 'celebrate' | 'cheer' | 'think'>('happy')
   const [showConfetti, setShowConfetti] = useState(false)
@@ -181,6 +183,8 @@ export default function App() {
   // Handle timeout for a question
   const handleTimeExpired = () => {
     setIsAnswered(true)
+    setIsCalculating(false)
+    setHasEvaluated(true)
     setCurrentFeedback({
       isCorrect: false,
       text: `หมดเวลาข้อนี้แล้วนะน้อง${kidName}! ไปลุยข้อถัดไปกันเลย!`,
@@ -196,12 +200,14 @@ export default function App() {
         setCurrentQuestion(nextQ)
         setSelectedAnswer(null)
         setIsAnswered(false)
+        setIsCalculating(false)
+        setHasEvaluated(false)
         setCurrentFeedback(null)
         setMascotMood('think')
       } else {
         setGameState('completed')
       }
-    }, 1200)
+    }, 1400)
   }
 
   // Start new game
@@ -225,55 +231,69 @@ export default function App() {
     setCurrentQuestion(firstQ)
     setSelectedAnswer(null)
     setIsAnswered(false)
+    setIsCalculating(false)
+    setHasEvaluated(false)
     setCurrentFeedback(null)
     setShowConfetti(false)
     setMascotMood('think')
     setGameState('playing')
   }
 
-  // Handle choice selection
+  // Handle choice selection with 2-step calculation animation
   const handleSelectChoice = (choice: number) => {
     if (isAnswered || !currentQuestion) return
 
+    // Phase 1: Lock answering immediately, put selected choice into the slot, and start calculation animation
     setSelectedAnswer(choice)
     setIsAnswered(true)
+    setIsCalculating(true)
+    setHasEvaluated(false)
+    setMascotMood('think')
 
-    const isCorrect = choice === currentQuestion.correctAnswer
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-      setCurrentFeedback({
-        isCorrect: true,
-        text: getRandomCorrectMessage(kidName),
-      })
-      setMascotMood('celebrate')
-      setShowConfetti(true)
-    } else {
-      setCurrentFeedback({
-        isCorrect: false,
-        text: getRandomEncouragingMessage(kidName),
-      })
-      setMascotMood('cheer')
-      setShowConfetti(false)
-    }
-
-    // Auto proceed to next question
+    // Phase 2: After 850ms of calculation animation, evaluate and reveal the result (green or red)
     setTimeout(() => {
-      setShowConfetti(false)
-      if (currentIndex < totalQuestions) {
-        const nextIndex = currentIndex + 1
-        setCurrentIndex(nextIndex)
-        setTimeLeft(QUESTION_TIME_SECONDS)
-        // Ensure no repeat question in this round
-        const nextQ = generateQuestion(nextIndex, problemType, askedQuestions)
-        setCurrentQuestion(nextQ)
-        setSelectedAnswer(null)
-        setIsAnswered(false)
-        setCurrentFeedback(null)
-        setMascotMood('think')
+      setIsCalculating(false)
+      setHasEvaluated(true)
+
+      const isCorrect = choice === currentQuestion.correctAnswer
+      if (isCorrect) {
+        setScore((prev) => prev + 1)
+        setCurrentFeedback({
+          isCorrect: true,
+          text: getRandomCorrectMessage(kidName),
+        })
+        setMascotMood('celebrate')
+        setShowConfetti(true)
       } else {
-        setGameState('completed')
+        setCurrentFeedback({
+          isCorrect: false,
+          text: getRandomEncouragingMessage(kidName),
+        })
+        setMascotMood('cheer')
+        setShowConfetti(false)
       }
-    }, 1000)
+
+      // Phase 3: Give children plenty of comfortable time (1600ms) to read and see the result before proceeding
+      setTimeout(() => {
+        setShowConfetti(false)
+        if (currentIndex < totalQuestions) {
+          const nextIndex = currentIndex + 1
+          setCurrentIndex(nextIndex)
+          setTimeLeft(QUESTION_TIME_SECONDS)
+          // Ensure no repeat question in this round
+          const nextQ = generateQuestion(nextIndex, problemType, askedQuestions)
+          setCurrentQuestion(nextQ)
+          setSelectedAnswer(null)
+          setIsAnswered(false)
+          setIsCalculating(false)
+          setHasEvaluated(false)
+          setCurrentFeedback(null)
+          setMascotMood('think')
+        } else {
+          setGameState('completed')
+        }
+      }, 1600)
+    }, 850)
   }
 
   // Change kid name / reset
@@ -283,6 +303,8 @@ export default function App() {
     setCurrentQuestion(null)
     setSelectedAnswer(null)
     setIsAnswered(false)
+    setIsCalculating(false)
+    setHasEvaluated(false)
     setCurrentFeedback(null)
     setShowConfetti(false)
     setMascotMood('happy')
@@ -555,10 +577,53 @@ export default function App() {
                     <text x="246" y="48" textAnchor="middle" fontSize="38" fontWeight="700" fill="var(--notion-text)">
                       =
                     </text>
-                    {/* Placeholder Question Mark */}
-                    <text x="296" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
-                      ?
-                    </text>
+                    {/* Placeholder / Answer Slot with Animation */}
+                    {selectedAnswer === null ? (
+                      <text x="296" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
+                        ?
+                      </text>
+                    ) : (
+                      <g transform="translate(266, 14)">
+                        <rect
+                          width="60"
+                          height="48"
+                          rx="10"
+                          fill={
+                            isCalculating
+                              ? 'var(--notion-blue-bg)'
+                              : hasEvaluated && selectedAnswer === currentQuestion.correctAnswer
+                              ? 'var(--notion-green-bg)'
+                              : 'var(--notion-red-bg)'
+                          }
+                          stroke={
+                            isCalculating
+                              ? 'var(--notion-blue)'
+                              : hasEvaluated && selectedAnswer === currentQuestion.correctAnswer
+                              ? 'var(--notion-green)'
+                              : 'var(--notion-red)'
+                          }
+                          strokeWidth="2.5"
+                          strokeDasharray={isCalculating ? '4 2' : 'none'}
+                        />
+                        <text
+                          x="30"
+                          y="34"
+                          textAnchor="middle"
+                          fontSize="32"
+                          fontWeight="700"
+                          fontFamily="var(--font-mono)"
+                          fill={
+                            isCalculating
+                              ? 'var(--notion-blue)'
+                              : hasEvaluated && selectedAnswer === currentQuestion.correctAnswer
+                              ? 'var(--notion-green)'
+                              : 'var(--notion-red)'
+                          }
+                        >
+                          {selectedAnswer}
+                        </text>
+                      </g>
+                    )}
 
                     {/* Step 1 Connecting Bracket: Linking Num1 (x=36) and Num2 (x=116) */}
                     <path
@@ -613,15 +678,41 @@ export default function App() {
                     </text>
                   </svg>
                 </div>
+                {isCalculating && (
+                  <div className="calculating-subtext pop-in">
+                    <span>กำลังตรวจคำตอบ...</span>
+                  </div>
+                )}
               </div>
             ) : (
-              /* Standard 2-number formula */
-              <div className="math-formula">
-                <span>{currentQuestion.num1}</span>
-                <span className="math-operator">{currentQuestion.operator}</span>
-                <span>{currentQuestion.num2}</span>
-                <span>=</span>
-                <span className="math-placeholder">?</span>
+              /* Standard 2-number formula with dynamic answer slot */
+              <div className="math-formula-wrapper">
+                <div className="math-formula">
+                  <span>{currentQuestion.num1}</span>
+                  <span className="math-operator">{currentQuestion.operator}</span>
+                  <span>{currentQuestion.num2}</span>
+                  <span>=</span>
+                  {selectedAnswer === null ? (
+                    <span className="math-placeholder">?</span>
+                  ) : (
+                    <span
+                      className={`math-slot ${
+                        isCalculating
+                          ? 'math-slot-calculating'
+                          : hasEvaluated && selectedAnswer === currentQuestion.correctAnswer
+                          ? 'math-slot-correct'
+                          : 'math-slot-incorrect'
+                      }`}
+                    >
+                      {selectedAnswer}
+                    </span>
+                  )}
+                </div>
+                {isCalculating && (
+                  <div className="calculating-subtext pop-in">
+                    <span>กำลังตรวจคำตอบ...</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -644,10 +735,14 @@ export default function App() {
             {currentQuestion.choices.map((choice, index) => {
               let choiceClass = 'choice-btn'
               if (isAnswered) {
-                if (choice === currentQuestion.correctAnswer) {
-                  choiceClass += ' selected-correct pop-success'
-                } else if (choice === selectedAnswer) {
-                  choiceClass += ' selected-incorrect shake-error'
+                if (isCalculating && choice === selectedAnswer) {
+                  choiceClass += ' selected-calculating'
+                } else if (hasEvaluated) {
+                  if (choice === currentQuestion.correctAnswer) {
+                    choiceClass += ' selected-correct pop-success'
+                  } else if (choice === selectedAnswer) {
+                    choiceClass += ' selected-incorrect shake-error'
+                  }
                 }
               }
 

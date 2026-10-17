@@ -871,6 +871,13 @@
   75% { transform: translateX(5px); }
 }
 
+.choice-btn.selected-calculating {
+  background-color: var(--notion-blue-bg);
+  border-color: var(--notion-blue);
+  color: var(--notion-blue);
+  animation: slotPulseCalc 0.65s ease-in-out infinite alternate;
+}
+
 .choice-btn.selected-correct {
   background-color: var(--notion-green-bg);
   border-color: var(--notion-green);
@@ -1206,5 +1213,72 @@
   width: 100%;
   height: auto;
   overflow: visible;
+}
+
+/* ===================================================
+   Answer Reveal & Calculating Animation Styles
+   =================================================== */
+.math-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  height: 64px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+
+.math-slot-calculating {
+  background-color: var(--notion-blue-bg);
+  border: 2px dashed var(--notion-blue);
+  color: var(--notion-blue);
+  animation: slotPulseCalc 0.65s ease-in-out infinite alternate;
+}
+
+.math-slot-correct {
+  background-color: var(--notion-green-bg);
+  border: 2.5px solid var(--notion-green);
+  color: var(--notion-green);
+  box-shadow: 0 4px 12px rgba(15, 123, 108, 0.25);
+  animation: bouncePop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.math-slot-incorrect {
+  background-color: var(--notion-red-bg);
+  border: 2.5px solid var(--notion-red);
+  color: var(--notion-red);
+  box-shadow: 0 4px 12px rgba(224, 62, 62, 0.25);
+  animation: smallShake 0.4s ease-in-out;
+}
+
+@keyframes slotPulseCalc {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.calculating-subtext {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--notion-blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  animation: fadeInOut 1s ease-in-out infinite alternate;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
