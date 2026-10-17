@@ -229,7 +229,7 @@ function speakViaWebSpeech(
 
   // If only a male voice is installed on Windows, pitch it up to 1.35 to sound cute and friendly
   utterance.pitch = isKnownMale ? 1.35 : 1.15
-  utterance.rate = typeof customRate === 'number' ? customRate : 0.92
+  utterance.rate = typeof customRate === 'number' ? customRate : 1.05
 
   const cleanup = () => {
     if (activeUtterance === utterance) {
@@ -307,7 +307,7 @@ export function speakThaiText(
     }
 
     currentAudio = audio
-    audio.playbackRate = typeof customRate === 'number' ? customRate : 0.95
+    audio.playbackRate = typeof customRate === 'number' ? customRate : 1.08
 
     audio.onplay = () => {
       if (!hasStarted) {
