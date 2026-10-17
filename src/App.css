@@ -12,6 +12,165 @@
   align-items: center;
 }
 
+/* QR Welcome Banner */
+.qr-welcome-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--notion-callout-bg);
+  border: 2px solid var(--notion-blue);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  position: relative;
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(35, 131, 226, 0.15);
+}
+
+.qr-welcome-badge {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  background-color: var(--notion-blue);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.qr-welcome-text {
+  flex: 1;
+  font-size: 14px;
+  color: var(--notion-text);
+  line-height: 1.4;
+}
+
+.qr-welcome-text strong {
+  display: block;
+  font-size: 15px;
+  color: var(--notion-blue);
+  margin-bottom: 2px;
+}
+
+.qr-welcome-text p {
+  color: var(--notion-text-muted);
+}
+
+.qr-banner-close {
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--notion-text-muted);
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.qr-banner-close:hover {
+  background-color: var(--notion-hover);
+  color: var(--notion-text);
+}
+
+/* Top bar with View QR button */
+.top-actions-bar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.view-qr-btn {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--notion-text-muted);
+  background-color: var(--notion-hover);
+  border: 1px solid var(--notion-border);
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.view-qr-btn:hover {
+  background-color: var(--notion-blue-bg);
+  border-color: var(--notion-blue);
+  color: var(--notion-blue);
+}
+
+/* Modal Backdrop & Popup */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.notion-modal {
+  width: 100%;
+  max-width: 360px;
+  background-color: var(--notion-bg);
+  border: 1px solid var(--notion-border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-popup);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modal-close-btn {
+  font-size: 16px;
+  color: var(--notion-text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--notion-hover);
+}
+
+.modal-body {
+  text-align: center;
+}
+
+.qr-image {
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--notion-border);
+  margin-bottom: 12px;
+  display: inline-block;
+}
+
+.qr-link-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--notion-blue);
+  word-break: break-all;
+  margin-bottom: 8px;
+}
+
+.qr-hint {
+  font-size: 13px;
+  color: var(--notion-text-muted);
+  line-height: 1.4;
+}
+
 /* Confetti Falling Animation */
 .confetti-container {
   position: fixed;

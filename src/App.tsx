@@ -24,6 +24,14 @@ export default function App() {
   const [currentFeedback, setCurrentFeedback] = useState<{ isCorrect: boolean; text: string } | null>(null)
   const [mascotMood, setMascotMood] = useState<'happy' | 'celebrate' | 'cheer' | 'think'>('happy')
   const [showConfetti, setShowConfetti] = useState(false)
+  const [isFromQr, setIsFromQr] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      return params.get('source') === 'qrcode'
+    }
+    return false
+  })
+  const [showQrModal, setShowQrModal] = useState(false)
 
   // Start new game
   const handleStart = (e?: FormEvent) => {
@@ -98,9 +106,38 @@ export default function App() {
 
   return (
     <main className="notion-container">
+      {/* Cute Welcome Banner for QR Scanners */}
+      {isFromQr && (
+        <aside className="qr-welcome-banner pop-in" role="status">
+          <div className="qr-welcome-badge">ยินดีต้อนรับเพื่อนใหม่</div>
+          <div className="qr-welcome-text">
+            <strong>เย้! สแกน QR Code เข้ามาสำเร็จแล้วนะ!</strong>
+            <p>ยินดีต้อนรับสู่อาณาจักรคณิตคิดเร็ว วันนี้มาโชว์พลังสมองประลองความไวกันเถอะ!</p>
+          </div>
+          <button
+            type="button"
+            className="qr-banner-close"
+            onClick={() => setIsFromQr(false)}
+            aria-label="ปิดการแจ้งเตือน"
+          >
+            ✕
+          </button>
+        </aside>
+      )}
+
       {/* State 1: NAME INPUT & WELCOME */}
       {gameState === 'name-input' && (
         <section aria-label="Welcome and name input" className="screen-center">
+          <div className="top-actions-bar">
+            <button
+              type="button"
+              className="view-qr-btn"
+              onClick={() => setShowQrModal(true)}
+            >
+              ดู QR Code สำหรับแชร์
+            </button>
+          </div>
+
           <div className="mascot-wrapper mascot-float">
             <KidMascot mood="happy" size={130} />
           </div>
@@ -280,6 +317,36 @@ export default function App() {
           </section>
         )
       })()}
+      {/* QR Code Modal Dialog */}
+      {showQrModal && (
+        <div className="modal-backdrop" onClick={() => setShowQrModal(false)}>
+          <div className="notion-modal pop-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="badge badge-tag">สแกนเพื่อเข้าเล่น</span>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setShowQrModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              <img
+                src="/qrcode.png"
+                alt="QR Code สำหรับเข้าเล่น Math Quiz"
+                className="qr-image"
+              />
+              <p className="qr-link-text">
+                https://math-quiz-two-livid.vercel.app/
+              </p>
+              <p className="qr-hint">
+                เปิดกล้องมือถือหรือแท็บเล็ตแล้วสแกนเพื่อเข้าเล่นพร้อมลูกเล่นต้อนรับได้ทันที!
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
