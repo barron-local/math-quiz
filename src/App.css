@@ -629,20 +629,20 @@
 
 .math-formula {
   font-family: var(--font-mono);
-  font-size: 54px;
+  font-size: 64px;
   font-weight: 700;
   color: var(--notion-text);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 @media (max-width: 480px) {
   .math-formula {
-    font-size: 40px;
-    gap: 10px;
+    font-size: 48px;
+    gap: 12px;
   }
 }
 
@@ -707,37 +707,46 @@
 .choices-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 480px) {
+  .choices-grid {
+    gap: 12px;
+  }
 }
 
 .choice-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px 20px;
   background-color: var(--notion-bg);
-  border: 2px solid var(--notion-border);
-  border-radius: 12px;
+  border: 3px solid var(--notion-border);
+  border-radius: 16px;
   font-family: var(--font-mono);
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 38px;
+  font-weight: 700;
   color: var(--notion-text);
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   user-select: none;
-  min-height: 82px;
+  min-height: 96px;
+  touch-action: manipulation;
+  box-shadow: 0 3px 0 var(--notion-border);
 }
 
 .choice-btn:hover:not(:disabled) {
   background-color: var(--notion-hover);
-  border-color: var(--notion-border-hover);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  border-color: var(--notion-blue);
+  color: var(--notion-blue);
+  transform: translateY(-4px);
+  box-shadow: 0 7px 0 var(--notion-blue-bg), 0 8px 16px rgba(0,0,0,0.06);
 }
 
 .choice-btn:active:not(:disabled) {
-  background-color: var(--notion-hover-active);
-  transform: scale(0.95);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--notion-border);
 }
 
 /* Pop success & Shake error for choices */

@@ -162,7 +162,7 @@ export default function App() {
           </div>
 
           <div className="mascot-wrapper mascot-float">
-            <KidMascot mood="happy" size={130} />
+            <KidMascot mood="happy" size={140} />
           </div>
 
           {/* Cute mascot dialogue bubble for normal visitors */}
@@ -170,32 +170,27 @@ export default function App() {
             <span className="mascot-speech-text">{welcomeMessage}</span>
           </div>
 
-          <div className="title-tag">แบบฝึกหัดคณิตคิดเร็ว</div>
           <h1 className="page-title">Math Quiz</h1>
-          <p className="page-subtitle">ยินดีต้อนรับเพื่อนคนเก่ง มาฝึกคิดเลขเร็วสนุกๆ กันนะ!</p>
+          <p className="page-subtitle">เกมคณิตคิดเร็วแสนสนุก 10 ข้อ</p>
 
           <form onSubmit={handleStart} className="name-form">
             <label htmlFor="kidNameInput" className="name-label">
-              อยากให้ระบบเรียกว่าอะไรดีเอ่ย?
+              ชื่อเล่น หรือ ฉายาของหนู
             </label>
             <input
               id="kidNameInput"
               type="text"
               className="name-input"
-              placeholder="พิมพ์ชื่อเล่น หรือฉายาเท่ๆ ได้เลย..."
+              placeholder="พิมพ์ชื่อตรงนี้ (หรือไม่พิมพ์ก็ได้จ้า)"
               value={kidName}
               onChange={(e) => setKidName(e.target.value)}
               maxLength={15}
               autoFocus
             />
 
-            <button type="submit" className="notion-btn-primary pulse-btn">
-              เริ่มทำแบบฝึกหัด (Start)
+            <button type="submit" className="notion-btn-primary pulse-btn kid-big-btn">
+              เริ่มเล่นเลย (Start)
             </button>
-
-            <p className="privacy-note">
-              ใช้เพื่อแสดงผลให้กำลังใจบนหน้าจอนี้เท่านั้น ไม่มีการส่งหรือบันทึกข้อมูลส่วนตัวใดๆ
-            </p>
           </form>
         </section>
       )}
