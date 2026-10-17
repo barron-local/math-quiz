@@ -944,7 +944,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className={`math-card ${hasEvaluated ? (currentFeedback?.isCorrect ? 'card-pulse-success' : 'card-shake') : ''}`}>
+          <div className={`math-card ${hasEvaluated && !isExplained ? (currentFeedback?.isCorrect ? 'card-pulse-success' : 'card-shake') : ''}`}>
             {currentQuestion.problemType === 'add-3' && typeof currentQuestion.num3 === 'number' ? (
               /* 3-number addition with step-by-step connection lines & walkthrough demonstration */
               <div className="addition-3-container">
