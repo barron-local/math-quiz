@@ -16,11 +16,13 @@ export function speakThaiText(
   // Cancel any ongoing speech
   window.speechSynthesis.cancel()
 
-  // Normalize phonetic Thai text to avoid robotic TTS quirks (e.g. "สวัสดีครับ" being mispronounced as "สวัสดีขอรับ")
+  // Normalize phonetic Thai text to avoid robotic TTS quirks (e.g. "สวัสดีครับ" being mispronounced as "สวัสดีขอรับ", or "แล้วนะ" sounding unnatural)
   const normalizedText = text
     .replace(/สวัสดีครับ/g, 'สวัสดีจ้า')
     .replace(/ครับ/g, 'คับ')
     .replace(/คร้าบ/g, 'ค้าบ')
+    .replace(/แล้วนะ/g, 'แล้วจ้า')
+    .replace(/แล้วน้า/g, 'แล้วจ้า')
 
   const utterance = new SpeechSynthesisUtterance(normalizedText)
   utterance.lang = 'th-TH'
