@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, type FormEvent } from 'react'
 import { generateQuestion, type Question, type ProblemType } from './quizGenerator'
 import { KidMascot } from './components/KidMascot'
 import { ConfettiEffect } from './components/ConfettiEffect'
+import { MascotCustomizerModal } from './components/MascotCustomizerModal'
+import { type MascotConfig, loadSavedMascotConfig, saveMascotConfig } from './mascotTypes'
 import {
   getRandomCorrectMessage,
   getRandomEncouragingMessage,
@@ -149,6 +151,13 @@ export default function App() {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
   const [isPoked, setIsPoked] = useState(false)
+  const [mascotConfig, setMascotConfig] = useState<MascotConfig>(() => loadSavedMascotConfig())
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false)
+
+  const handleSaveMascotConfig = (newConfig: MascotConfig) => {
+    setMascotConfig(newConfig)
+    saveMascotConfig(newConfig)
+  }
   const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => new Set())
   const [hasUsedLifeline, setHasUsedLifeline] = useState(false)
   const [eliminatedChoices, setEliminatedChoices] = useState<number[]>([])
@@ -673,8 +682,24 @@ export default function App() {
               size={140}
               onClick={handlePokeMascot}
               isPoked={isPoked}
+              config={mascotConfig}
             />
           </div>
+
+          {/* Button to dress up mascot in Notion style without emoji */}
+          <button
+            type="button"
+            className="mascot-customize-pill pop-in"
+            onClick={() => setIsCustomizerOpen(true)}
+            title="กดเพื่อแต่งตัวและเปลี่ยนมาสคอต"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a7 7 0 0 1 7 7c0 2-1 3.5-2 4.5s-1.5 2-1 3.5a1.5 1.5 0 0 1-2.5 1.5c-1-.5-2.5-1-4.5-1A7 7 0 0 1 12 2z" />
+            </svg>
+            <span>แต่งตัวมาสคอต</span>
+            <span className="customize-tag">เปลี่ยนตัว & สีเสื้อ</span>
+          </button>
 
           {/* Cute mascot dialogue bubble for normal visitors (clickable to replay speech) */}
           <div
@@ -933,6 +958,7 @@ export default function App() {
                 size={82}
                 onClick={handlePokeMascot}
                 isPoked={isPoked}
+                config={mascotConfig}
               />
             </div>
             <div className={`mascot-speech-bubble ${currentFeedback ? (currentFeedback.isCorrect ? 'bubble-correct pop-in' : 'bubble-try pop-in') : ''}`}>
@@ -951,9 +977,9 @@ export default function App() {
                 {demoStep !== 3 && !isExplained && (
                   <div className={`step-flow-banner ${demoStep > 0 ? 'step-flow-active' : ''}`}>
                     {demoStep === 1 ? (
-                      <span>💡 ขั้นที่ 1: นำ {currentQuestion.num1} + {currentQuestion.num2} = {currentQuestion.num1 + currentQuestion.num2}</span>
+                      <span>ขั้นที่ 1: นำ {currentQuestion.num1} + {currentQuestion.num2} = {currentQuestion.num1 + currentQuestion.num2}</span>
                     ) : demoStep === 2 ? (
-                      <span>✨ ขั้นที่ 2: นำผลลัพธ์ {currentQuestion.num1 + currentQuestion.num2} + {currentQuestion.num3} = {currentQuestion.correctAnswer}</span>
+                      <span>ขั้นที่ 2: นำผลลัพธ์ {currentQuestion.num1 + currentQuestion.num2} + {currentQuestion.num3} = {currentQuestion.correctAnswer}</span>
                     ) : (
                       <span>คิดทีละคู่: บวก 2 ตัวแรกก่อน แล้วบวกตัวที่สาม</span>
                     )}
@@ -1278,7 +1304,7 @@ export default function App() {
                 onClick={advanceToNextQuestion}
                 disabled={isDemoRunning}
               >
-                <span>{currentIndex < totalQuestions ? 'ไปข้อถัดไปเลย ➔' : 'ดูสรุปผลคะแนน 🎉'}</span>
+                <span>{currentIndex < totalQuestions ? 'ไปข้อถัดไป' : 'ดูสรุปผลคะแนน'}</span>
               </button>
             </div>
           ) : (
@@ -1352,7 +1378,7 @@ export default function App() {
             <ConfettiEffect />
 
             <div className="mascot-wrapper celebrate-bounce">
-              <KidMascot mood={resultMsg.mood} size={140} />
+              <KidMascot mood={resultMsg.mood} size={140} config={mascotConfig} />
             </div>
 
             <div className="title-tag">ผลการทำแบบฝึกหัด</div>
@@ -1516,6 +1542,14 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Mascot Customizer Modal */}
+      <MascotCustomizerModal
+        isOpen={isCustomizerOpen}
+        currentConfig={mascotConfig}
+        onSave={handleSaveMascotConfig}
+        onClose={() => setIsCustomizerOpen(false)}
+      />
     </main>
   )
 }
