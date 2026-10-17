@@ -1112,11 +1112,48 @@ export default function App() {
               <span className="badge badge-tag">สแกนเพื่อเข้าเล่น</span>
             </div>
             <div className="modal-body">
-              <img
-                src="/qrcode/qrcode.png"
-                alt="QR Code สำหรับเข้าเล่น Math Quiz"
-                className="qr-image"
-              />
+              {/* Playful Kid-Friendly QR Photo Frame with Peeking Mascot */}
+              <div className="qr-photo-frame-container">
+                {/* Peeking Cute Mascot at top-left corner */}
+                <div className="qr-peeking-mascot" aria-hidden="true">
+                  <svg width="52" height="48" viewBox="0 0 70 65" fill="none">
+                    {/* Two Paws gripping the frame */}
+                    <ellipse cx="24" cy="56" rx="6" ry="4.5" fill="#FFDCB2" stroke="#2383E2" strokeWidth="2.5" />
+                    <ellipse cx="46" cy="56" rx="6" ry="4.5" fill="#FFDCB2" stroke="#2383E2" strokeWidth="2.5" />
+                    {/* Head */}
+                    <circle cx="35" cy="30" r="23" fill="#FFDCB2" />
+                    {/* Hair */}
+                    <path
+                      d="M13 28C13 14 22 8 35 8C48 8 57 14 57 28C57 30 55 31 54 28C52 23 47 18 41 18C37 18 34 20 32 23C29 19 23 19 18 23C15 25 14 28 13 28Z"
+                      fill="#37352F"
+                    />
+                    {/* Blinking Happy Eyes */}
+                    <path d="M25 28C26.5 24 30.5 24 32 28" stroke="#37352F" strokeWidth="2.4" strokeLinecap="round" />
+                    <path d="M38 28C39.5 24 43.5 24 45 28" stroke="#37352F" strokeWidth="2.4" strokeLinecap="round" />
+                    {/* Cheeks */}
+                    <circle cx="21" cy="33" r="3.5" fill="#FFAAA6" opacity="0.8" />
+                    <circle cx="49" cy="33" r="3.5" fill="#FFAAA6" opacity="0.8" />
+                    {/* Smile */}
+                    <path d="M31 33C33 36 37 36 39 33" stroke="#37352F" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
+
+                {/* Floating Math Charms on the corners */}
+                <span className="qr-charm qr-charm-star" aria-hidden="true">⭐</span>
+                <span className="qr-charm qr-charm-sparkle" aria-hidden="true">✨</span>
+                <span className="qr-charm qr-charm-plus" aria-hidden="true">➕</span>
+                <span className="qr-charm qr-charm-pencil" aria-hidden="true">✏️</span>
+
+                {/* The QR Image itself */}
+                <div className="qr-image-wrapper">
+                  <img
+                    src="/qrcode/qrcode.png"
+                    alt="QR Code สำหรับเข้าเล่น Math Quiz"
+                    className="qr-image"
+                  />
+                </div>
+              </div>
+
               <div className="qr-actions-row">
                 <button
                   type="button"
