@@ -23,22 +23,37 @@ function shuffleArray<T>(array: T[]): T[] {
 /**
  * Generate a dynamic single-digit math problem (addition or subtraction).
  * Single digit: 1 to 9.
- * Subtraction ensures num1 >= num2 so the answer is never negative (0 to 8).
+ * Subtraction ensures num1 >= num2 so the answer is never negative.
+ * @param id Question sequence number (1 to 10)
+ * @param existingKeys Set of question signature strings (e.g. "3+4", "7-2") already used in this round
  */
-export function generateQuestion(id: number): Question {
-  const operator: '+' | '-' = Math.random() < 0.5 ? '+' : '-'
+export function generateQuestion(id: number, existingKeys?: Set<string>): Question {
+  let operator: '+' | '-' = '+'
   let num1 = 0
   let num2 = 0
   let correctAnswer = 0
+  let key = ''
 
-  if (operator === '+') {
-    num1 = getRandomInt(1, 9)
-    num2 = getRandomInt(1, 9)
-    correctAnswer = num1 + num2
-  } else {
-    num1 = getRandomInt(1, 9)
-    num2 = getRandomInt(1, num1) // num1 >= num2 to keep result >= 0
-    correctAnswer = num1 - num2
+  let attempts = 0
+  do {
+    operator = Math.random() < 0.5 ? '+' : '-'
+    if (operator === '+') {
+      num1 = getRandomInt(1, 9)
+      num2 = getRandomInt(1, 9)
+      correctAnswer = num1 + num2
+    } else {
+      num1 = getRandomInt(1, 9)
+      num2 = getRandomInt(1, num1) // num1 >= num2 to keep result >= 0
+      correctAnswer = num1 - num2
+    }
+
+    key = `${num1}${operator}${num2}`
+    attempts++
+  } while (existingKeys && existingKeys.has(key) && attempts < 100)
+
+  // Track the unique question
+  if (existingKeys) {
+    existingKeys.add(key)
   }
 
   // Generate 3 plausible distractors (choices)

@@ -38,6 +38,7 @@ export default function App() {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
   const [isPoked, setIsPoked] = useState(false)
+  const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => new Set())
 
   // Interactive mascot poke handler (child taps the mascot - animation only, no voice)
   const handlePokeMascot = () => {
@@ -133,7 +134,10 @@ export default function App() {
     setKidName(nameToUse)
     setScore(0)
     setCurrentIndex(1)
-    setCurrentQuestion(generateQuestion(1))
+    const newAskedSet = new Set<string>()
+    const firstQ = generateQuestion(1, newAskedSet)
+    setAskedQuestions(newAskedSet)
+    setCurrentQuestion(firstQ)
     setSelectedAnswer(null)
     setIsAnswered(false)
     setCurrentFeedback(null)
@@ -173,7 +177,9 @@ export default function App() {
       if (currentIndex < TOTAL_QUESTIONS) {
         const nextIndex = currentIndex + 1
         setCurrentIndex(nextIndex)
-        setCurrentQuestion(generateQuestion(nextIndex))
+        // Ensure no repeat question in this round
+        const nextQ = generateQuestion(nextIndex, askedQuestions)
+        setCurrentQuestion(nextQ)
         setSelectedAnswer(null)
         setIsAnswered(false)
         setCurrentFeedback(null)
