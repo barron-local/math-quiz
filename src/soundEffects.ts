@@ -1,6 +1,6 @@
 /**
- * Web Audio API synthesized celebration fireworks (เสียงพลุฉลอง)
- * Zero external audio files required, instant playback, works on all modern browsers & mobile.
+ * Web Audio API synthesized celebration fireworks (เสียงพลุฉลองเพราะๆ นุ่มนวลสดใสสำหรับเด็ก)
+ * Zero external audio files required, instant playback, warm pops, and magical stardust bell chimes.
  */
 
 class SoundEffectsManager {
@@ -9,7 +9,9 @@ class SoundEffectsManager {
   private getAudioContext(): AudioContext | null {
     if (typeof window === 'undefined') return null
     if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       if (AudioCtx) {
         this.ctx = new AudioCtx()
       }
@@ -21,94 +23,130 @@ class SoundEffectsManager {
   }
 
   /**
-   * Single firework rocket sound:
-   * 1. Whistle/lift whoosh rising into the sky
-   * 2. Loud satisfying "BOOM!" blast
-   * 3. Sparkling crackles/rumble decay
+   * Play a single magical firework with warm pop & sparkling stardust chimes
    */
-  public playSingleFirework(delayMs = 0, pitchVariation = 1.0): void {
+  public playSingleFirework(delayMs = 0, chordNotes: number[] = [1046, 1318, 1568]): void {
     setTimeout(() => {
       const ctx = this.getAudioContext()
       if (!ctx) return
 
       const now = ctx.currentTime
 
-      // 1. Whistle rocket rising (0 to 0.4s)
-      const osc = ctx.createOscillator()
-      const oscGain = ctx.createGain()
-      osc.type = 'triangle'
-      osc.frequency.setValueAtTime(320 * pitchVariation, now)
-      osc.frequency.exponentialRampToValueAtTime(1100 * pitchVariation, now + 0.35)
+      // 1. Soft rising whoosh (airy, gentle, not piercing)
+      this.playWhoosh(ctx, now)
 
-      oscGain.gain.setValueAtTime(0.001, now)
-      oscGain.gain.linearRampToValueAtTime(0.12, now + 0.1)
-      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.38)
+      // 2. Warm Pop/Thump at +0.26s
+      const popTime = now + 0.26
+      this.playWarmPop(ctx, popTime)
 
-      osc.connect(oscGain)
-      oscGain.connect(ctx.destination)
-      osc.start(now)
-      osc.stop(now + 0.4)
-
-      // 2. Main Explosive Boom at 0.35s
-      const boomTime = now + 0.35
-      const boomOsc = ctx.createOscillator()
-      const boomGain = ctx.createGain()
-      boomOsc.type = 'sine'
-      boomOsc.frequency.setValueAtTime(160 * pitchVariation, boomTime)
-      boomOsc.frequency.exponentialRampToValueAtTime(32, boomTime + 0.5)
-
-      boomGain.gain.setValueAtTime(0.45, boomTime)
-      boomGain.gain.exponentialRampToValueAtTime(0.001, boomTime + 0.6)
-
-      boomOsc.connect(boomGain)
-      boomGain.connect(ctx.destination)
-      boomOsc.start(boomTime)
-      boomOsc.stop(boomTime + 0.65)
-
-      // 3. Crackling Noise Burst (white noise buffer through bandpass filter)
-      const bufferSize = Math.floor(ctx.sampleRate * 0.9)
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
-      const output = noiseBuffer.getChannelData(0)
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1
-      }
-
-      const whiteNoise = ctx.createBufferSource()
-      whiteNoise.buffer = noiseBuffer
-
-      const filter = ctx.createBiquadFilter()
-      filter.type = 'lowpass'
-      filter.frequency.setValueAtTime(1200, boomTime)
-      filter.frequency.exponentialRampToValueAtTime(200, boomTime + 0.8)
-
-      const noiseGain = ctx.createGain()
-      noiseGain.gain.setValueAtTime(0.35, boomTime)
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, boomTime + 0.85)
-
-      whiteNoise.connect(filter)
-      filter.connect(noiseGain)
-      noiseGain.connect(ctx.destination)
-
-      whiteNoise.start(boomTime)
-      whiteNoise.stop(boomTime + 0.9)
+      // 3. Stardust sparkling chimes & soft crackles
+      this.playSparkleChimes(ctx, popTime, chordNotes)
+      this.playSoftCrackle(ctx, popTime)
     }, delayMs)
   }
 
+  // Soft whoosh (gentle warm sweep)
+  private playWhoosh(ctx: AudioContext, time: number): void {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(260, time)
+    osc.frequency.exponentialRampToValueAtTime(720, time + 0.24)
+
+    gain.gain.setValueAtTime(0.001, time)
+    gain.gain.linearRampToValueAtTime(0.06, time + 0.1)
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.26)
+
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(time)
+    osc.stop(time + 0.28)
+  }
+
+  // Warm round pop (clean, punchy, no harsh distortion)
+  private playWarmPop(ctx: AudioContext, time: number): void {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(130, time)
+    osc.frequency.exponentialRampToValueAtTime(36, time + 0.35)
+
+    gain.gain.setValueAtTime(0.28, time)
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.36)
+
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(time)
+    osc.stop(time + 0.38)
+  }
+
+  // Sparkling golden bell chimes (magical stardust notes in pentatonic harmony)
+  private playSparkleChimes(ctx: AudioContext, time: number, notes: number[]): void {
+    notes.forEach((freq, idx) => {
+      const noteTime = time + idx * 0.04 + Math.random() * 0.015
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, noteTime)
+
+      gain.gain.setValueAtTime(0.001, noteTime)
+      gain.gain.linearRampToValueAtTime(0.11, noteTime + 0.012)
+      gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.42)
+
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(noteTime)
+      osc.stop(noteTime + 0.45)
+    })
+  }
+
+  // Soft sparkle crackle (gentle glittering stardust shower)
+  private playSoftCrackle(ctx: AudioContext, time: number): void {
+    const bufferSize = Math.floor(ctx.sampleRate * 0.45)
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
+    const data = buffer.getChannelData(0)
+    for (let i = 0; i < bufferSize; i++) {
+      // Gentle random sparkle impulses
+      data[i] = Math.random() > 0.88 ? (Math.random() * 2 - 1) * 0.4 : 0
+    }
+
+    const noise = ctx.createBufferSource()
+    noise.buffer = buffer
+
+    const filter = ctx.createBiquadFilter()
+    filter.type = 'bandpass'
+    filter.frequency.setValueAtTime(3400, time)
+    filter.Q.setValueAtTime(2.8, time)
+
+    const gain = ctx.createGain()
+    gain.gain.setValueAtTime(0.001, time)
+    gain.gain.linearRampToValueAtTime(0.09, time + 0.025)
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.42)
+
+    noise.connect(filter)
+    filter.connect(gain)
+    gain.connect(ctx.destination)
+    noise.start(time)
+    noise.stop(time + 0.45)
+  }
+
   /**
-   * Grand finale fireworks show (ชุดพลุเฉลิมฉลองต่อเนื่องเมื่อจบเกม)
-   * Shoots 5 multi-burst fireworks with alternating pitch and spatial delay
+   * Grand finale celebratory fireworks:
+   * Plays a joyful, harmonious progression that sounds magical and delightful for kids
    */
   public playGrandFireworks(): void {
+    // Musical pentatonic chords (C major progression: C -> E -> G -> High C -> Grand Cascade)
     const bursts = [
-      { delay: 0, pitch: 1.0 },
-      { delay: 420, pitch: 1.25 },
-      { delay: 850, pitch: 0.9 },
-      { delay: 1350, pitch: 1.15 },
-      { delay: 1800, pitch: 1.05 },
+      { delay: 0, notes: [1046, 1318, 1568] },         // C6, E6, G6 (Joyful triad)
+      { delay: 360, notes: [1318, 1568, 2093] },       // E6, G6, C7 (Brighter upward lift)
+      { delay: 760, notes: [1568, 2093, 2637] },       // G6, C7, E7 (High sparkle)
+      { delay: 1220, notes: [2093, 2637, 3136] },      // C7, E7, G7 (Stardust crescendo)
+      { delay: 1680, notes: [1046, 1318, 1568, 2093, 2637] }, // Grand full celebratory chord cascade!
     ]
 
-    bursts.forEach(({ delay, pitch }) => {
-      this.playSingleFirework(delay, pitch)
+    bursts.forEach(({ delay, notes }) => {
+      this.playSingleFirework(delay, notes)
     })
   }
 }
