@@ -547,7 +547,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className={`math-card ${isAnswered ? (currentFeedback?.isCorrect ? 'card-pulse-success' : 'card-shake') : ''}`}>
+          <div className={`math-card ${hasEvaluated ? (currentFeedback?.isCorrect ? 'card-pulse-success' : 'card-shake') : ''}`}>
             {currentQuestion.problemType === 'add-3' && typeof currentQuestion.num3 === 'number' ? (
               /* 3-number addition with step-by-step connection lines */
               <div className="addition-3-container">
@@ -630,21 +630,21 @@ export default function App() {
                           height="48"
                           rx="10"
                           fill={
-                            isCalculating
+                            !hasEvaluated
                               ? 'var(--notion-blue-bg)'
-                              : hasEvaluated && selectedAnswer === currentQuestion.correctAnswer
+                              : selectedAnswer === currentQuestion.correctAnswer
                               ? 'var(--notion-green-bg)'
                               : 'var(--notion-red-bg)'
                           }
                           stroke={
-                            isCalculating
+                            !hasEvaluated
                               ? 'var(--notion-blue)'
-                              : hasEvaluated && selectedAnswer === currentQuestion.correctAnswer
+                              : selectedAnswer === currentQuestion.correctAnswer
                               ? 'var(--notion-green)'
                               : 'var(--notion-red)'
                           }
                           strokeWidth="2.5"
-                          strokeDasharray={isCalculating ? '4 2' : 'none'}
+                          strokeDasharray={!hasEvaluated ? '4 2' : 'none'}
                         />
                         <text
                           x="30"
@@ -654,9 +654,9 @@ export default function App() {
                           fontWeight="700"
                           fontFamily="var(--font-mono)"
                           fill={
-                            isCalculating
+                            !hasEvaluated
                               ? 'var(--notion-blue)'
-                              : hasEvaluated && selectedAnswer === currentQuestion.correctAnswer
+                              : selectedAnswer === currentQuestion.correctAnswer
                               ? 'var(--notion-green)'
                               : 'var(--notion-red)'
                           }
@@ -686,9 +686,9 @@ export default function App() {
                   ) : (
                     <span
                       className={`math-slot ${
-                        isCalculating
+                        !hasEvaluated
                           ? 'math-slot-calculating'
-                          : hasEvaluated && selectedAnswer === currentQuestion.correctAnswer
+                          : selectedAnswer === currentQuestion.correctAnswer
                           ? 'math-slot-correct'
                           : 'math-slot-incorrect'
                       }`}
