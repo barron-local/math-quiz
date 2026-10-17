@@ -1272,10 +1272,6 @@ export default function App() {
           {/* Either show Next Question button (if solution was viewed/explained) OR regular choices grid */}
           {isExplained ? (
             <div className="explained-next-action-card pop-in">
-              <div className="explained-status-note">
-                <span className="explained-badge-tag">เฉลยข้อนี้แล้ว (ไม่นับคะแนน)</span>
-                <p className="explained-subtext">หนูๆ จำเทคนิคการจับคู่สองตัวแรกไว้ใช้นะจ๊ะ พร้อมแล้วกดไปลุยข้อถัดไปกันเลย!</p>
-              </div>
               <button
                 type="button"
                 className="notion-btn-primary next-question-after-demo-btn pulse-btn"
