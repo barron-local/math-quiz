@@ -618,52 +618,29 @@ export default function App() {
                       =
                     </text>
 
-                    {/* Placeholder / Answer Slot with Animation (y=56 to y=104) */}
+                    {/* Placeholder / Answer Slot (renders pure number text cleanly without box or dashed border) */}
                     {selectedAnswer === null ? (
                       <text x="296" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
                         ?
                       </text>
                     ) : (
-                      <g transform="translate(266, 56)">
-                        <rect
-                          width="60"
-                          height="48"
-                          rx="10"
-                          fill={
-                            !hasEvaluated
-                              ? 'var(--notion-blue-bg)'
-                              : selectedAnswer === currentQuestion.correctAnswer
-                              ? 'var(--notion-green-bg)'
-                              : 'var(--notion-red-bg)'
-                          }
-                          stroke={
-                            !hasEvaluated
-                              ? 'var(--notion-blue)'
-                              : selectedAnswer === currentQuestion.correctAnswer
-                              ? 'var(--notion-green)'
-                              : 'var(--notion-red)'
-                          }
-                          strokeWidth="2.5"
-                          strokeDasharray={!hasEvaluated ? '4 2' : 'none'}
-                        />
-                        <text
-                          x="30"
-                          y="34"
-                          textAnchor="middle"
-                          fontSize="32"
-                          fontWeight="700"
-                          fontFamily="var(--font-mono)"
-                          fill={
-                            !hasEvaluated
-                              ? 'var(--notion-blue)'
-                              : selectedAnswer === currentQuestion.correctAnswer
-                              ? 'var(--notion-green)'
-                              : 'var(--notion-red)'
-                          }
-                        >
-                          {selectedAnswer}
-                        </text>
-                      </g>
+                      <text
+                        x="296"
+                        y="92"
+                        textAnchor="middle"
+                        fontSize="42"
+                        fontWeight="700"
+                        fontFamily="var(--font-mono)"
+                        fill={
+                          !hasEvaluated
+                            ? 'var(--notion-blue)'
+                            : selectedAnswer === currentQuestion.correctAnswer
+                            ? 'var(--notion-green)'
+                            : 'var(--notion-red)'
+                        }
+                      >
+                        {selectedAnswer}
+                      </text>
                     )}
                   </svg>
                 </div>
