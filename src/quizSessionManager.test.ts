@@ -26,7 +26,6 @@ describe('quizSessionManager', () => {
       num2: 4,
       correctAnswer: 12,
       choices: [10, 11, 12, 13],
-      explanationSteps: ['8 + 4 = 12'],
     }
 
     saveQuizSession({
@@ -67,9 +66,8 @@ describe('quizSessionManager', () => {
         num2: 2,
         correctAnswer: 5,
         choices: [4, 5, 6, 7],
-        explanationSteps: ['3 + 2 = 5'],
       },
-      askedQuestions: ['q-1', 'q-2'],
+      askedQuestions: ['1', '2'],
       score: 1,
       hasUsedLifeline: false,
       eliminatedChoices: [],
