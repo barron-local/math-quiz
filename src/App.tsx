@@ -767,25 +767,7 @@ export default function App() {
               </div>
             )}
 
-            {/* Special Booster: 50-50 Lifeline Button (Cut 2 incorrect choices, usable 1 time per round) */}
-            <div className="lifeline-bar">
-              <button
-                type="button"
-                className={`lifeline-btn ${hasUsedLifeline ? 'lifeline-used' : 'pulse-btn'}`}
-                disabled={hasUsedLifeline || isAnswered}
-                onClick={handleUseLifeline}
-                title={hasUsedLifeline ? 'ใช้สิทธิ์ตัวช่วยตัด 2 ชอยส์ในรอบนี้ไปแล้ว' : 'กดเพื่อตัดตัวเลือกที่ผิดออก 2 ข้อ (ใช้ได้ 1 ครั้งต่อรอบ)'}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                </svg>
-                <span>ตัวช่วยตัด 2 ตัวเลือก</span>
-                <span className="lifeline-count-badge">
-                  {hasUsedLifeline ? '0/1' : '1/1'}
-                </span>
-              </button>
-            </div>
+
 
             {/* Read aloud / replay button for kids (Only shown when voice is enabled) */}
             {isVoiceEnabled && (
@@ -836,6 +818,30 @@ export default function App() {
               )
             })}
           </div>
+          {/* Floating Skill Booster: 50-50 Lifeline Button positioned at bottom-left of the screen */}
+          <aside className="skill-floating-pod pop-in" aria-label="สกิลพิเศษ">
+            <button
+              type="button"
+              className={`skill-btn ${hasUsedLifeline ? 'skill-used' : 'pulse-btn'}`}
+              disabled={hasUsedLifeline || isAnswered}
+              onClick={handleUseLifeline}
+              title={hasUsedLifeline ? 'ใช้สิทธิ์สกิลตัด 2 ตัวเลือกในรอบนี้ไปแล้ว' : 'กดเพื่อตัดตัวเลือกที่ผิดออก 2 ข้อ (ใช้ได้ 1 ครั้งต่อรอบ)'}
+              aria-label="สกิลพิเศษ ตัด 2 ตัวเลือก"
+            >
+              <div className="skill-icon-gem" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+              </div>
+              <div className="skill-info">
+                <div className="skill-name-row">
+                  <span className="skill-name">ตัด 2 ชอยส์</span>
+                  <span className="skill-badge">{hasUsedLifeline ? '0/1' : '1/1'}</span>
+                </div>
+                <span className="skill-desc">Skill พิเศษช่วยคิด</span>
+              </div>
+            </button>
+          </aside>
         </section>
       )}
 
