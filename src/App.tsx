@@ -733,9 +733,55 @@ export default function App() {
               สวัสดีน้อง <span className="highlight-name">{kidName}</span>
             </div>
             <div className="stats-badges">
-              <span className={`badge badge-timer ${timeLeft <= 10 ? 'timer-urgent' : ''}`}>
-                เวลา: {timeLeft} วิ
-              </span>
+              {/* Circular Countdown Timer Ring */}
+              {(() => {
+                const radius = 17
+                const circumference = 2 * Math.PI * radius
+                const progressRatio = Math.max(0, Math.min(1, timeLeft / QUESTION_TIME_SECONDS))
+                const strokeDashoffset = circumference * (1 - progressRatio)
+                const timerState = timeLeft <= 10 ? 'urgent' : timeLeft <= 25 ? 'warning' : 'normal'
+
+                return (
+                  <div
+                    className={`circular-timer-pill ${timerState === 'urgent' ? 'timer-urgent' : ''}`}
+                    title={`เวลาที่เหลือ: ${timeLeft} วินาที`}
+                    role="timer"
+                    aria-label={`เหลือเวลา ${timeLeft} วินาที`}
+                  >
+                    <svg className="timer-ring-svg" width="38" height="38" viewBox="0 0 42 42">
+                      {/* Background Track */}
+                      <circle
+                        className="timer-ring-track"
+                        cx="21"
+                        cy="21"
+                        r={radius}
+                        fill="transparent"
+                        strokeWidth="3.5"
+                      />
+                      {/* Animated Countdown Ring */}
+                      <circle
+                        className={`timer-ring-bar timer-bar-${timerState}`}
+                        cx="21"
+                        cy="21"
+                        r={radius}
+                        fill="transparent"
+                        strokeWidth="3.5"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                        transform="rotate(-90 21 21)"
+                      />
+                    </svg>
+                    <div className="timer-center-content">
+                      <span className={`timer-seconds timer-text-${timerState}`}>
+                        {timeLeft}
+                      </span>
+                      <span className="timer-sec-unit">วิ</span>
+                    </div>
+                  </div>
+                )
+              })()}
+
               <span className="badge badge-tag">
                 ข้อที่ {currentIndex} / {totalQuestions}
               </span>
