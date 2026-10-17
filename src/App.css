@@ -149,6 +149,7 @@
 }
 
 .notion-modal {
+  position: relative;
   width: 100%;
   max-width: 360px;
   background-color: var(--notion-bg);
@@ -161,23 +162,34 @@
 .modal-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  position: relative;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .modal-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
   font-size: 16px;
   color: var(--notion-text-muted);
   width: 28px;
   height: 28px;
-  border-radius: 4px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 2;
 }
 
 .modal-close-btn:hover {
   background-color: var(--notion-hover);
+  color: var(--notion-text);
 }
 
 .modal-body {
