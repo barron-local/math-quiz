@@ -447,7 +447,7 @@ export default function App() {
 
     const { num1, num2, num3 } = currentQuestion
 
-    // Step 1: Animate pair 1 (num1 + num2) and speak slowly with comfortable pauses
+    // Step 1: Animate pair 1 (num1 + num2) and speak clearly with the mascot voice
     setDemoStep(1)
     setMascotMood('think')
 
@@ -458,7 +458,7 @@ export default function App() {
         () => setIsSpeaking(true),
         () => {
           setIsSpeaking(false)
-          // Generous pause (1400ms) after Step 1 so the child has time to absorb and see the intermediate sum
+          // Short pause (700ms) after Step 1 before moving to the next step
           const t1 = setTimeout(() => {
             // Step 2: Animate adding intermediate sum with num3
             setDemoStep(2)
@@ -470,7 +470,7 @@ export default function App() {
               () => setIsSpeaking(true),
               () => {
                 setIsSpeaking(false)
-                // Generous pause (1400ms) after Step 2 before revealing final answer
+                // Short pause (700ms) after Step 2 before revealing final answer
                 const t2 = setTimeout(() => {
                   setDemoStep(3)
                   setMascotMood('cheer')
@@ -482,18 +482,15 @@ export default function App() {
                     () => {
                       setIsSpeaking(false)
                       setIsDemoRunning(false)
-                    },
-                    0.82 // Gentle, relaxed pace for final explanation
+                    }
                   )
-                }, 1400)
+                }, 700)
                 demoTimeoutRefs.current.push(t2)
-              },
-              0.82 // Gentle, relaxed pace for step 2
+              }
             )
-          }, 1400)
+          }, 700)
           demoTimeoutRefs.current.push(t1)
-        },
-        0.82 // Gentle, relaxed pace for young kids to follow easily
+        }
       )
     }
 
