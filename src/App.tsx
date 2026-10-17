@@ -72,9 +72,13 @@ export default function App() {
     }, 10)
   }
 
-  // Welcome speech intro text (cheerful & cute for children, guiding them on what to do)
+  // Welcome speech intro text (personalized with kidName if already entered/saved)
   const welcomeSpeechText = isFromQr
-    ? 'เย้! สแกนคิวอาร์โค้ดเข้ามาแล้ว ยินดีต้อนรับนะคนเก่ง! หนูพิมพ์ชื่อเล่นหรือฉายาเท่ๆ เลือกลักษณะโจทย์ แล้วกดปุ่มเริ่มเล่นได้เลยจ้า!'
+    ? kidName.trim()
+      ? `เย้! สแกนคิวอาร์โค้ดเข้ามาแล้ว ยินดีต้อนรับน้อง${kidName.trim()}นะคร้าบ! เลือกลักษณะโจทย์ แล้วกดปุ่มเริ่มเล่นได้เลยจ้า!`
+      : 'เย้! สแกนคิวอาร์โค้ดเข้ามาแล้ว ยินดีต้อนรับนะคนเก่ง! หนูพิมพ์ชื่อเล่นหรือฉายาเท่ๆ เลือกลักษณะโจทย์ แล้วกดปุ่มเริ่มเล่นได้เลยจ้า!'
+    : kidName.trim()
+    ? `สวัสดีครับน้อง${kidName.trim()}! ยินดีต้อนรับนะคร้าบ เลือกลักษณะโจทย์ที่ชอบ แล้วกดปุ่มเริ่มเล่นเพื่อไปลุยด้วยกันได้เลยจ้า!`
     : 'สวัสดีครับเพื่อนคนเก่ง! ยินดีต้อนรับนะคร้าบ ให้หนูพิมพ์ชื่อเล่น เลือกลักษณะโจทย์ที่ชอบ แล้วกดปุ่มเริ่มเล่นเพื่อไปลุยด้วยกันได้เลยจ้า!'
 
   const handleSpeakWelcome = () => {
@@ -385,7 +389,11 @@ export default function App() {
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
               <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
             </svg>
-            <span className="mascot-speech-text">{welcomeMessage}</span>
+            <span className="mascot-speech-text">
+              {kidName.trim()
+                ? `สวัสดีครับน้อง${kidName.trim()}! ยินดีต้อนรับกลับมานะคร้าบ เลือกลักษณะโจทย์แล้วกดเริ่มเล่นได้เลย!`
+                : welcomeMessage}
+            </span>
           </div>
 
           <h1 className="page-title">Math Quiz</h1>
