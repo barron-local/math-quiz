@@ -748,15 +748,6 @@ export default function App() {
               )
             })}
           </div>
-
-          {/* Explicit solution hint after answer */}
-          <div className="feedback-bar">
-            {isAnswered && !currentFeedback?.isCorrect && (
-              <span className="feedback-answer-hint pop-in">
-                คำตอบที่ถูกต้องคือ {currentQuestion.correctAnswer}
-              </span>
-            )}
-          </div>
         </section>
       )}
 
