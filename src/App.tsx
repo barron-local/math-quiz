@@ -948,17 +948,17 @@ export default function App() {
             {currentQuestion.problemType === 'add-3' && typeof currentQuestion.num3 === 'number' ? (
               /* 3-number addition with step-by-step connection lines & walkthrough demonstration */
               <div className="addition-3-container">
-                <div className={`step-flow-banner ${demoStep > 0 ? 'step-flow-active' : ''}`}>
-                  {demoStep === 1 ? (
-                    <span>💡 ขั้นที่ 1: นำ {currentQuestion.num1} + {currentQuestion.num2} = {currentQuestion.num1 + currentQuestion.num2}</span>
-                  ) : demoStep === 2 ? (
-                    <span>✨ ขั้นที่ 2: นำผลลัพธ์ {currentQuestion.num1 + currentQuestion.num2} + {currentQuestion.num3} = {currentQuestion.correctAnswer}</span>
-                  ) : demoStep === 3 ? (
-                    <span>🎉 ได้คำตอบแล้ว: {currentQuestion.correctAnswer} เก่งมาก!</span>
-                  ) : (
-                    <span>คิดทีละคู่: บวก 2 ตัวแรกก่อน แล้วบวกตัวที่สาม</span>
-                  )}
-                </div>
+                {demoStep !== 3 && !isExplained && (
+                  <div className={`step-flow-banner ${demoStep > 0 ? 'step-flow-active' : ''}`}>
+                    {demoStep === 1 ? (
+                      <span>💡 ขั้นที่ 1: นำ {currentQuestion.num1} + {currentQuestion.num2} = {currentQuestion.num1 + currentQuestion.num2}</span>
+                    ) : demoStep === 2 ? (
+                      <span>✨ ขั้นที่ 2: นำผลลัพธ์ {currentQuestion.num1 + currentQuestion.num2} + {currentQuestion.num3} = {currentQuestion.correctAnswer}</span>
+                    ) : (
+                      <span>คิดทีละคู่: บวก 2 ตัวแรกก่อน แล้วบวกตัวที่สาม</span>
+                    )}
+                  </div>
+                )}
                 <div className="addition-guide-svg-wrapper">
                   <svg
                     viewBox="0 0 420 180"
