@@ -11,47 +11,12 @@ import {
 } from './encouragements'
 import { speakThaiText, formatProblemForSpeech, getAddition3StepSpeech } from './speechHelper'
 import { soundEffects } from './soundEffects'
-import { SoundTestPage } from './components/SoundTestPage'
 import './App.css'
 
 type QuizState = 'name-input' | 'playing' | 'completed'
 
 export default function App() {
   const [gameState, setGameState] = useState<QuizState>('name-input')
-  const [isTestRoute, setIsTestRoute] = useState(() => {
-    if (typeof window === 'undefined') return false
-    const path = window.location.pathname.toLowerCase()
-    const hash = window.location.hash.toLowerCase()
-    const search = window.location.search.toLowerCase()
-    return (
-      path.startsWith('/test') ||
-      hash.startsWith('#/test') ||
-      search.includes('test=fireworks') ||
-      search.includes('test=sound') ||
-      search.includes('test=true')
-    )
-  })
-
-  useEffect(() => {
-    const checkRoute = () => {
-      const path = window.location.pathname.toLowerCase()
-      const hash = window.location.hash.toLowerCase()
-      const search = window.location.search.toLowerCase()
-      setIsTestRoute(
-        path.startsWith('/test') ||
-        hash.startsWith('#/test') ||
-        search.includes('test=fireworks') ||
-        search.includes('test=sound') ||
-        search.includes('test=true')
-      )
-    }
-    window.addEventListener('popstate', checkRoute)
-    window.addEventListener('hashchange', checkRoute)
-    return () => {
-      window.removeEventListener('popstate', checkRoute)
-      window.removeEventListener('hashchange', checkRoute)
-    }
-  }, [])
 
   const [kidName, setKidName] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -555,24 +520,6 @@ export default function App() {
     setGameState('name-input')
   }
 
-  if (isTestRoute) {
-    return (
-      <main className="notion-container">
-        <SoundTestPage
-          onBack={() => {
-            if (window.location.pathname.startsWith('/test')) {
-              window.history.pushState({}, '', '/')
-            } else if (window.location.hash.startsWith('#/test')) {
-              window.location.hash = ''
-            } else {
-              window.history.pushState({}, '', window.location.pathname)
-            }
-            setIsTestRoute(false)
-          }}
-        />
-      </main>
-    )
-  }
 
   return (
     <main className="notion-container">
@@ -850,25 +797,6 @@ export default function App() {
               เริ่มเล่นเลย (Start)
             </button>
 
-            <div style={{ textAlign: 'center', marginTop: '14px' }}>
-              <a
-                href="/test"
-                className="sound-test-footer-link"
-                onClick={(e) => {
-                  e.preventDefault()
-                  window.history.pushState({}, '', '/test')
-                  setIsTestRoute(true)
-                }}
-                title="เปิดหน้าทดสอบเสียงพลุฉลอง (/test)"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M9 18V5l12-2v13" />
-                  <circle cx="6" cy="18" r="3" />
-                  <circle cx="18" cy="16" r="3" />
-                </svg>
-                <span>ทดสอบเสียงพลุ (/test)</span>
-              </a>
-            </div>
           </form>
         </section>
       )}
