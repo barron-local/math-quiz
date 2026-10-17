@@ -8,9 +8,8 @@ import {
   getRandomCorrectMessage,
   getRandomEncouragingMessage,
   getCompletionMessage,
-  getRandomWelcomeMessage,
 } from './encouragements'
-import { speakThaiText, formatProblemForSpeech, warmUpSpeech, getAddition3StepSpeech } from './speechHelper'
+import { speakThaiText, formatProblemForSpeech, getAddition3StepSpeech } from './speechHelper'
 import { soundEffects } from './soundEffects'
 import './App.css'
 
@@ -147,9 +146,7 @@ export default function App() {
     }
   }
 
-  const [welcomeMessage] = useState(() => getRandomWelcomeMessage())
   const [isSpeaking, setIsSpeaking] = useState(false)
-  const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
   const [isPoked, setIsPoked] = useState(false)
   const [mascotConfig, setMascotConfig] = useState<MascotConfig>(() => loadSavedMascotConfig())
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false)
@@ -179,61 +176,7 @@ export default function App() {
     }, 10)
   }
 
-  // Welcome speech intro text (personalized with kidName if already entered/saved)
-  const welcomeSpeechText = isFromQr
-    ? kidName.trim()
-      ? `เย้! สแกนคิวอาร์โค้ดเข้ามาแล้ว ยินดีต้อนรับน้อง${kidName.trim()}นะจ๊ะ! เลือกลักษณะโจทย์ แล้วกดปุ่มเริ่มเล่นได้เลยจ้า!`
-      : 'เย้! สแกนคิวอาร์โค้ดเข้ามาแล้ว ยินดีต้อนรับนะคนเก่ง! หนูพิมพ์ชื่อเล่นหรือฉายาเท่ๆ เลือกลักษณะโจทย์ แล้วกดปุ่มเริ่มเล่นได้เลยจ้า!'
-    : kidName.trim()
-    ? `สวัสดีจ้าน้อง${kidName.trim()}! ยินดีต้อนรับนะจ๊ะ เลือกลักษณะโจทย์ที่ชอบ แล้วกดปุ่มเริ่มเล่นเพื่อไปลุยด้วยกันได้เลยจ้า!`
-    : 'สวัสดีจ้าเพื่อนคนเก่ง! ยินดีต้อนรับนะจ๊ะ ให้หนูพิมพ์ชื่อเล่น เลือกลักษณะโจทย์ที่ชอบ แล้วกดปุ่มเริ่มเล่นเพื่อไปลุยด้วยกันได้เลยจ้า!'
 
-  const handleSpeakWelcome = () => {
-    if (!isVoiceEnabled) return
-    setIsSpeaking(true)
-    speakThaiText(
-      welcomeSpeechText,
-      () => setIsSpeaking(true),
-      () => setIsSpeaking(false)
-    )
-  }
-
-  // Auto-speak cute welcome message on first entry or user click
-  useEffect(() => {
-    if (gameState !== 'name-input' || hasSpokenWelcome || !isVoiceEnabled) return
-
-    const tryAutoSpeak = () => {
-      if (!hasSpokenWelcome && isVoiceEnabled) {
-        setHasSpokenWelcome(true)
-        handleSpeakWelcome()
-      }
-    }
-
-    // Try speaking after short gentle delay
-    const timer = setTimeout(() => {
-      tryAutoSpeak()
-    }, 600)
-
-    // Browsers require a user gesture if auto-speech is blocked: listen to first click/tap
-    const handleFirstGesture = () => {
-      warmUpSpeech()
-      tryAutoSpeak()
-      window.removeEventListener('click', handleFirstGesture)
-      window.removeEventListener('touchstart', handleFirstGesture)
-      window.removeEventListener('touchend', handleFirstGesture)
-    }
-
-    window.addEventListener('click', handleFirstGesture, { once: true })
-    window.addEventListener('touchstart', handleFirstGesture, { once: true, passive: true })
-    window.addEventListener('touchend', handleFirstGesture, { once: true, passive: true })
-
-    return () => {
-      clearTimeout(timer)
-      window.removeEventListener('click', handleFirstGesture)
-      window.removeEventListener('touchstart', handleFirstGesture)
-      window.removeEventListener('touchend', handleFirstGesture)
-    }
-  }, [gameState, hasSpokenWelcome, isVoiceEnabled])
 
   // Read math problem aloud with cheerful Thai speech
   const handleSpeakProblem = (questionToSpeak = currentQuestion) => {
@@ -701,24 +644,6 @@ export default function App() {
             <span className="customize-tag">เปลี่ยนตัว & สีเสื้อ</span>
           </button>
 
-          {/* Cute mascot dialogue bubble for normal visitors (clickable to replay speech) */}
-          <div
-            className={`mascot-home-speech pop-in ${isSpeaking ? 'speech-bubble-speaking' : ''}`}
-            onClick={handleSpeakWelcome}
-            title="กดเพื่อฟังเสียงแนะนำอีกครั้ง"
-            role="button"
-            tabIndex={0}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="speech-icon" aria-hidden="true">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-            </svg>
-            <span className="mascot-speech-text">
-              {kidName.trim()
-                ? `สวัสดีจ้าน้อง${kidName.trim()}! ยินดีต้อนรับกลับมานะจ๊ะ เลือกลักษณะโจทย์แล้วกดเริ่มเล่นได้เลย!`
-                : welcomeMessage}
-            </span>
-          </div>
 
           <form onSubmit={handleStart} className="name-form">
             <label htmlFor="kidNameInput" className="name-label">

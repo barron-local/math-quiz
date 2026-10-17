@@ -353,60 +353,7 @@
   user-select: none;
 }
 
-/* Home Speech Bubble */
-.mascot-home-speech {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background-color: var(--notion-callout-bg);
-  border: 1px solid var(--notion-border);
-  border-radius: 24px;
-  padding: 10px 20px;
-  margin-bottom: 20px;
-  max-width: 460px;
-  box-shadow: var(--shadow-subtle);
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  user-select: none;
-}
 
-.mascot-home-speech:hover {
-  background-color: var(--notion-blue-bg);
-  border-color: var(--notion-blue);
-  transform: translateY(-2px);
-}
-
-.speech-icon {
-  flex-shrink: 0;
-  color: var(--notion-blue);
-}
-
-.speech-bubble-speaking {
-  border-color: var(--notion-blue);
-  background-color: var(--notion-blue-bg);
-  animation: audioPulse 1.2s infinite ease-in-out;
-}
-
-.mascot-home-speech::after {
-  content: '';
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 6px solid var(--notion-border);
-}
-
-.mascot-speech-text {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--notion-text);
-  line-height: 1.5;
-  text-align: center;
-}
 
 .mascot-svg {
   display: block;
