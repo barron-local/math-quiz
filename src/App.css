@@ -164,10 +164,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   width: 100%;
   min-height: 36px;
   text-align: center;
+  padding: 0 44px; /* Safe clearance on both sides so corner button never touches the badge */
+  box-sizing: border-box;
 }
 
 .modal-header .badge {
@@ -175,6 +177,7 @@
   text-align: center;
   justify-content: center;
   display: inline-flex;
+  white-space: nowrap;
 }
 
 /* Dedicated Universal Corner Close Button */
