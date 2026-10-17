@@ -169,6 +169,22 @@ export function useAppUpdate(): AppUpdateState {
     setDismissed(true)
   }, [])
 
+  // Expose convenient test trigger for development & verification
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).__simulateUpdate = () => {
+        setDismissed(false)
+        setHasUpdate(true)
+        console.log('[MathQuiz] Simulated update triggered!')
+      }
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as any).__simulateUpdate
+      }
+    }
+  }, [])
+
   return {
     hasUpdate,
     isUpdating,
