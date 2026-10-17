@@ -419,11 +419,14 @@ export default function App() {
                     <input
                       id="customCountInput"
                       type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       min={3}
                       max={50}
                       className="custom-count-input"
                       value={customQuestionCount}
                       onChange={(e) => setCustomQuestionCount(Math.max(1, parseInt(e.target.value) || 0))}
+                      autoFocus
                     />
                     <span className="custom-count-hint">(3 - 50 ข้อ)</span>
                   </div>
