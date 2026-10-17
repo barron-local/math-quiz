@@ -729,19 +729,21 @@ export default function App() {
               </div>
             )}
 
-            {/* Read aloud / replay button for kids */}
-            <button
-              type="button"
-              className={`speak-problem-btn ${isSpeaking ? 'speaking-active' : ''}`}
-              onClick={() => handleSpeakProblem(currentQuestion)}
-              title="กดเพื่อฟังเสียงอ่านโจทย์ซ้ำอีกครั้ง"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-              </svg>
-              <span>{isSpeaking ? 'กำลังอ่านโจทย์...' : 'กดฟังเสียงซ้ำ'}</span>
-            </button>
+            {/* Read aloud / replay button for kids (Only shown when voice is enabled) */}
+            {isVoiceEnabled && (
+              <button
+                type="button"
+                className={`speak-problem-btn ${isSpeaking ? 'speaking-active' : ''}`}
+                onClick={() => handleSpeakProblem(currentQuestion)}
+                title="กดเพื่อฟังเสียงอ่านโจทย์ซ้ำอีกครั้ง"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                </svg>
+                <span>{isSpeaking ? 'กำลังอ่านโจทย์...' : 'กดฟังเสียงซ้ำ'}</span>
+              </button>
+            )}
           </div>
 
           <div className="choices-grid">
