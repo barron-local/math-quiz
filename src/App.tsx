@@ -9,7 +9,7 @@ import {
   getCompletionMessage,
   getRandomWelcomeMessage,
 } from './encouragements'
-import { speakThaiText, formatProblemForSpeech } from './speechHelper'
+import { speakThaiText, formatProblemForSpeech, warmUpSpeech } from './speechHelper'
 import { soundEffects } from './soundEffects'
 import './App.css'
 
@@ -188,18 +188,22 @@ export default function App() {
 
     // Browsers require a user gesture if auto-speech is blocked: listen to first click/tap
     const handleFirstGesture = () => {
+      warmUpSpeech()
       tryAutoSpeak()
       window.removeEventListener('click', handleFirstGesture)
       window.removeEventListener('touchstart', handleFirstGesture)
+      window.removeEventListener('touchend', handleFirstGesture)
     }
 
     window.addEventListener('click', handleFirstGesture, { once: true })
-    window.addEventListener('touchstart', handleFirstGesture, { once: true })
+    window.addEventListener('touchstart', handleFirstGesture, { once: true, passive: true })
+    window.addEventListener('touchend', handleFirstGesture, { once: true, passive: true })
 
     return () => {
       clearTimeout(timer)
       window.removeEventListener('click', handleFirstGesture)
       window.removeEventListener('touchstart', handleFirstGesture)
+      window.removeEventListener('touchend', handleFirstGesture)
     }
   }, [gameState, hasSpokenWelcome, isVoiceEnabled])
 

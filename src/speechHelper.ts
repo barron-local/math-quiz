@@ -3,6 +3,56 @@
  * Optimized for natural, cheerful kid-friendly Thai speech (pitch: 1.25, rate: 0.95).
  */
 
+// Keep a global reference to the active utterance so browser garbage collection doesn't cancel audio prematurely
+let activeUtterance: SpeechSynthesisUtterance | null = null
+let cachedVoices: SpeechSynthesisVoice[] = []
+
+let isWarmedUp = false
+
+// Helper called on user touch to unlock iOS Safari and mobile speech synthesis
+export function warmUpSpeech(): void {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window) || isWarmedUp) return
+  isWarmedUp = true
+  try {
+    const emptyUtterance = new SpeechSynthesisUtterance(' ')
+    emptyUtterance.volume = 0.01
+    window.speechSynthesis.speak(emptyUtterance)
+    window.speechSynthesis.resume()
+  } catch {
+    // Ignore warmup error
+  }
+}
+
+// Pre-warm and cache voices as soon as possible
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  const loadVoices = () => {
+    try {
+      const v = window.speechSynthesis.getVoices()
+      if (v && v.length > 0) {
+        cachedVoices = v
+      }
+    } catch {
+      // Ignore errors on restricted environments
+    }
+  }
+
+  loadVoices()
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices
+  }
+
+  // Also hook into touchstart/click globally once to ensure mobile speech audio context is unlocked
+  const unlockAudio = () => {
+    warmUpSpeech()
+    window.removeEventListener('touchstart', unlockAudio, true)
+    window.removeEventListener('touchend', unlockAudio, true)
+    window.removeEventListener('click', unlockAudio, true)
+  }
+  window.addEventListener('touchstart', unlockAudio, { capture: true, passive: true })
+  window.addEventListener('touchend', unlockAudio, { capture: true, passive: true })
+  window.addEventListener('click', unlockAudio, { capture: true, passive: true })
+}
+
 export function speakThaiText(
   text: string,
   onStart?: () => void,
@@ -10,11 +60,19 @@ export function speakThaiText(
 ): void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     console.warn('Speech synthesis not supported in this browser.')
+    if (onEnd) onEnd()
     return
   }
 
-  // Cancel any ongoing speech
-  window.speechSynthesis.cancel()
+  try {
+    // 1. Cancel previous utterance and resume synthesis queue (fixes frozen/stuck state in Chrome/Safari)
+    window.speechSynthesis.cancel()
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume()
+    }
+  } catch (e) {
+    console.warn('Could not reset speechSynthesis state', e)
+  }
 
   // Normalize phonetic Thai text to avoid robotic TTS quirks (e.g. "สวัสดีครับ" being mispronounced as "สวัสดีขอรับ", or "แล้วนะ" sounding unnatural)
   const normalizedText = text
@@ -25,34 +83,93 @@ export function speakThaiText(
     .replace(/แล้วน้า/g, 'แล้วจ้า')
 
   const utterance = new SpeechSynthesisUtterance(normalizedText)
+  activeUtterance = utterance
+
+  // Standard Thai language code
   utterance.lang = 'th-TH'
 
   // Soft, warm, and gentle kid-friendly speech tuning
-  utterance.volume = 0.78 // Soften volume slightly (not too loud)
+  utterance.volume = 0.95 // Clear volume
   utterance.pitch = 1.08 // Warm, friendly, and natural pitch (not shrill)
-  utterance.rate = 0.88 // Gentle, comfortable pacing for young ears
+  utterance.rate = 0.9 // Comfortable pacing for young ears
 
-  // Select the smoothest/most natural Thai voice available (e.g., Premwadee, Niwat, Achara, Google Thai)
-  const voices = window.speechSynthesis.getVoices()
-  const thaiVoices = voices.filter((v) => v.lang.includes('th') || v.lang.includes('TH'))
-  
-  // Prioritize premium/natural neural voices if available
-  const preferredVoice =
-    thaiVoices.find((v) => v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('online')) ||
-    thaiVoices.find((v) => v.name.includes('Premwadee') || v.name.includes('Achara')) ||
-    thaiVoices[0]
-
-  if (preferredVoice) {
-    utterance.voice = preferredVoice
+  // Get freshest voices list, falling back to cached voices
+  let voices = window.speechSynthesis.getVoices()
+  if (!voices || voices.length === 0) {
+    voices = cachedVoices
+  } else {
+    cachedVoices = voices
   }
 
-  if (onStart) utterance.onstart = onStart
-  if (onEnd) utterance.onend = onEnd
-  utterance.onerror = () => {
-    if (onEnd) onEnd()
+  // Look for Thai voices
+  const thaiVoices = voices.filter(
+    (v) =>
+      v.lang === 'th-TH' ||
+      v.lang === 'th_TH' ||
+      v.lang.toLowerCase().startsWith('th')
+  )
+
+  if (thaiVoices.length > 0) {
+    // Prioritize natural/neural Thai voices if available (e.g., Premwadee, Niwat, Achara, Google Thai)
+    const preferredVoice =
+      thaiVoices.find((v) => {
+        const name = v.name.toLowerCase()
+        return name.includes('natural') || name.includes('online') || name.includes('neural')
+      }) ||
+      thaiVoices.find((v) => {
+        const name = v.name.toLowerCase()
+        return name.includes('premwadee') || name.includes('achara') || name.includes('niwat')
+      }) ||
+      thaiVoices.find((v) => v.name.toLowerCase().includes('google')) ||
+      thaiVoices[0]
+
+    if (preferredVoice) {
+      utterance.voice = preferredVoice
+    }
   }
 
-  window.speechSynthesis.speak(utterance)
+  const cleanup = () => {
+    if (activeUtterance === utterance) {
+      activeUtterance = null
+    }
+    if (onEnd) {
+      onEnd()
+    }
+  }
+
+  utterance.onstart = () => {
+    if (onStart) onStart()
+  }
+
+  utterance.onend = cleanup
+
+  utterance.onerror = (event) => {
+    // Ignore harmless 'canceled' or 'interrupted' errors when another sound starts
+    if (event.error !== 'canceled' && event.error !== 'interrupted') {
+      console.warn('SpeechSynthesis error:', event.error)
+    }
+    cleanup()
+  }
+
+  // Periodic resume heartbeat for long speech (Chromium bug where speech pauses after ~15s)
+  const resumeInterval = setInterval(() => {
+    if (!window.speechSynthesis.speaking) {
+      clearInterval(resumeInterval)
+    } else if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume()
+    }
+  }, 3000)
+
+  try {
+    window.speechSynthesis.speak(utterance)
+    // Extra kick in case browser starts in paused state
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume()
+    }
+  } catch (err) {
+    console.error('Speech speak error:', err)
+    cleanup()
+  }
 }
 
 /**
