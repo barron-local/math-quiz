@@ -77,17 +77,24 @@ export const KidMascot: React.FC<CharacterProps> = ({
             <path d="M38 82C34 88 32 94 34 100" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
           </g>
         ) : mood === 'think' ? (
-          // Thinking pose arm under chin
+          // Thinking pose: Hand gently resting at cheek/chin, other hand casually by hip
           <g className="think-arm">
-            <path d="M80 82C84 76 80 66 68 60" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
-            <circle cx="68" cy="60" r="6" fill="#FFDCB2" />
-            <path d="M38 82C34 88 32 94 34 100" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
+            {/* Left arm relaxed by side */}
+            <path d="M38 80C34 86 33 92 35 98" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
+            <circle cx="35" cy="98" r="5" fill="#FFDCB2" />
+
+            {/* Right arm bent comfortably towards chin (x: 68, y: 56) */}
+            <path d="M82 80C88 78 86 68 72 58" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
+            {/* Cute small fist resting at chin/cheek */}
+            <circle cx="70" cy="56" r="6" fill="#FFDCB2" />
           </g>
         ) : (
-          // Gentle idle hands
+          // Gentle idle hands resting naturally by side with cute small hands
           <g className="idle-arms">
-            <path d="M38 82C33 88 32 94 34 100" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
-            <path d="M82 82C87 88 88 94 86 100" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
+            <path d="M38 80C33 86 33 92 35 98" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
+            <circle cx="35" cy="98" r="5" fill="#FFDCB2" />
+            <path d="M82 80C87 86 87 92 85 98" stroke="#2383E2" strokeWidth="8" strokeLinecap="round" />
+            <circle cx="85" cy="98" r="5" fill="#FFDCB2" />
           </g>
         )}
 
@@ -141,7 +148,13 @@ export const KidMascot: React.FC<CharacterProps> = ({
               strokeWidth="2"
             />
           ) : mood === 'think' ? (
-            <circle cx="62" cy="51" r="2.5" fill="#37352F" />
+            /* Cute curious smile when pondering math questions */
+            <path
+              d="M54 50C57 53 63 53 66 49"
+              stroke="#37352F"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
           ) : (
             <path
               d="M53 50C56 55 64 55 67 50"
