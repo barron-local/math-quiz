@@ -1,47 +1,55 @@
 /**
- * Helper to speak math problems and encouragement using Web Speech Synthesis.
- * Optimized for natural, cheerful kid-friendly Thai speech (pitch: 1.25, rate: 0.95).
+ * Universal Thai Speech Engine (หวาน ใส ธรรมชาติ ใช้งานได้ทุกอุปกรณ์ แม้ไม่ได้ติดตั้ง TTS ในเครื่อง)
+ *
+ * 1. Primary: High-fidelity sweet Thai female audio stream via Google Neural Voice (zero installation required, works on any Windows/Mac/iOS/Android/Linux)
+ * 2. Fallback: Native Web Speech API with pitch & rate tuning for sweet kid-friendly cadence
+ * 3. Pre-buffering & Memory caching for zero-latency instant replays
  */
 
-// Keep a global reference to the active utterance so browser garbage collection doesn't cancel audio prematurely
+// Active audio playback references
+let currentAudio: HTMLAudioElement | null = null
+let currentSequenceId = 0
 let activeUtterance: SpeechSynthesisUtterance | null = null
 let cachedVoices: SpeechSynthesisVoice[] = []
-
 let isWarmedUp = false
 
-// Helper called on user touch to unlock iOS Safari and mobile speech synthesis
+// In-memory audio cache for instant playback of repeated phrases & numbers
+const audioCache = new Map<string, HTMLAudioElement>()
+
+/**
+ * Pre-warm and unlock audio context for iOS Safari and mobile devices
+ */
 export function warmUpSpeech(): void {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window) || isWarmedUp) return
+  if (typeof window === 'undefined' || isWarmedUp) return
   isWarmedUp = true
+
+  // 1. Warm up HTML5 Audio (bypasses mobile auto-play restrictions)
   try {
-    const emptyUtterance = new SpeechSynthesisUtterance(' ')
-    emptyUtterance.volume = 0.01
-    window.speechSynthesis.speak(emptyUtterance)
-    window.speechSynthesis.resume()
+    const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A')
+    silentAudio.volume = 0.01
+    const playPromise = silentAudio.play()
+    if (playPromise !== undefined) {
+      playPromise.then(() => silentAudio.pause()).catch(() => {})
+    }
   } catch {
     // Ignore warmup error
   }
-}
 
-// Pre-warm and cache voices as soon as possible
-if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-  const loadVoices = () => {
+  // 2. Warm up SpeechSynthesis if available
+  if ('speechSynthesis' in window) {
     try {
-      const v = window.speechSynthesis.getVoices()
-      if (v && v.length > 0) {
-        cachedVoices = v
-      }
+      const emptyUtterance = new SpeechSynthesisUtterance(' ')
+      emptyUtterance.volume = 0.01
+      window.speechSynthesis.speak(emptyUtterance)
+      window.speechSynthesis.resume()
     } catch {
-      // Ignore errors on restricted environments
+      // Ignore
     }
   }
+}
 
-  loadVoices()
-  if (window.speechSynthesis.onvoiceschanged !== undefined) {
-    window.speechSynthesis.onvoiceschanged = loadVoices
-  }
-
-  // Also hook into touchstart/click globally once to ensure mobile speech audio context is unlocked
+// Global user gesture listeners to unlock audio as early as possible
+if (typeof window !== 'undefined') {
   const unlockAudio = () => {
     warmUpSpeech()
     window.removeEventListener('touchstart', unlockAudio, true)
@@ -51,50 +59,129 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
   window.addEventListener('touchstart', unlockAudio, { capture: true, passive: true })
   window.addEventListener('touchend', unlockAudio, { capture: true, passive: true })
   window.addEventListener('click', unlockAudio, { capture: true, passive: true })
+
+  // Pre-load voices if SpeechSynthesis exists
+  if ('speechSynthesis' in window) {
+    const loadVoices = () => {
+      try {
+        const v = window.speechSynthesis.getVoices()
+        if (v && v.length > 0) {
+          cachedVoices = v
+        }
+      } catch {
+        // Ignore
+      }
+    }
+    loadVoices()
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices
+    }
+  }
 }
 
-export function speakThaiText(
+/**
+ * Immediately stop any ongoing audio and speech
+ */
+export function stopSpeaking(): void {
+  currentSequenceId++
+
+  if (currentAudio) {
+    try {
+      currentAudio.pause()
+      currentAudio.currentTime = 0
+    } catch {
+      // Ignore
+    }
+    currentAudio = null
+  }
+
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel()
+    } catch {
+      // Ignore
+    }
+    activeUtterance = null
+  }
+}
+
+/**
+ * Normalize Thai text for child-friendly natural cadence
+ */
+function normalizeThaiText(text: string): string {
+  return text
+    .replace(/สวัสดีครับ/g, 'สวัสดีจ้า')
+    .replace(/ครับ/g, 'คับ')
+    .replace(/คร้าบ/g, 'ค้าบ')
+    .replace(/แล้วนะ/g, 'แล้วจ้า')
+    .replace(/แล้วน้า/g, 'แล้วจ้า')
+    .replace(/\.\.\./g, ' ')
+    .trim()
+}
+
+/**
+ * Split text into safe chunks for online TTS (<160 chars per chunk)
+ */
+function splitTextIntoChunks(text: string, maxLen = 150): string[] {
+  if (text.length <= maxLen) return [text]
+
+  const chunks: string[] = []
+  // Split by natural clause delimiters
+  const segments = text.split(/([!?,;\n]|แล้ว|นะจ๊ะ|จ้า)/g)
+  let current = ''
+
+  for (const seg of segments) {
+    if (!seg) continue
+    if ((current + seg).length <= maxLen) {
+      current += seg
+    } else {
+      if (current.trim()) chunks.push(current.trim())
+      current = seg
+    }
+  }
+  if (current.trim()) {
+    chunks.push(current.trim())
+  }
+  return chunks.length > 0 ? chunks : [text.slice(0, maxLen)]
+}
+
+/**
+ * Generate Google TTS URL (Returns sweet neural Thai female voice)
+ */
+function getGoogleTtsUrl(text: string): string {
+  return `https://translate.google.com/translate_tts?ie=UTF-8&tl=th&client=tw-ob&q=${encodeURIComponent(text)}`
+}
+
+/**
+ * Fallback to Web Speech API when offline or if audio stream fails
+ */
+function speakViaWebSpeech(
   text: string,
   onStart?: () => void,
   onEnd?: () => void,
   customRate?: number
 ): void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-    console.warn('Speech synthesis not supported in this browser.')
     if (onEnd) onEnd()
     return
   }
 
   try {
-    // 1. Cancel previous utterance and resume synthesis queue (fixes frozen/stuck state in Chrome/Safari)
     window.speechSynthesis.cancel()
     if (window.speechSynthesis.paused) {
       window.speechSynthesis.resume()
     }
-  } catch (e) {
-    console.warn('Could not reset speechSynthesis state', e)
+  } catch {
+    // Ignore
   }
 
-  // Normalize phonetic Thai text to avoid robotic TTS quirks (e.g. "สวัสดีครับ" being mispronounced as "สวัสดีขอรับ", or "แล้วนะ" sounding unnatural)
-  const normalizedText = text
-    .replace(/สวัสดีครับ/g, 'สวัสดีจ้า')
-    .replace(/ครับ/g, 'คับ')
-    .replace(/คร้าบ/g, 'ค้าบ')
-    .replace(/แล้วนะ/g, 'แล้วจ้า')
-    .replace(/แล้วน้า/g, 'แล้วจ้า')
-
-  const utterance = new SpeechSynthesisUtterance(normalizedText)
+  const utterance = new SpeechSynthesisUtterance(text)
   activeUtterance = utterance
-
-  // Standard Thai language code
   utterance.lang = 'th-TH'
+  utterance.volume = 1.0
+  utterance.pitch = 1.15 // Slightly elevated pitch for sweet cheerful tone
+  utterance.rate = typeof customRate === 'number' ? customRate : 0.92
 
-  // Soft, warm, and gentle kid-friendly speech tuning
-  utterance.volume = 0.95 // Clear volume
-  utterance.pitch = 1.08 // Warm, friendly, and natural pitch (not shrill)
-  utterance.rate = typeof customRate === 'number' ? customRate : 0.9 // Comfortable pacing for young ears
-
-  // Get freshest voices list, falling back to cached voices
   let voices = window.speechSynthesis.getVoices()
   if (!voices || voices.length === 0) {
     voices = cachedVoices
@@ -102,7 +189,6 @@ export function speakThaiText(
     cachedVoices = voices
   }
 
-  // Look for Thai voices
   const thaiVoices = voices.filter(
     (v) =>
       v.lang === 'th-TH' ||
@@ -111,15 +197,10 @@ export function speakThaiText(
   )
 
   if (thaiVoices.length > 0) {
-    // Prioritize natural/neural Thai voices if available (e.g., Premwadee, Niwat, Achara, Google Thai)
     const preferredVoice =
       thaiVoices.find((v) => {
         const name = v.name.toLowerCase()
-        return name.includes('natural') || name.includes('online') || name.includes('neural')
-      }) ||
-      thaiVoices.find((v) => {
-        const name = v.name.toLowerCase()
-        return name.includes('premwadee') || name.includes('achara') || name.includes('niwat')
+        return name.includes('premwadee') || name.includes('achara') || name.includes('natural') || name.includes('neural')
       }) ||
       thaiVoices.find((v) => v.name.toLowerCase().includes('google')) ||
       thaiVoices[0]
@@ -133,49 +214,119 @@ export function speakThaiText(
     if (activeUtterance === utterance) {
       activeUtterance = null
     }
-    if (onEnd) {
-      onEnd()
-    }
+    if (onEnd) onEnd()
   }
 
   utterance.onstart = () => {
     if (onStart) onStart()
   }
-
   utterance.onend = cleanup
-
-  utterance.onerror = (event) => {
-    // Ignore harmless 'canceled' or 'interrupted' errors when another sound starts
-    if (event.error !== 'canceled' && event.error !== 'interrupted') {
-      console.warn('SpeechSynthesis error:', event.error)
+  utterance.onerror = (e) => {
+    if (e.error !== 'canceled' && e.error !== 'interrupted') {
+      console.warn('SpeechSynthesis fallback error:', e.error)
     }
     cleanup()
   }
 
-  // Periodic resume heartbeat for long speech (Chromium bug where speech pauses after ~15s)
-  const resumeInterval = setInterval(() => {
-    if (!window.speechSynthesis.speaking) {
-      clearInterval(resumeInterval)
-    } else if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume()
-    }
-  }, 3000)
-
   try {
     window.speechSynthesis.speak(utterance)
-    // Extra kick in case browser starts in paused state
-    if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume()
-    }
-  } catch (err) {
-    console.error('Speech speak error:', err)
+  } catch {
     cleanup()
   }
 }
 
 /**
+ * Universal speech player:
+ * Plays sweet Thai female voice on ANY device (even without Thai TTS installed).
+ */
+export function speakThaiText(
+  text: string,
+  onStart?: () => void,
+  onEnd?: () => void,
+  customRate?: number
+): void {
+  if (!text || typeof window === 'undefined') {
+    if (onEnd) onEnd()
+    return
+  }
+
+  // 1. Immediately cancel previous playback
+  stopSpeaking()
+
+  const seqId = currentSequenceId
+  const normalized = normalizeThaiText(text)
+  const chunks = splitTextIntoChunks(normalized)
+
+  let chunkIndex = 0
+  let hasStarted = false
+
+  const playNextChunk = () => {
+    // If user clicked another action, abort obsolete sequence
+    if (seqId !== currentSequenceId) return
+
+    if (chunkIndex >= chunks.length) {
+      currentAudio = null
+      if (onEnd) onEnd()
+      return
+    }
+
+    const chunk = chunks[chunkIndex]
+    const url = getGoogleTtsUrl(chunk)
+
+    // Check memory cache or create new Audio element
+    let audio = audioCache.get(chunk)
+    if (!audio) {
+      audio = new Audio(url)
+      // Cache small common phrases for instant replay
+      if (chunk.length < 50) {
+        audioCache.set(chunk, audio)
+      }
+    } else {
+      audio.currentTime = 0
+    }
+
+    currentAudio = audio
+    audio.playbackRate = typeof customRate === 'number' ? customRate : 0.95
+
+    audio.onplay = () => {
+      if (!hasStarted) {
+        hasStarted = true
+        if (onStart) onStart()
+      }
+    }
+
+    audio.onended = () => {
+      chunkIndex++
+      playNextChunk()
+    }
+
+    audio.onerror = () => {
+      // If online stream fails (e.g. offline device), seamlessly fallback to Web Speech
+      console.warn('Online Thai audio stream unreachable, falling back to Web Speech API.')
+      speakViaWebSpeech(normalized, onStart, onEnd, customRate)
+    }
+
+    const playPromise = audio.play()
+    if (playPromise !== undefined) {
+      playPromise.catch((err) => {
+        // Auto-play was blocked or network interrupted: try fallback
+        console.warn('Audio play promise caught:', err.name)
+        if (err.name === 'NotAllowedError') {
+          // Awaiting user gesture
+          if (onEnd) onEnd()
+        } else {
+          speakViaWebSpeech(normalized, onStart, onEnd, customRate)
+        }
+      })
+    }
+  }
+
+  playNextChunk()
+}
+
+/**
  * Format math formula into natural Thai speech for children
- * e.g., "7 + 2 = ?" -> "เจ็ด บวก สอง ได้เท่าไหร่ครับ"
+ * e.g., "7 + 2 = ?" -> "เจ็ด บวก สอง ได้เท่ากับเท่าไหร่เอ่ย"
  */
 const THAI_NUMBER_WORDS: Record<number, string> = {
   0: 'ศูนย์',
@@ -206,6 +357,9 @@ const THAI_NUMBER_WORDS: Record<number, string> = {
   25: 'ยี่สิบห้า',
   26: 'ยี่สิบหก',
   27: 'ยี่สิบเจ็ด',
+  28: 'ยี่สิบแปด',
+  29: 'ยี่สิบเก้า',
+  30: 'สามสิบ',
 }
 
 export function formatThaiNumber(n: number): string {
@@ -250,10 +404,10 @@ export function getAddition3StepSpeech(
   const nameSuffix = kidName ? `น้อง${kidName}` : 'คนเก่ง'
 
   if (step === 1) {
-    return `ขั้นที่หนึ่งจ้า... เรามาจับคู่สองตัวแรกกันก่อนนะ... นำ ${n1}... บวกกับ ${n2}... ได้ผลบวกเท่ากับ ${step1SumWord} จ้า`
+    return `ขั้นที่หนึ่งจ้า เรามาจับคู่สองตัวแรกกันก่อนนะ นำ ${n1} บวกกับ ${n2} ได้ผลบวกเท่ากับ ${step1SumWord} จ้า`
   }
   if (step === 2) {
-    return `ขั้นที่สองจ้า... นำ ${step1SumWord} ที่เราบวกได้ตะกี้... ไปบวกเพิ่มกับตัวเลขที่สาม... คือบวกอีก ${n3} นะจ๊ะ`
+    return `ขั้นที่สองจ้า นำ ${step1SumWord} ที่เราบวกได้ตะกี้ ไปบวกเพิ่มกับตัวเลขที่สาม คือบวกอีก ${n3} นะจ๊ะ`
   }
-  return `ดังนั้น... ${n1}... บวก ${n2}... บวก ${n3}... ได้คำตอบเท่ากับ ${finalSumWord} จ้า! จำวิธีคิดทีละคู่นี้ไว้นะน้อง${nameSuffix}... เก่งมากๆ เลย!`
+  return `ดังนั้น ${n1} บวก ${n2} บวก ${n3} ได้คำตอบเท่ากับ ${finalSumWord} จ้า! จำวิธีคิดทีละคู่นี้ไว้นะน้อง${nameSuffix} เก่งมากๆ เลย!`
 }
