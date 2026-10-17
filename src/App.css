@@ -594,6 +594,24 @@
   transition: transform 0.2s ease;
 }
 
+.badge-timer {
+  background-color: var(--notion-yellow-bg);
+  color: var(--notion-yellow);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.timer-urgent {
+  background-color: var(--notion-red-bg);
+  color: var(--notion-red);
+  animation: timerWarning 0.3s infinite alternate;
+}
+
+@keyframes timerWarning {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
 .badge-tag {
   background-color: var(--notion-hover);
   color: var(--notion-text);

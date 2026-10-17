@@ -39,6 +39,8 @@ export default function App() {
   const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
   const [isPoked, setIsPoked] = useState(false)
   const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => new Set())
+  const TOTAL_TIME_MS = 1000 // 1 second total for 10 questions
+  const [timeLeftMs, setTimeLeftMs] = useState(TOTAL_TIME_MS)
 
   // Interactive mascot poke handler (child taps the mascot - animation only, no voice)
   const handlePokeMascot = () => {
@@ -117,15 +119,31 @@ export default function App() {
   // Automatically read the math problem aloud when a new question appears
   useEffect(() => {
     if (gameState === 'playing' && currentQuestion && !isAnswered) {
-      // Small pause (350ms) for smooth visual transition before voice begins
+      // Small pause (100ms) before voice begins
       const timer = setTimeout(() => {
         handleSpeakProblem(currentQuestion)
-      }, 350)
+      }, 100)
       return () => clearTimeout(timer)
     }
   }, [currentQuestion?.id, gameState])
 
+  // 1-second total countdown timer for 10 questions
+  useEffect(() => {
+    if (gameState !== 'playing') return
 
+    const interval = setInterval(() => {
+      setTimeLeftMs((prev) => {
+        if (prev <= 50) {
+          clearInterval(interval)
+          setGameState('completed')
+          return 0
+        }
+        return prev - 50
+      })
+    }, 50)
+
+    return () => clearInterval(interval)
+  }, [gameState])
 
   // Start new game
   const handleStart = (e?: FormEvent) => {
@@ -133,6 +151,7 @@ export default function App() {
     const nameToUse = kidName.trim() || 'คนเก่ง'
     setKidName(nameToUse)
     setScore(0)
+    setTimeLeftMs(TOTAL_TIME_MS)
     setCurrentIndex(1)
     const newAskedSet = new Set<string>()
     const firstQ = generateQuestion(1, newAskedSet)
@@ -171,7 +190,7 @@ export default function App() {
       setShowConfetti(false)
     }
 
-    // Auto proceed to next question or finished screen
+    // Auto proceed to next question rapidly (90ms)
     setTimeout(() => {
       setShowConfetti(false)
       if (currentIndex < TOTAL_QUESTIONS) {
@@ -187,7 +206,7 @@ export default function App() {
       } else {
         setGameState('completed')
       }
-    }, 1300)
+    }, 90)
   }
 
   // Change kid name / reset
@@ -300,6 +319,9 @@ export default function App() {
               สวัสดีน้อง <span className="highlight-name">{kidName}</span>
             </div>
             <div className="stats-badges">
+              <span className={`badge badge-timer ${timeLeftMs <= 300 ? 'timer-urgent' : ''}`}>
+                เวลา: {(timeLeftMs / 1000).toFixed(1)} วิ
+              </span>
               <span className="badge badge-tag">
                 ข้อที่ {currentIndex} / {TOTAL_QUESTIONS}
               </span>
