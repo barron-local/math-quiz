@@ -116,7 +116,7 @@ export default function App() {
               id="kidNameInput"
               type="text"
               className="name-input"
-              placeholder="เช่น น้องต้นกล้า, มะนาว"
+              placeholder="กรอกชื่อเล่นของคุณที่นี่..."
               value={kidName}
               onChange={(e) => setKidName(e.target.value)}
               maxLength={20}
