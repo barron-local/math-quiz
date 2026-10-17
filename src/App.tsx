@@ -961,7 +961,7 @@ export default function App() {
                 </div>
                 <div className="addition-guide-svg-wrapper">
                   <svg
-                    viewBox="0 0 380 156"
+                    viewBox="0 0 420 180"
                     className="addition-guide-svg"
                     role="img"
                     aria-label={`โจทย์เลข 3 จำนวน: ${currentQuestion.num1} บวก ${currentQuestion.num2} บวก ${currentQuestion.num3}`}
@@ -971,13 +971,16 @@ export default function App() {
                         <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="var(--notion-blue)" floodOpacity="0.4" />
                       </filter>
                       <filter id="sumBubbleShadow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="rgba(0,0,0,0.15)" />
+                        <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="rgba(0,0,0,0.14)" />
                       </filter>
+                      <marker id="arrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--notion-green)" />
+                      </marker>
                     </defs>
 
-                    {/* Top Connecting Arc: Linking Num1 (x=36) and Num2 (x=116) */}
+                    {/* Step 1 Connecting Arc: Linking Num1 (x=45) and Num2 (x=135) from above */}
                     <path
-                      d="M 36 68 C 36 34, 76 30, 76 18 C 76 30, 116 34, 116 68"
+                      d="M 45 60 C 45 26, 90 22, 90 12 C 90 22, 135 26, 135 60"
                       fill="none"
                       stroke={demoStep === 1 ? 'var(--notion-blue)' : demoStep > 1 ? 'var(--notion-green)' : 'var(--notion-blue)'}
                       strokeWidth={demoStep >= 1 ? '3.5' : '2.8'}
@@ -985,21 +988,21 @@ export default function App() {
                       className={demoStep === 1 ? 'guide-arc-pulsing' : ''}
                     />
 
-                    {/* Step Guide label on top of Pair 1 */}
-                    <g transform="translate(54, 8)">
+                    {/* Step 1 Guide Label on top of Pair 1 */}
+                    <g transform="translate(64, 2)">
                       <rect
-                        width="44"
-                        height="20"
-                        rx="10"
+                        width="52"
+                        height="22"
+                        rx="11"
                         fill={demoStep >= 1 ? 'var(--notion-blue)' : 'var(--notion-blue-bg)'}
                         stroke="var(--notion-blue)"
                         strokeWidth="1.5"
                       />
                       <text
-                        x="22"
-                        y="14"
+                        x="26"
+                        y="15"
                         textAnchor="middle"
-                        fontSize="12"
+                        fontSize="12.5"
                         fontWeight="700"
                         fill={demoStep >= 1 ? '#ffffff' : 'var(--notion-blue)'}
                       >
@@ -1007,32 +1010,32 @@ export default function App() {
                       </text>
                     </g>
 
-                    {/* Intermediate Sum Badge below the first pair */}
+                    {/* Intermediate Sum (Result of Pair 1) below num1 & num2 */}
                     {demoStep >= 1 && (
                       <g className="intermediate-badge-group pop-in">
                         {/* Connecting bracket down from num1 & num2 */}
                         <path
-                          d="M 40 128 C 40 144, 76 142, 76 148 C 76 142, 112 144, 112 128"
+                          d="M 48 116 C 48 136, 90 134, 90 140 C 90 134, 132 136, 132 116"
                           fill="none"
                           stroke="var(--notion-blue)"
-                          strokeWidth="2.2"
+                          strokeWidth="2.4"
                           strokeLinecap="round"
                         />
                         {/* Intermediate sum pill bubble */}
                         <rect
-                          x="54"
+                          x="65"
                           y="136"
-                          width="44"
-                          height="24"
-                          rx="12"
+                          width="50"
+                          height="28"
+                          rx="14"
                           fill="var(--notion-blue)"
                           filter="url(#sumBubbleShadow)"
                         />
                         <text
-                          x="76"
-                          y="152"
+                          x="90"
+                          y="155"
                           textAnchor="middle"
-                          fontSize="15"
+                          fontSize="17"
                           fontWeight="800"
                           fill="#ffffff"
                           fontFamily="var(--font-mono)"
@@ -1042,33 +1045,34 @@ export default function App() {
                       </g>
                     )}
 
-                    {/* Step 2 Arc: Linking Intermediate Sum to Num3 */}
+                    {/* Step 2 Arc: Smooth flowing path from intermediate sum (x=115, y=150) to num3 bottom (x=225, y=120) */}
                     {demoStep >= 2 && (
                       <g className="step2-arc-group pop-in">
                         <path
-                          d="M 98 148 C 146 166, 172 154, 196 128"
+                          d="M 116 150 C 160 156, 195 152, 222 124"
                           fill="none"
                           stroke="var(--notion-green)"
                           strokeWidth="3.2"
-                          strokeDasharray="4 4"
+                          strokeDasharray="5 4"
                           strokeLinecap="round"
                           className="step2-arc-pulse"
+                          markerEnd="url(#arrowGreen)"
                         />
-                        {/* Badge for Step 2 */}
-                        <g transform="translate(130, 136)">
+                        {/* Step 2 Badge neatly centered above the connecting path */}
+                        <g transform="translate(142, 156)">
                           <rect
-                            width="48"
-                            height="18"
-                            rx="9"
+                            width="60"
+                            height="20"
+                            rx="10"
                             fill="var(--notion-green-bg)"
                             stroke="var(--notion-green)"
-                            strokeWidth="1.2"
+                            strokeWidth="1.4"
                           />
                           <text
-                            x="24"
-                            y="13"
+                            x="30"
+                            y="14"
                             textAnchor="middle"
-                            fontSize="11"
+                            fontSize="11.5"
                             fontWeight="700"
                             fill="var(--notion-green)"
                           >
@@ -1078,17 +1082,17 @@ export default function App() {
                       </g>
                     )}
 
-                    {/* Main Formula Row (y=112) */}
+                    {/* Main Formula Row (y=100) */}
                     {/* Num1 */}
                     <g className={demoStep === 1 ? 'num-highlight-pulse' : ''}>
                       {demoStep === 1 && (
-                        <circle cx="36" cy="100" r="28" fill="var(--notion-blue-bg)" opacity="0.6" />
+                        <circle cx="45" cy="88" r="28" fill="var(--notion-blue-bg)" opacity="0.65" />
                       )}
                       <text
-                        x="36"
-                        y="112"
+                        x="45"
+                        y="100"
                         textAnchor="middle"
-                        fontSize="42"
+                        fontSize="44"
                         fontWeight="700"
                         fill={demoStep === 1 ? 'var(--notion-blue)' : 'var(--notion-text)'}
                         fontFamily="var(--font-mono)"
@@ -1098,20 +1102,20 @@ export default function App() {
                     </g>
 
                     {/* Operator 1 */}
-                    <text x="76" y="110" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
+                    <text x="90" y="98" textAnchor="middle" fontSize="36" fontWeight="700" fill="var(--notion-blue)">
                       +
                     </text>
 
                     {/* Num2 */}
                     <g className={demoStep === 1 ? 'num-highlight-pulse' : ''}>
                       {demoStep === 1 && (
-                        <circle cx="116" cy="100" r="28" fill="var(--notion-blue-bg)" opacity="0.6" />
+                        <circle cx="135" cy="88" r="28" fill="var(--notion-blue-bg)" opacity="0.65" />
                       )}
                       <text
-                        x="116"
-                        y="112"
+                        x="135"
+                        y="100"
                         textAnchor="middle"
-                        fontSize="42"
+                        fontSize="44"
                         fontWeight="700"
                         fill={demoStep === 1 ? 'var(--notion-blue)' : 'var(--notion-text)'}
                         fontFamily="var(--font-mono)"
@@ -1121,20 +1125,20 @@ export default function App() {
                     </g>
 
                     {/* Operator 2 */}
-                    <text x="156" y="110" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
+                    <text x="180" y="98" textAnchor="middle" fontSize="36" fontWeight="700" fill="var(--notion-blue)">
                       +
                     </text>
 
                     {/* Num3 */}
                     <g className={demoStep === 2 ? 'num-highlight-pulse' : ''}>
                       {demoStep === 2 && (
-                        <circle cx="196" cy="100" r="28" fill="var(--notion-green-bg)" opacity="0.6" />
+                        <circle cx="225" cy="88" r="28" fill="var(--notion-green-bg)" opacity="0.65" />
                       )}
                       <text
-                        x="196"
-                        y="112"
+                        x="225"
+                        y="100"
                         textAnchor="middle"
-                        fontSize="42"
+                        fontSize="44"
                         fontWeight="700"
                         fill={demoStep === 2 ? 'var(--notion-green)' : 'var(--notion-text)'}
                         fontFamily="var(--font-mono)"
@@ -1144,19 +1148,19 @@ export default function App() {
                     </g>
 
                     {/* Equals */}
-                    <text x="246" y="110" textAnchor="middle" fontSize="38" fontWeight="700" fill="var(--notion-text)">
+                    <text x="275" y="98" textAnchor="middle" fontSize="38" fontWeight="700" fill="var(--notion-text)">
                       =
                     </text>
 
                     {/* Placeholder / Answer Slot */}
                     {demoStep === 3 || isExplained ? (
                       <g className="pop-success">
-                        <circle cx="296" cy="100" r="28" fill="var(--notion-blue-bg)" stroke="var(--notion-blue)" strokeWidth="2" />
+                        <circle cx="335" cy="88" r="30" fill="var(--notion-blue-bg)" stroke="var(--notion-blue)" strokeWidth="2.5" />
                         <text
-                          x="296"
-                          y="112"
+                          x="335"
+                          y="100"
                           textAnchor="middle"
-                          fontSize="42"
+                          fontSize="44"
                           fontWeight="700"
                           fontFamily="var(--font-mono)"
                           fill="var(--notion-blue)"
@@ -1165,15 +1169,15 @@ export default function App() {
                         </text>
                       </g>
                     ) : selectedAnswer === null ? (
-                      <text x="296" y="112" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
+                      <text x="335" y="100" textAnchor="middle" fontSize="44" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
                         ?
                       </text>
                     ) : (
                       <text
-                        x="296"
-                        y="112"
+                        x="335"
+                        y="100"
                         textAnchor="middle"
-                        fontSize="42"
+                        fontSize="44"
                         fontWeight="700"
                         fontFamily="var(--font-mono)"
                         fill={
