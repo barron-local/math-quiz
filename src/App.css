@@ -2,6 +2,7 @@
   width: 100%;
   max-width: 580px;
   margin: 0 auto;
+  position: relative;
 }
 
 .screen-center {
@@ -11,7 +12,41 @@
   align-items: center;
 }
 
-/* Mascot Wrapper & Animation */
+/* Confetti Falling Animation */
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 999;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  opacity: 0.9;
+  animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Mascot SVG Animation Layers */
 .mascot-wrapper {
   margin-bottom: 16px;
   display: flex;
@@ -21,25 +56,126 @@
 
 .mascot-svg {
   display: block;
-  transition: transform 0.25s ease;
+  overflow: visible;
 }
 
-.bounce-in {
-  animation: gentleBob 2.4s ease-in-out infinite alternate;
+/* Eye Blinking Animation */
+.eye-pupil {
+  transform-origin: center;
+  animation: naturalBlink 4s infinite;
 }
 
+@keyframes naturalBlink {
+  0%, 45%, 55%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.1);
+  }
+}
+
+/* Idle Float & Breathing */
+.mascot-float {
+  animation: gentleFloat 3s ease-in-out infinite alternate;
+}
+
+@keyframes gentleFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Floor Shadow reacts to floating */
+.mascot-shadow {
+  transform-origin: center;
+  animation: shadowPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes shadowPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.85);
+    opacity: 0.4;
+  }
+}
+
+/* Waving Arm when cheering */
+.cheer-arm-waving {
+  transform-origin: 82px 80px;
+  animation: cheerWave 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes cheerWave {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-18deg);
+  }
+}
+
+/* Both Arms waving when celebrating */
+.arm-left-celebrate {
+  transform-origin: 38px 76px;
+  animation: waveLeftArm 0.35s ease-in-out infinite alternate;
+}
+
+.arm-right-celebrate {
+  transform-origin: 82px 76px;
+  animation: waveRightArm 0.35s ease-in-out infinite alternate;
+}
+
+@keyframes waveLeftArm {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-16deg); }
+}
+
+@keyframes waveRightArm {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(16deg); }
+}
+
+/* Floating Sparkles */
+.sparkles-group {
+  animation: sparkleTwinkle 1s ease-in-out infinite alternate;
+}
+
+@keyframes sparkleTwinkle {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* Head tilt on thinking */
+.mood-think .mascot-head-group {
+  transform-origin: 60px 50px;
+  animation: headThinkTilt 2s ease-in-out infinite alternate;
+}
+
+@keyframes headThinkTilt {
+  0% { transform: rotate(-4deg); }
+  100% { transform: rotate(4deg); }
+}
+
+/* Celebrate Hop */
 .celebrate-bounce {
-  animation: celebrateHop 0.8s ease-in-out infinite alternate;
+  animation: happyHop 0.55s ease-in-out infinite alternate;
 }
 
-@keyframes gentleBob {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-8px); }
-}
-
-@keyframes celebrateHop {
+@keyframes happyHop {
   0% { transform: translateY(0px) scale(1); }
-  100% { transform: translateY(-14px) scale(1.04); }
+  100% { transform: translateY(-16px) scale(1.05); }
 }
 
 /* Title Tag Badge */
@@ -97,19 +233,20 @@
   color: var(--notion-text);
   text-align: center;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .name-input:focus {
   border-color: var(--notion-blue);
-  box-shadow: 0 0 0 3px var(--notion-blue-bg);
+  box-shadow: 0 0 0 4px var(--notion-blue-bg);
+  transform: scale(1.02);
 }
 
 .name-input::placeholder {
   color: var(--notion-text-light);
 }
 
-/* Buttons */
+/* Primary Button with subtle pulse */
 .notion-btn-primary {
   display: inline-flex;
   align-items: center;
@@ -121,16 +258,17 @@
   font-size: 17px;
   padding: 15px 24px;
   border-radius: 8px;
-  transition: opacity 0.15s ease, transform 0.05s ease;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: var(--shadow-subtle);
 }
 
-.notion-btn-primary:hover {
-  opacity: 0.92;
+.pulse-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 14px rgba(35, 131, 226, 0.35);
 }
 
 .notion-btn-primary:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .notion-btn-secondary {
@@ -142,10 +280,10 @@
   color: var(--notion-text-muted);
   font-weight: 500;
   font-size: 15px;
-  padding: 10px 16px;
+  padding: 11px 16px;
   border-radius: 6px;
   border: 1px solid var(--notion-border);
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .notion-btn-secondary:hover {
@@ -184,6 +322,7 @@
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 4px;
+  transition: transform 0.2s ease;
 }
 
 .badge-tag {
@@ -197,10 +336,10 @@
   color: var(--notion-green);
 }
 
-/* Progress bar */
+/* Animated Progress bar */
 .progress-bar-bg {
   width: 100%;
-  height: 5px;
+  height: 6px;
   background-color: var(--notion-border);
   border-radius: 3px;
   overflow: hidden;
@@ -210,7 +349,7 @@
 .progress-bar-fill {
   height: 100%;
   background-color: var(--notion-blue);
-  transition: width 0.3s ease;
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Mascot Interactive Speech Area */
@@ -221,14 +360,16 @@
   margin-bottom: 20px;
   background-color: var(--notion-callout-bg);
   border: 1px solid var(--notion-border);
-  border-radius: 10px;
-  padding: 12px 16px;
+  border-radius: 12px;
+  padding: 12px 18px;
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.2s ease;
 }
 
 .mascot-mini {
   flex-shrink: 0;
-  width: 76px;
-  height: 76px;
+  width: 82px;
+  height: 82px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -255,16 +396,39 @@
 .math-card {
   background-color: var(--notion-bg);
   border: 2px solid var(--notion-border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 34px 20px;
   text-align: center;
   margin-bottom: 20px;
   box-shadow: var(--shadow-subtle);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease;
+}
+
+.card-pulse-success {
+  animation: cardSuccessGlow 0.5s ease-out;
+  border-color: var(--notion-green);
+}
+
+.card-shake {
+  animation: cardWiggle 0.4s ease-in-out;
+  border-color: var(--notion-red);
+}
+
+@keyframes cardSuccessGlow {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes cardWiggle {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
 }
 
 .math-formula {
   font-family: var(--font-mono);
-  font-size: 52px;
+  font-size: 54px;
   font-weight: 700;
   color: var(--notion-text);
   letter-spacing: 0.04em;
@@ -276,7 +440,7 @@
 
 @media (max-width: 480px) {
   .math-formula {
-    font-size: 38px;
+    font-size: 40px;
     gap: 10px;
   }
 }
@@ -289,7 +453,7 @@
   color: var(--notion-text-muted);
 }
 
-/* Choice Buttons */
+/* Choice Buttons with bouncy spring transitions */
 .choices-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -304,27 +468,49 @@
   padding: 20px;
   background-color: var(--notion-bg);
   border: 2px solid var(--notion-border);
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: var(--font-mono);
   font-size: 32px;
   font-weight: 600;
   color: var(--notion-text);
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   user-select: none;
-  min-height: 80px;
+  min-height: 82px;
 }
 
 .choice-btn:hover:not(:disabled) {
   background-color: var(--notion-hover);
   border-color: var(--notion-border-hover);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 .choice-btn:active:not(:disabled) {
   background-color: var(--notion-hover-active);
-  transform: scale(0.98);
+  transform: scale(0.95);
 }
 
-/* Selected state feedback */
+/* Pop success & Shake error for choices */
+.pop-success {
+  animation: bouncePop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bouncePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1.04); }
+}
+
+.shake-error {
+  animation: smallShake 0.35s ease-in-out;
+}
+
+@keyframes smallShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
 .choice-btn.selected-correct {
   background-color: var(--notion-green-bg);
   border-color: var(--notion-green);
@@ -335,6 +521,22 @@
   background-color: var(--notion-red-bg);
   border-color: var(--notion-red);
   color: var(--notion-red);
+}
+
+/* Micro Pop-in Animation */
+.pop-in {
+  animation: popInAnim 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popInAnim {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Feedback hint */
@@ -354,43 +556,49 @@
 /* Result screen */
 .result-card {
   width: 100%;
-  max-width: 460px;
+  max-width: 480px;
   border: 2px solid var(--notion-border);
-  border-radius: 12px;
-  padding: 36px 24px;
+  border-radius: 14px;
+  padding: 38px 24px;
   text-align: center;
   background-color: var(--notion-bg);
   box-shadow: var(--shadow-subtle);
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .result-score {
   font-family: var(--font-mono);
-  font-size: 64px;
+  font-size: 68px;
   font-weight: 700;
   color: var(--notion-text);
   line-height: 1;
   margin-bottom: 8px;
+  animation: scoreScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scoreScale {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .result-label {
   font-size: 15px;
   font-weight: 600;
   color: var(--notion-text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .result-subtext {
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--notion-text);
   margin-bottom: 28px;
   background-color: var(--notion-callout-bg);
-  border-radius: 8px;
-  padding: 12px 16px;
+  border-radius: 10px;
+  padding: 14px 18px;
   border: 1px solid var(--notion-border);
 }
 

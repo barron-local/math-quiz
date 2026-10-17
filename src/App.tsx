@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { generateQuestion, type Question } from './quizGenerator'
 import { KidMascot } from './components/KidMascot'
+import { ConfettiEffect } from './components/ConfettiEffect'
 import {
   getRandomCorrectMessage,
   getRandomEncouragingMessage,
@@ -22,6 +23,7 @@ export default function App() {
   const [isAnswered, setIsAnswered] = useState(false)
   const [currentFeedback, setCurrentFeedback] = useState<{ isCorrect: boolean; text: string } | null>(null)
   const [mascotMood, setMascotMood] = useState<'happy' | 'celebrate' | 'cheer' | 'think'>('happy')
+  const [showConfetti, setShowConfetti] = useState(false)
 
   // Start new game
   const handleStart = (e?: FormEvent) => {
@@ -34,6 +36,7 @@ export default function App() {
     setSelectedAnswer(null)
     setIsAnswered(false)
     setCurrentFeedback(null)
+    setShowConfetti(false)
     setMascotMood('think')
     setGameState('playing')
   }
@@ -53,16 +56,19 @@ export default function App() {
         text: getRandomCorrectMessage(kidName),
       })
       setMascotMood('celebrate')
+      setShowConfetti(true)
     } else {
       setCurrentFeedback({
         isCorrect: false,
         text: getRandomEncouragingMessage(kidName),
       })
       setMascotMood('cheer')
+      setShowConfetti(false)
     }
 
     // Auto proceed to next question or finished screen
     setTimeout(() => {
+      setShowConfetti(false)
       if (currentIndex < TOTAL_QUESTIONS) {
         const nextIndex = currentIndex + 1
         setCurrentIndex(nextIndex)
@@ -74,7 +80,7 @@ export default function App() {
       } else {
         setGameState('completed')
       }
-    }, 1200)
+    }, 1300)
   }
 
   // Change kid name / reset
@@ -85,6 +91,7 @@ export default function App() {
     setSelectedAnswer(null)
     setIsAnswered(false)
     setCurrentFeedback(null)
+    setShowConfetti(false)
     setMascotMood('happy')
     setGameState('name-input')
   }
@@ -94,12 +101,12 @@ export default function App() {
       {/* State 1: NAME INPUT & WELCOME */}
       {gameState === 'name-input' && (
         <section aria-label="Welcome and name input" className="screen-center">
-          <div className="mascot-wrapper bounce-in">
-            <KidMascot mood="happy" size={120} />
+          <div className="mascot-wrapper mascot-float">
+            <KidMascot mood="happy" size={130} />
           </div>
           <div className="title-tag">แบบฝึกหัดคณิตคิดเร็ว</div>
           <h1 className="page-title">Math Quiz</h1>
-          <p className="page-subtitle">ยินดีต้อนรับเพื่อนคนเก่ง มาฝึกคิดเลขเร็วกันนะ!</p>
+          <p className="page-subtitle">ยินดีต้อนรับเพื่อนคนเก่ง มาฝึกคิดเลขเร็วสนุกๆ กันนะ!</p>
 
           <form onSubmit={handleStart} className="name-form">
             <label htmlFor="kidNameInput" className="name-label">
@@ -115,7 +122,7 @@ export default function App() {
               maxLength={20}
               autoFocus
             />
-            <button type="submit" className="notion-btn-primary">
+            <button type="submit" className="notion-btn-primary pulse-btn">
               เริ่มทำแบบฝึกหัด (Start)
             </button>
           </form>
@@ -124,7 +131,10 @@ export default function App() {
 
       {/* State 2: PLAYING QUESTION */}
       {gameState === 'playing' && currentQuestion && (
-        <section aria-label="Quiz question">
+        <section aria-label="Quiz question" className="quiz-section">
+          {/* Confetti particle shower on correct answer */}
+          {showConfetti && <ConfettiEffect />}
+
           <div className="quiz-top-bar">
             <div className="kid-greeting">
               สวัสดีน้อง <span className="highlight-name">{kidName}</span>
@@ -147,12 +157,12 @@ export default function App() {
             />
           </div>
 
-          {/* Character and Speech feedback bubble */}
+          {/* Character and Speech feedback bubble with interactive animations */}
           <div className="mascot-status-area">
             <div className="mascot-mini">
-              <KidMascot mood={mascotMood} size={76} />
+              <KidMascot mood={mascotMood} size={82} />
             </div>
-            <div className={`mascot-speech-bubble ${currentFeedback ? (currentFeedback.isCorrect ? 'bubble-correct' : 'bubble-try') : ''}`}>
+            <div className={`mascot-speech-bubble ${currentFeedback ? (currentFeedback.isCorrect ? 'bubble-correct pop-in' : 'bubble-try pop-in') : ''}`}>
               {currentFeedback ? (
                 <span>{currentFeedback.text}</span>
               ) : (
@@ -161,7 +171,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="math-card">
+          <div className={`math-card ${isAnswered ? (currentFeedback?.isCorrect ? 'card-pulse-success' : 'card-shake') : ''}`}>
             <div className="math-formula">
               <span>{currentQuestion.num1}</span>
               <span className="math-operator">{currentQuestion.operator}</span>
@@ -176,9 +186,9 @@ export default function App() {
               let choiceClass = 'choice-btn'
               if (isAnswered) {
                 if (choice === currentQuestion.correctAnswer) {
-                  choiceClass += ' selected-correct'
+                  choiceClass += ' selected-correct pop-success'
                 } else if (choice === selectedAnswer) {
-                  choiceClass += ' selected-incorrect'
+                  choiceClass += ' selected-incorrect shake-error'
                 }
               }
 
@@ -199,7 +209,7 @@ export default function App() {
           {/* Explicit solution hint after answer */}
           <div className="feedback-bar">
             {isAnswered && !currentFeedback?.isCorrect && (
-              <span className="feedback-answer-hint">
+              <span className="feedback-answer-hint pop-in">
                 คำตอบที่ถูกต้องคือ {currentQuestion.correctAnswer}
               </span>
             )}
@@ -212,14 +222,17 @@ export default function App() {
         const resultMsg = getCompletionMessage(kidName, score, TOTAL_QUESTIONS)
         return (
           <section aria-label="Results" className="screen-center">
+            {/* Grand Confetti shower on completion */}
+            <ConfettiEffect />
+
             <div className="mascot-wrapper celebrate-bounce">
-              <KidMascot mood={resultMsg.mood} size={130} />
+              <KidMascot mood={resultMsg.mood} size={140} />
             </div>
 
             <div className="title-tag">ผลการทำแบบฝึกหัด</div>
             <h1 className="page-title">{resultMsg.headline}</h1>
 
-            <div className="result-card">
+            <div className="result-card pop-in">
               <div className="result-score">
                 {score} / {TOTAL_QUESTIONS}
               </div>
@@ -229,7 +242,7 @@ export default function App() {
               <div className="result-actions">
                 <button
                   type="button"
-                  className="notion-btn-primary"
+                  className="notion-btn-primary pulse-btn"
                   onClick={() => handleStart()}
                   autoFocus
                 >
