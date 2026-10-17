@@ -65,3 +65,16 @@ export function getRandomEncouragingMessage(name: string): string {
   const index = Math.floor(Math.random() * TRY_AGAIN_TEMPLATES.length)
   return TRY_AGAIN_TEMPLATES[index](safeName)
 }
+
+// Welcoming messages for standard visits
+export const GENERAL_WELCOME_MESSAGES = [
+  'ยินดีต้อนรับเพื่อนคนเก่ง! วันนี้สมองพร้อมลุยโจทย์เลขสนุกๆ หรือยังเอ่ย?',
+  'สวัสดีจ้า! คณิตคิดเร็วไม่ยากเลย ค่อยๆ คิด สนุกไปด้วยกันนะ!',
+  'เย้! ดีใจจังที่ได้เจอเพื่อนใหม่ วันนี้มาสะสมคะแนนเต็มสิบด้วยกันนะ!',
+  'ยินดีต้อนรับสู่ห้องเรียนคิดเลขจิ๋ว วันนี้เราจะมาเป็นฮีโร่นักคิดเลขกัน!',
+]
+
+export function getRandomWelcomeMessage(): string {
+  const index = Math.floor(Math.random() * GENERAL_WELCOME_MESSAGES.length)
+  return GENERAL_WELCOME_MESSAGES[index]
+}

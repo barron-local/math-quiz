@@ -207,10 +207,44 @@
 
 /* Mascot SVG Animation Layers */
 .mascot-wrapper {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: flex;
   justify-content: center;
   user-select: none;
+}
+
+/* Home Speech Bubble */
+.mascot-home-speech {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--notion-callout-bg);
+  border: 1px solid var(--notion-border);
+  border-radius: 20px;
+  padding: 8px 18px;
+  margin-bottom: 20px;
+  max-width: 440px;
+  box-shadow: var(--shadow-subtle);
+  position: relative;
+}
+
+.mascot-home-speech::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid var(--notion-border);
+}
+
+.mascot-speech-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--notion-text);
+  line-height: 1.4;
+  text-align: center;
 }
 
 .mascot-svg {

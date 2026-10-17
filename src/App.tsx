@@ -6,6 +6,7 @@ import {
   getRandomCorrectMessage,
   getRandomEncouragingMessage,
   getCompletionMessage,
+  getRandomWelcomeMessage,
 } from './encouragements'
 import './App.css'
 
@@ -32,6 +33,7 @@ export default function App() {
     return false
   })
   const [showQrModal, setShowQrModal] = useState(false)
+  const [welcomeMessage] = useState(() => getRandomWelcomeMessage())
 
   // Start new game
   const handleStart = (e?: FormEvent) => {
@@ -141,6 +143,12 @@ export default function App() {
           <div className="mascot-wrapper mascot-float">
             <KidMascot mood="happy" size={130} />
           </div>
+
+          {/* Cute mascot dialogue bubble for normal visitors */}
+          <div className="mascot-home-speech pop-in">
+            <span className="mascot-speech-text">{welcomeMessage}</span>
+          </div>
+
           <div className="title-tag">แบบฝึกหัดคณิตคิดเร็ว</div>
           <h1 className="page-title">Math Quiz</h1>
           <p className="page-subtitle">ยินดีต้อนรับเพื่อนคนเก่ง มาฝึกคิดเลขเร็วสนุกๆ กันนะ!</p>
