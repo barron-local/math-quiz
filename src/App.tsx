@@ -442,7 +442,7 @@ export default function App() {
     setHasEvaluated(true) // Evaluated as incorrect / skipped for score
     setCurrentFeedback({
       isCorrect: false,
-      text: `ดูเฉลยและวิธีทำข้อนี้แล้วนะน้อง${kidName}! ข้อนี้ไม่คิดคะแนนนะ ตั้งใจดูแล้วลุยข้อถัดไปกันเลย!`,
+      text: `ดูเฉลยและวิธีทำข้อนี้แล้วนะ${kidName.trim() ? `น้อง${kidName.trim()}` : ''}! ข้อนี้ไม่คิดคะแนนนะ ตั้งใจดูแล้วลุยข้อถัดไปกันเลย!`,
     })
 
     const { num1, num2, num3 } = currentQuestion

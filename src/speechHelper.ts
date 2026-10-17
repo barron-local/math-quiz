@@ -414,7 +414,7 @@ export function getAddition3StepSpeech(
   num1: number,
   num2: number,
   num3: number,
-  kidName?: string
+  _kidName?: string
 ): string {
   const n1 = formatThaiNumber(num1)
   const n2 = formatThaiNumber(num2)
@@ -423,13 +423,11 @@ export function getAddition3StepSpeech(
   const step1SumWord = formatThaiNumber(step1Sum)
   const finalSum = step1Sum + num3
   const finalSumWord = formatThaiNumber(finalSum)
-  const displayName = kidName ? `น้อง${kidName}` : 'คนเก่ง'
-
   if (step === 1) {
     return `ขั้นที่หนึ่ง จับคู่ ${n1} บวก ${n2} ได้ ${step1SumWord}`
   }
   if (step === 2) {
     return `ขั้นที่สอง นำ ${step1SumWord} บวกอีก ${n3}`
   }
-  return `คำตอบคือ ${finalSumWord} ${displayName}เก่งมากเลย!`
+  return `คำตอบคือ ${finalSumWord}`
 }
