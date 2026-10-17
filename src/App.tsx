@@ -226,7 +226,7 @@ export default function App() {
 
     // Calculate effective total questions
     const activeTotal = questionCountChoice === 'custom'
-      ? Math.max(3, Math.min(50, Number(customQuestionCount) || 10))
+      ? Math.max(1, Number(customQuestionCount) || 10)
       : questionCountChoice
     setTotalQuestions(activeTotal)
 
@@ -456,11 +456,10 @@ export default function App() {
                       value={customQuestionCount}
                       onChange={(e) => {
                         const val = e.target.value.replace(/\D/g, '')
-                        setCustomQuestionCount(val.slice(0, 3))
+                        setCustomQuestionCount(val)
                       }}
                       autoFocus
                     />
-                    <span className="custom-count-hint">(3 - 50 ข้อ)</span>
                   </div>
                 )}
               </div>
