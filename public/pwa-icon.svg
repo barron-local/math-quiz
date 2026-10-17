@@ -1,32 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Background Gradient -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Background Vibrant Kid Gradient -->
+    <linearGradient id="pwaBg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#2383E2" />
+      <stop offset="50%" stop-color="#1A73E8" />
       <stop offset="100%" stop-color="#0F7B6C" />
     </linearGradient>
-    <!-- Inner Card Shadow -->
-    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity="0.25" />
+
+    <!-- Star Glow -->
+    <filter id="starGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#DFAB01" flood-opacity="0.5" />
+    </filter>
+
+    <!-- Card Shadow -->
+    <filter id="pwaShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000" flood-opacity="0.22" />
     </filter>
   </defs>
 
-  <!-- Base Rounded App Icon Frame -->
-  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <!-- Base App Frame -->
+  <rect width="512" height="512" rx="120" fill="url(#pwaBg)" />
 
-  <!-- Glass Inner Card -->
-  <rect x="56" y="56" width="400" height="400" rx="72" fill="#FFFFFF" filter="url(#cardShadow)" />
+  <!-- Inner Soft Card -->
+  <rect x="44" y="44" width="424" height="424" rx="84" fill="#FFFFFF" filter="url(#pwaShadow)" />
 
-  <!-- Math & Fun Symbols: Clean, No Emojis -->
-  <!-- Plus Symbol (Top Left) -->
-  <path d="M148 116V164M124 140H172" stroke="#2383E2" stroke-width="12" stroke-linecap="round" />
+  <!-- Playful Floating Math Badges (SVG only, No Emojis) -->
+  <!-- Plus Badge (Top Left) -->
+  <circle cx="114" cy="118" r="32" fill="#EBF5FB" stroke="#2383E2" stroke-width="4" />
+  <path d="M114 102V134M98 118H130" stroke="#2383E2" stroke-width="6" stroke-linecap="round" />
 
-  <!-- Multiply Symbol (Top Right) -->
-  <path d="M344 120L376 152M376 120L344 152" stroke="#DFAB01" stroke-width="10" stroke-linecap="round" />
+  <!-- Multiply Badge (Top Right) -->
+  <circle cx="398" cy="118" r="32" fill="#FBE4E4" stroke="#E03E3E" stroke-width="4" />
+  <path d="M386 106L410 130M410 106L386 130" stroke="#E03E3E" stroke-width="6" stroke-linecap="round" />
 
-  <!-- Mascot Body (Centered Kid Mascot from App) -->
-  <g transform="translate(136, 110) scale(2.0)">
-    <!-- Mascot Hoodie -->
+  <!-- Golden Star Charm (Center Top) -->
+  <g transform="translate(256, 102)" filter="url(#starGlow)">
+    <polygon points="0 -22 6 -6 22 -4 11 8 14 24 0 16 -14 24 -11 8 -22 -4 -6 -6" fill="#DFAB01" />
+  </g>
+
+  <!-- Kid Mascot Face & Character in the Center -->
+  <g transform="translate(136, 126) scale(2.0)">
+    <!-- Hoodie -->
     <path d="M38 88C38 74 46 66 60 66C74 66 82 74 82 88L84 104C84 106 82 108 80 108H40C38 108 36 106 36 104L38 88Z" fill="#2383E2" />
     <!-- Collar Strings -->
     <path d="M52 68L60 76L68 68" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -36,14 +50,14 @@
 
     <!-- Cute Hair -->
     <path d="M32 44C32 28 42 20 60 20C78 20 88 28 88 44C88 34 82 25 72 23C64 21 54 22 46 25C38 28 34 35 32 44Z" fill="#37352F" />
-    <!-- Hair Bangs -->
+    <!-- Bangs -->
     <path d="M42 27C48 33 54 33 58 29C64 34 72 32 76 27" stroke="#37352F" stroke-width="3" stroke-linecap="round" />
 
     <!-- Rosy Cheeks -->
     <ellipse cx="42" cy="51" rx="4.5" ry="3" fill="#FF9A9E" opacity="0.65" />
     <ellipse cx="78" cy="51" rx="4.5" ry="3" fill="#FF9A9E" opacity="0.65" />
 
-    <!-- Cheerful Eyes (Arcs) -->
+    <!-- Cheerful Eyes -->
     <path d="M44 43C46 39 50 39 52 43" stroke="#37352F" stroke-width="3.5" stroke-linecap="round" />
     <path d="M68 43C70 39 74 39 76 43" stroke="#37352F" stroke-width="3.5" stroke-linecap="round" />
 
@@ -52,9 +66,18 @@
     <path d="M54 53C56 57 64 57 66 53" fill="#E03E3E" opacity="0.8" />
   </g>
 
-  <!-- Bottom Title Badge -->
-  <rect x="120" y="380" width="272" height="62" rx="31" fill="#2383E2" />
-  <text x="256" y="422" font-family="'Inter', -apple-system, sans-serif" font-size="30" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">
-    MATH QUIZ
-  </text>
+  <!-- Big Playful Dual-Color Logo Badge (Bottom) -->
+  <g transform="translate(256, 396)">
+    <!-- Pill Container -->
+    <rect x="-170" y="-36" width="340" height="72" rx="36" fill="#2383E2" />
+    <!-- White Inner Border for pop -->
+    <rect x="-166" y="-32" width="332" height="64" rx="32" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-opacity="0.3" />
+    <!-- Title Text -->
+    <text x="-55" y="12" font-family="'Inter', -apple-system, sans-serif" font-size="34" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">
+      MATH
+    </text>
+    <text x="65" y="12" font-family="'Inter', -apple-system, sans-serif" font-size="34" font-weight="900" fill="#FBF3DB" text-anchor="middle" letter-spacing="1">
+      QUIZ
+    </text>
+  </g>
 </svg>

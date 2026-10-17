@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react'
 import { generateQuestion, type Question, type ProblemType } from './quizGenerator'
 import { KidMascot } from './components/KidMascot'
+import { AppLogo } from './components/AppLogo'
 import { ConfettiEffect } from './components/ConfettiEffect'
 import {
   getRandomCorrectMessage,
@@ -549,8 +550,8 @@ export default function App() {
             </span>
           </div>
 
-          <h1 className="page-title">Math Quiz</h1>
-          <p className="page-subtitle">เกมคณิตคิดเร็วแสนสนุกสำหรับเด็กๆ</p>
+          {/* Vibrant & Playful Kid-Friendly Game Logo */}
+          <AppLogo />
 
           <form onSubmit={handleStart} className="name-form">
             <label htmlFor="kidNameInput" className="name-label">
