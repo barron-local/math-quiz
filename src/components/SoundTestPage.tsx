@@ -9,34 +9,45 @@ interface SoundTestPageProps {
 export function SoundTestPage({ onBack }: SoundTestPageProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showConfetti, setShowConfetti] = useState(true)
-  const [activeBurstCount, setActiveBurstCount] = useState(0)
+  const [lastPlayedName, setLastPlayedName] = useState<string>('ยังไม่ได้กด')
 
   const handlePlayGrandFinale = () => {
     setIsPlaying(true)
-    setActiveBurstCount((prev) => prev + 5)
+    setLastPlayedName('เสียงฉลองจบเกม (Confetti Pop + Ta-da)')
     soundEffects.playGrandFireworks()
 
     setTimeout(() => {
       setIsPlaying(false)
-    }, 2400)
+    }, 2000)
   }
 
-  const handlePlaySingle = () => {
-    soundEffects.playSingleFirework(0, [1046, 1318, 1568])
-    setActiveBurstCount((prev) => prev + 1)
+  const handlePlayConfetti = () => {
+    setLastPlayedName('พลุกระดาษ Confetti Pop')
+    soundEffects.playConfettiPop()
   }
 
-  const handlePlayTriple = () => {
-    soundEffects.playSingleFirework(0, [1046, 1318, 1568])
-    soundEffects.playSingleFirework(320, [1318, 1568, 2093])
-    soundEffects.playSingleFirework(640, [1568, 2093, 2637])
-    setActiveBurstCount((prev) => prev + 3)
+  const handlePlayTada = () => {
+    setLastPlayedName('เสียงแตรฉลอง Ta-da')
+    soundEffects.playTada()
   }
 
-  const handlePlayHighShimmer = () => {
-    soundEffects.playSingleFirework(0, [2093, 2637, 3136])
-    soundEffects.playSingleFirework(300, [1046, 1318, 1568, 2093, 2637])
-    setActiveBurstCount((prev) => prev + 2)
+  const handlePlayVictory = () => {
+    setLastPlayedName('เสียงดนตรีฉลองชัยชนะ Victory Fanfare')
+    soundEffects.playVictory()
+  }
+
+  const handlePlayWebFireworkShow = () => {
+    setIsPlaying(true)
+    setLastPlayedName('ชุดพลุ Web Fireworks Show (Fireworks-js)')
+    soundEffects.playWebFireworksShow()
+    setTimeout(() => {
+      setIsPlaying(false)
+    }, 2200)
+  }
+
+  const handlePlaySingleWebBurst = (idx: number) => {
+    setLastPlayedName(`เสียงพลุเว็บแบบที่ ${idx + 1} (explosion${idx}.mp3)`)
+    soundEffects.playWebFirework(idx)
   }
 
   return (
@@ -62,15 +73,15 @@ export function SoundTestPage({ onBack }: SoundTestPageProps) {
 
       <main className="sound-test-card">
         <div className="sound-test-title-group">
-          <h1 className="sound-test-title">ทดสอบระบบเสียงพลุเฉลิมฉลอง</h1>
+          <h1 className="sound-test-title">ทดสอบเสียงฉลองพลุบนเว็บไซต์</h1>
           <p className="sound-test-desc">
-            หน้านี้สร้างขึ้นเพื่อให้ทดลองฟังเสียงพลุ (Web Audio Synthesis) ที่ใช้ในฉากจบเกมเมื่อทำครบ 10 ข้อ
+            เสียงสไตล์เว็บไซต์และแอพเพื่อการศึกษา (เช่น Duolingo / Khan Academy) สดใส เป็นมิตร เด็กไม่ตกใจ
           </p>
         </div>
 
-        {/* Primary Action: Exact Ending Sequence */}
+        {/* Primary Action: Default Ending Sequence */}
         <div className="test-primary-box">
-          <div className="test-primary-label">เสียงที่ใช้จริงตอนจบเกม (Grand Finale)</div>
+          <div className="test-primary-label">เสียงที่ใช้จริงตอนจบเกม (Current Default)</div>
           <button
             type="button"
             className={`notion-btn-primary test-grand-btn ${isPlaying ? 'pulse-active' : ''}`}
@@ -79,45 +90,72 @@ export function SoundTestPage({ onBack }: SoundTestPageProps) {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
-            <span>{isPlaying ? 'กำลังยิงพลุฉลอง...' : 'กดฟังเสียงพลุชุดจบเกม (5 ลูกต่อเนื่อง)'}</span>
+            <span>{isPlaying ? 'กำลังเล่นเสียงฉลอง...' : 'กดฟังเสียงฉลองตอนจบเกม (Confetti + Ta-da)'}</span>
           </button>
           <div className="test-hint">
-            ประกอบด้วยเสียงพุ่งนุ่มนวล + เสียงแตกตัวแน่นกลมกล่อม + เสียงกระดิ่งระยิบระยับ C Major Pentatonic
+            เสียงพลุกระดาษ Party Popper / Confetti Pop นุ่มนวลร่าเริง + เสียงแตรเฉลิมฉลอง Ta-da ชัยชนะ
           </div>
         </div>
 
-        {/* Individual Sound Variations */}
-        <div className="test-section-heading">ทดสอบเสียงแยกแต่ละลูก</div>
+        {/* Individual Web Audio Options */}
+        <div className="test-section-heading">เลือกทดสอบเสียงสไตล์ต่างๆ ที่เว็บนิยมใช้</div>
         <div className="test-buttons-grid">
           <button
             type="button"
             className="test-sub-btn"
-            onClick={handlePlaySingle}
+            onClick={handlePlayConfetti}
           >
-            <span className="btn-main-text">พลุเดี่ยว (Single Burst)</span>
-            <span className="btn-sub-text">1 ลูก คอร์ดเสียงประสาน Do-Mi-Sol</span>
+            <span className="btn-main-text">Confetti Pop (ยอดนิยม)</span>
+            <span className="btn-sub-text">เสียงป๊อปพลุกระดาษปาร์ตี้ สดใส สบายหู</span>
           </button>
 
           <button
             type="button"
             className="test-sub-btn"
-            onClick={handlePlayTriple}
+            onClick={handlePlayTada}
           >
-            <span className="btn-main-text">พลุ 3 ลูก (Triple Burst)</span>
-            <span className="btn-sub-text">3 ลูก ยิงต่อเนื่องไล่ระดับเสียง</span>
+            <span className="btn-main-text">Ta-da Fanfare</span>
+            <span className="btn-sub-text">เสียงแต๊นแต้นเฉลิมฉลอง ชัยชนะ สนุกสนาน</span>
           </button>
 
           <button
             type="button"
             className="test-sub-btn"
-            onClick={handlePlayHighShimmer}
+            onClick={handlePlayVictory}
           >
-            <span className="btn-main-text">พลุละอองดาว (Stardust Cascade)</span>
-            <span className="btn-sub-text">เสียงกระดิ่งประกายทองชุดใหญ่</span>
+            <span className="btn-main-text">Victory Fanfare</span>
+            <span className="btn-sub-text">เสียงดนตรีฉลองแบบเกม ผ่านด่านสำเร็จ</span>
+          </button>
+
+          <button
+            type="button"
+            className="test-sub-btn"
+            onClick={handlePlayWebFireworkShow}
+          >
+            <span className="btn-main-text">Web Fireworks Show</span>
+            <span className="btn-sub-text">ชุดพลุเสียงแตกตัวจาก library fireworks-js</span>
+          </button>
+
+          <button
+            type="button"
+            className="test-sub-btn"
+            onClick={() => handlePlaySingleWebBurst(0)}
+          >
+            <span className="btn-main-text">พลุดอกไม้ไฟเว็บ 1</span>
+            <span className="btn-sub-text">เสียงพลุแตกตัวแบบที่ 1 (explosion0.mp3)</span>
+          </button>
+
+          <button
+            type="button"
+            className="test-sub-btn"
+            onClick={() => handlePlaySingleWebBurst(1)}
+          >
+            <span className="btn-main-text">พลุดอกไม้ไฟเว็บ 2</span>
+            <span className="btn-sub-text">เสียงพลุแตกตัวแบบที่ 2 (explosion1.mp3)</span>
           </button>
         </div>
 
-        {/* Settings Toggle */}
+        {/* Options & Status */}
         <div className="test-options-row">
           <label className="test-checkbox-label">
             <input
@@ -129,17 +167,17 @@ export function SoundTestPage({ onBack }: SoundTestPageProps) {
           </label>
 
           <span className="burst-counter-pill">
-            ยิงไปแล้ว: {activeBurstCount} ครั้ง
+            เล่นล่าสุด: {lastPlayedName}
           </span>
         </div>
 
-        {/* Audio Engine Technical Spec */}
+        {/* Safety Note for Kids */}
         <div className="sound-spec-box">
-          <div className="spec-title">ข้อมูลเทคนิคระบบเสียง (Sound Engine Specs)</div>
+          <div className="spec-title">ความปลอดภัยต่อการได้ยินของเด็ก (Kid-Friendly Audio)</div>
           <ul className="spec-list">
-            <li><strong>เทคโนโลยี:</strong> Web Audio API (Native Browser Synthesis - 0kb audio downloads)</li>
-            <li><strong>ส่วนประกอบเสียง:</strong> Soft Launch Sweep + Low-Sine Pop (130Hz &rarr; 36Hz) + Golden Bell Chimes (1046Hz &ndash; 3136Hz) + Bandpass Stardust Crackle</li>
-            <li><strong>ความเข้ากันได้:</strong> รองรับ 100% บนมือถือ iOS/Android, Chrome, Safari, Edge โดยไม่ต้องติดตั้งไฟล์เสียง</li>
+            <li><strong>ไม่ใช้เสียงระเบิดจริง:</strong> ตัดเสียงตูมหรือเสียงระเบิดกระแทกหู เพื่อป้องกันไม่ให้เด็กตกใจหรือตกใจกลัว</li>
+            <li><strong>เสียงแบบ Website Celebration:</strong> ใช้เสียงพลุกระดาษ Confetti Pop ผสานเสียง Ta-da คอร์ดสดใสที่เด็กคุ้นเคยในแอพชั้นนำ</li>
+            <li><strong>ระดับเสียงนุ่มนวล:</strong> ปรับ Volume Normalization ให้อยู่ในระดับพอเหมาะ ไม่ดังแผดหรือแตกพร่าในหูฟังหรือลำโพงมือถือ</li>
           </ul>
         </div>
       </main>

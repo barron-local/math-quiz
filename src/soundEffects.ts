@@ -1,153 +1,91 @@
 /**
- * Web Audio API synthesized celebration fireworks (เสียงพลุฉลองเพราะๆ นุ่มนวลสดใสสำหรับเด็ก)
- * Zero external audio files required, instant playback, warm pops, and magical stardust bell chimes.
+ * Sound Effects Manager:
+ * Uses real web-optimized celebration sounds (Party Popper, Confetti Pop, Ta-da, Victory fanfare)
+ * Friendly, cheerful, and delighting for kids without loud frightening blasts.
  */
 
 class SoundEffectsManager {
-  private ctx: AudioContext | null = null
+  private audioCache = new Map<string, HTMLAudioElement>()
 
-  private getAudioContext(): AudioContext | null {
-    if (typeof window === 'undefined') return null
-    if (!this.ctx) {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-      if (AudioCtx) {
-        this.ctx = new AudioCtx()
-      }
+  private getAudio(src: string): HTMLAudioElement {
+    let audio = this.audioCache.get(src)
+    if (!audio) {
+      audio = new Audio(src)
+      audio.preload = 'auto'
+      this.audioCache.set(src, audio)
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume().catch(() => {})
-    }
-    return this.ctx
+    return audio
   }
 
-  /**
-   * Play a single magical firework with warm pop & sparkling stardust chimes
-   */
-  public playSingleFirework(delayMs = 0, chordNotes: number[] = [1046, 1318, 1568]): void {
+  private playSound(src: string, volume = 0.8, delayMs = 0): void {
     setTimeout(() => {
-      const ctx = this.getAudioContext()
-      if (!ctx) return
-
-      const now = ctx.currentTime
-
-      // 1. Soft rising whoosh (airy, gentle, not piercing)
-      this.playWhoosh(ctx, now)
-
-      // 2. Warm Pop/Thump at +0.26s
-      const popTime = now + 0.26
-      this.playWarmPop(ctx, popTime)
-
-      // 3. Stardust sparkling chimes & soft crackles
-      this.playSparkleChimes(ctx, popTime, chordNotes)
-      this.playSoftCrackle(ctx, popTime)
+      try {
+        const audio = this.getAudio(src)
+        audio.currentTime = 0
+        audio.volume = Math.max(0, Math.min(1, volume))
+        audio.play().catch(() => {
+          // Autoplay policy or user hasn't interacted yet
+        })
+      } catch {
+        // Fallback gracefully
+      }
     }, delayMs)
   }
 
-  // Soft whoosh (gentle warm sweep)
-  private playWhoosh(ctx: AudioContext, time: number): void {
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.type = 'sine'
-    osc.frequency.setValueAtTime(260, time)
-    osc.frequency.exponentialRampToValueAtTime(720, time + 0.24)
-
-    gain.gain.setValueAtTime(0.001, time)
-    gain.gain.linearRampToValueAtTime(0.06, time + 0.1)
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.26)
-
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.start(time)
-    osc.stop(time + 0.28)
-  }
-
-  // Warm round pop (clean, punchy, no harsh distortion)
-  private playWarmPop(ctx: AudioContext, time: number): void {
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.type = 'sine'
-    osc.frequency.setValueAtTime(130, time)
-    osc.frequency.exponentialRampToValueAtTime(36, time + 0.35)
-
-    gain.gain.setValueAtTime(0.28, time)
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.36)
-
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.start(time)
-    osc.stop(time + 0.38)
-  }
-
-  // Sparkling golden bell chimes (magical stardust notes in pentatonic harmony)
-  private playSparkleChimes(ctx: AudioContext, time: number, notes: number[]): void {
-    notes.forEach((freq, idx) => {
-      const noteTime = time + idx * 0.04 + Math.random() * 0.015
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(freq, noteTime)
-
-      gain.gain.setValueAtTime(0.001, noteTime)
-      gain.gain.linearRampToValueAtTime(0.11, noteTime + 0.012)
-      gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.42)
-
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start(noteTime)
-      osc.stop(noteTime + 0.45)
-    })
-  }
-
-  // Soft sparkle crackle (gentle glittering stardust shower)
-  private playSoftCrackle(ctx: AudioContext, time: number): void {
-    const bufferSize = Math.floor(ctx.sampleRate * 0.45)
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
-    const data = buffer.getChannelData(0)
-    for (let i = 0; i < bufferSize; i++) {
-      // Gentle random sparkle impulses
-      data[i] = Math.random() > 0.88 ? (Math.random() * 2 - 1) * 0.4 : 0
-    }
-
-    const noise = ctx.createBufferSource()
-    noise.buffer = buffer
-
-    const filter = ctx.createBiquadFilter()
-    filter.type = 'bandpass'
-    filter.frequency.setValueAtTime(3400, time)
-    filter.Q.setValueAtTime(2.8, time)
-
-    const gain = ctx.createGain()
-    gain.gain.setValueAtTime(0.001, time)
-    gain.gain.linearRampToValueAtTime(0.09, time + 0.025)
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.42)
-
-    noise.connect(filter)
-    filter.connect(gain)
-    gain.connect(ctx.destination)
-    noise.start(time)
-    noise.stop(time + 0.45)
+  /**
+   * Real website Confetti / Party Popper sound (เสียงพลุเปเปอร์ชู้ต/ปาร์ตี้ป็อปเปอร์ที่เว็บนิยมใช้)
+   */
+  public playConfettiPop(delayMs = 0, volume = 0.85): void {
+    this.playSound('/sounds/confetti.mp3', volume, delayMs)
   }
 
   /**
-   * Grand finale celebratory fireworks:
-   * Plays a joyful, harmonious progression that sounds magical and delightful for kids
+   * Cheerful Ta-da celebration fanfare (เสียงแต๊นแต้นฉลองชัยชนะ)
+   */
+  public playTada(delayMs = 0, volume = 0.8): void {
+    this.playSound('/sounds/tada.mp3', volume, delayMs)
+  }
+
+  /**
+   * Full victory fanfare (เสียงดนตรีฉลองชัยชนะ)
+   */
+  public playVictory(delayMs = 0, volume = 0.75): void {
+    this.playSound('/sounds/victory.mp3', volume, delayMs)
+  }
+
+  /**
+   * Web animation firework burst (from fireworks-js library)
+   */
+  public playWebFirework(burstIndex = 0, delayMs = 0, volume = 0.65): void {
+    const files = [
+      '/sounds/explosion0.mp3',
+      '/sounds/explosion1.mp3',
+      '/sounds/explosion2.mp3',
+    ]
+    const file = files[burstIndex % files.length]
+    this.playSound(file, volume, delayMs)
+  }
+
+  /**
+   * Grand finale celebration sound played when finishing the quiz (ฉากจบเกมเมื่อทำครบ 10 ข้อ):
+   * Combines friendly Confetti Pop + Ta-da Fanfare that makes kids smile and feel proud!
    */
   public playGrandFireworks(): void {
-    // Musical pentatonic chords (C major progression: C -> E -> G -> High C -> Grand Cascade)
-    const bursts = [
-      { delay: 0, notes: [1046, 1318, 1568] },         // C6, E6, G6 (Joyful triad)
-      { delay: 360, notes: [1318, 1568, 2093] },       // E6, G6, C7 (Brighter upward lift)
-      { delay: 760, notes: [1568, 2093, 2637] },       // G6, C7, E7 (High sparkle)
-      { delay: 1220, notes: [2093, 2637, 3136] },      // C7, E7, G7 (Stardust crescendo)
-      { delay: 1680, notes: [1046, 1318, 1568, 2093, 2637] }, // Grand full celebratory chord cascade!
-    ]
+    // 1. Festive Confetti / Party Popper Pop right as confetti showers down
+    this.playConfettiPop(0, 0.9)
 
-    bursts.forEach(({ delay, notes }) => {
-      this.playSingleFirework(delay, notes)
-    })
+    // 2. Uplifting Ta-da fanfare chiming right after
+    this.playTada(380, 0.85)
+  }
+
+  /**
+   * Alternative: Fireworks-JS 4-burst sequence
+   */
+  public playWebFireworksShow(): void {
+    this.playWebFirework(0, 0, 0.6)
+    this.playWebFirework(1, 400, 0.6)
+    this.playWebFirework(2, 850, 0.65)
+    this.playConfettiPop(1300, 0.85)
   }
 }
 
