@@ -364,7 +364,7 @@ export default function App() {
     setMascotMood('cheer')
 
     if (isVoiceEnabled) {
-      speakThaiText('ใช้ตัวช่วยตัดสองข้อแล้วนะคนเก่ง เหลือสองข้อให้เลือกแล้วจ้า!')
+      speakThaiText('ใช้ตัวช่วยตัดสองข้อแล้ว!')
     }
   }
 
