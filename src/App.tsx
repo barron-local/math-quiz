@@ -495,7 +495,7 @@ export default function App() {
 
     const { num1, num2, num3 } = currentQuestion
 
-    // Step 1: Animate pair 1 (num1 + num2) and speak
+    // Step 1: Animate pair 1 (num1 + num2) and speak slowly with comfortable pauses
     setDemoStep(1)
     setMascotMood('think')
 
@@ -506,7 +506,7 @@ export default function App() {
         () => setIsSpeaking(true),
         () => {
           setIsSpeaking(false)
-          // After Step 1 finishes speaking, pause 600ms then transition to Step 2
+          // Generous pause (1400ms) after Step 1 so the child has time to absorb and see the intermediate sum
           const t1 = setTimeout(() => {
             // Step 2: Animate adding intermediate sum with num3
             setDemoStep(2)
@@ -518,7 +518,7 @@ export default function App() {
               () => setIsSpeaking(true),
               () => {
                 setIsSpeaking(false)
-                // After Step 2 finishes speaking, pause 600ms then transition to Step 3 (final answer)
+                // Generous pause (1400ms) after Step 2 before revealing final answer
                 const t2 = setTimeout(() => {
                   setDemoStep(3)
                   setMascotMood('cheer')
@@ -530,20 +530,23 @@ export default function App() {
                     () => {
                       setIsSpeaking(false)
                       setIsDemoRunning(false)
-                    }
+                    },
+                    0.82 // Gentle, relaxed pace for final explanation
                   )
-                }, 600)
+                }, 1400)
                 demoTimeoutRefs.current.push(t2)
-              }
+              },
+              0.82 // Gentle, relaxed pace for step 2
             )
-          }, 600)
+          }, 1400)
           demoTimeoutRefs.current.push(t1)
-        }
+        },
+        0.82 // Gentle, relaxed pace for young kids to follow easily
       )
     }
 
-    // Small delay to let initial UI state settle
-    const initialT = setTimeout(speakStep1, 150)
+    // Small initial pause (400ms) before voice begins so child can focus on highlighted pair
+    const initialT = setTimeout(speakStep1, 400)
     demoTimeoutRefs.current.push(initialT)
   }
 

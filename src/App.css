@@ -1617,10 +1617,10 @@
   overflow: visible;
 }
 
-/* Walkthrough SVG Interactive Animations */
+/* Walkthrough SVG Interactive Animations (Smooth & relaxed pacing for kids) */
 .guide-arc-pulsing {
   stroke-dasharray: 6 3;
-  animation: arcMarch 1.2s linear infinite;
+  animation: arcMarch 2.2s linear infinite;
 }
 
 @keyframes arcMarch {
@@ -1633,7 +1633,7 @@
 }
 
 .step2-arc-pulse {
-  animation: arcMarchGreen 1.2s linear infinite;
+  animation: arcMarchGreen 2.2s linear infinite;
 }
 
 @keyframes arcMarchGreen {
@@ -1646,16 +1646,16 @@
 }
 
 .num-highlight-pulse circle {
-  animation: highlightGlow 1s ease-in-out infinite alternate;
+  animation: highlightGlow 1.8s ease-in-out infinite alternate;
 }
 
 @keyframes highlightGlow {
   0% {
-    transform: scale(0.92);
-    opacity: 0.4;
+    transform: scale(0.95);
+    opacity: 0.45;
   }
   100% {
-    transform: scale(1.08);
+    transform: scale(1.06);
     opacity: 0.85;
   }
 }

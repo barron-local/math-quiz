@@ -56,7 +56,8 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 export function speakThaiText(
   text: string,
   onStart?: () => void,
-  onEnd?: () => void
+  onEnd?: () => void,
+  customRate?: number
 ): void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     console.warn('Speech synthesis not supported in this browser.')
@@ -91,7 +92,7 @@ export function speakThaiText(
   // Soft, warm, and gentle kid-friendly speech tuning
   utterance.volume = 0.95 // Clear volume
   utterance.pitch = 1.08 // Warm, friendly, and natural pitch (not shrill)
-  utterance.rate = 0.9 // Comfortable pacing for young ears
+  utterance.rate = typeof customRate === 'number' ? customRate : 0.9 // Comfortable pacing for young ears
 
   // Get freshest voices list, falling back to cached voices
   let voices = window.speechSynthesis.getVoices()
@@ -249,10 +250,10 @@ export function getAddition3StepSpeech(
   const nameSuffix = kidName ? `น้อง${kidName}` : 'คนเก่ง'
 
   if (step === 1) {
-    return `ขั้นที่หนึ่งจ้า เราจับคู่สองตัวแรกก่อน เอา ${n1} บวกกับ ${n2} ได้เท่ากับ ${step1SumWord} จ้า`
+    return `ขั้นที่หนึ่งจ้า... เรามาจับคู่สองตัวแรกกันก่อนนะ... นำ ${n1}... บวกกับ ${n2}... ได้ผลบวกเท่ากับ ${step1SumWord} จ้า`
   }
   if (step === 2) {
-    return `ขั้นที่สอง เอา ${step1SumWord} ที่ได้ ไปบวกกับตัวที่สาม คือบวกอีก ${n3} จ้า`
+    return `ขั้นที่สองจ้า... นำ ${step1SumWord} ที่เราบวกได้ตะกี้... ไปบวกเพิ่มกับตัวเลขที่สาม... คือบวกอีก ${n3} นะจ๊ะ`
   }
-  return `ดังนั้น ${n1} บวก ${n2} บวก ${n3} ได้คำตอบคือ ${finalSumWord} จ้า! จำวิธีคิดแบบนี้ไว้ แล้วกดไปลุยข้อถัดไปกันเลยนะน้อง${nameSuffix}!`
+  return `ดังนั้น... ${n1}... บวก ${n2}... บวก ${n3}... ได้คำตอบเท่ากับ ${finalSumWord} จ้า! จำวิธีคิดทีละคู่นี้ไว้นะน้อง${nameSuffix}... เก่งมากๆ เลย!`
 }
