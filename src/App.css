@@ -1596,6 +1596,10 @@
   margin-top: 22px;
 }
 
+.math-card-actions-row:empty {
+  display: none;
+}
+
 /* Explain Solution Button */
 .explain-solution-btn {
   display: inline-flex;
