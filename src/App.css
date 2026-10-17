@@ -845,101 +845,86 @@
   transition: transform 0.2s ease;
 }
 
-/* Circular Countdown Timer Ring Component */
-.circular-timer-pill {
-  position: relative;
+/* Kid-friendly, easy-to-read Notion Timer Badge */
+.badge-timer {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background-color: var(--notion-bg);
-  box-shadow: var(--shadow-subtle);
-  border: 1px solid var(--notion-border);
-  flex-shrink: 0;
-  user-select: none;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.timer-ring-svg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.timer-ring-track {
-  stroke: var(--notion-border);
-  opacity: 0.6;
-}
-
-.timer-ring-bar {
-  transition: stroke-dashoffset 0.85s linear, stroke 0.3s ease;
-}
-
-.timer-bar-normal {
-  stroke: var(--notion-blue);
-}
-
-.timer-bar-warning {
-  stroke: #d97706; /* Warm amber/orange */
-}
-
-.timer-bar-urgent {
-  stroke: var(--notion-red);
-}
-
-.timer-center-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  z-index: 1;
-}
-
-.timer-seconds {
+  gap: 6px;
   font-family: var(--font-mono);
   font-size: 14px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 6px;
+  border: 1px solid var(--notion-border);
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
-.timer-text-normal {
+.timer-badge-icon {
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.timer-badge-number {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1;
+}
+
+.timer-badge-unit {
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 1px;
+  opacity: 0.85;
+}
+
+/* Timer States (Notion style, high contrast, readable for kids) */
+.badge-timer-normal {
+  background-color: var(--notion-callout-bg);
+  border-color: var(--notion-border);
+  color: var(--notion-text);
+}
+
+.badge-timer-normal .timer-badge-icon {
   color: var(--notion-blue);
 }
 
-.timer-text-warning {
+.badge-timer-warning {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.badge-timer-warning .timer-badge-icon {
   color: #d97706;
 }
 
-.timer-text-urgent {
+[data-theme='dark'] .badge-timer-warning {
+  background-color: #372f1e;
+  border-color: #e9b949;
+  color: #fbbf24;
+}
+
+.badge-timer-urgent {
+  background-color: var(--notion-red-bg);
+  border-color: var(--notion-red);
+  color: var(--notion-red);
+  animation: timerGentlePulse 0.8s infinite alternate ease-in-out;
+}
+
+.badge-timer-urgent .timer-badge-icon {
   color: var(--notion-red);
 }
 
-.timer-sec-unit {
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--notion-text-muted);
-  margin-top: 1px;
-}
-
-.timer-urgent {
-  border-color: var(--notion-red);
-  background-color: var(--notion-red-bg);
-  animation: timerHeartbeat 0.6s infinite alternate ease-in-out;
-}
-
-@keyframes timerHeartbeat {
+@keyframes timerGentlePulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(224, 62, 62, 0.4);
+    box-shadow: 0 0 0 0 rgba(224, 62, 62, 0.25);
   }
   100% {
-    transform: scale(1.08);
-    box-shadow: 0 0 10px 2px rgba(224, 62, 62, 0.3);
+    transform: scale(1.04);
+    box-shadow: 0 0 0 3px rgba(224, 62, 62, 0.2);
   }
 }
 

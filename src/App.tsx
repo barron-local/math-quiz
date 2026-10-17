@@ -809,51 +809,33 @@ export default function App() {
               สวัสดีน้อง <span className="highlight-name">{kidName}</span>
             </div>
             <div className="stats-badges">
-              {/* Circular Countdown Timer Ring */}
+              {/* Kid-friendly, easy-to-read Notion Timer Badge */}
               {(() => {
-                const radius = 17
-                const circumference = 2 * Math.PI * radius
-                const progressRatio = Math.max(0, Math.min(1, timeLeft / QUESTION_TIME_SECONDS))
-                const strokeDashoffset = circumference * (1 - progressRatio)
                 const timerState = timeLeft <= 10 ? 'urgent' : timeLeft <= 25 ? 'warning' : 'normal'
-
                 return (
                   <div
-                    className={`circular-timer-pill ${timerState === 'urgent' ? 'timer-urgent' : ''}`}
+                    className={`badge badge-timer badge-timer-${timerState}`}
                     title={`เวลาที่เหลือ: ${timeLeft} วินาที`}
                     role="timer"
                     aria-label={`เหลือเวลา ${timeLeft} วินาที`}
                   >
-                    <svg className="timer-ring-svg" width="38" height="38" viewBox="0 0 42 42">
-                      {/* Background Track */}
-                      <circle
-                        className="timer-ring-track"
-                        cx="21"
-                        cy="21"
-                        r={radius}
-                        fill="transparent"
-                        strokeWidth="3.5"
-                      />
-                      {/* Animated Countdown Ring */}
-                      <circle
-                        className={`timer-ring-bar timer-bar-${timerState}`}
-                        cx="21"
-                        cy="21"
-                        r={radius}
-                        fill="transparent"
-                        strokeWidth="3.5"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={strokeDashoffset}
-                        strokeLinecap="round"
-                        transform="rotate(-90 21 21)"
-                      />
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="timer-badge-icon"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    <div className="timer-center-content">
-                      <span className={`timer-seconds timer-text-${timerState}`}>
-                        {timeLeft}
-                      </span>
-                      <span className="timer-sec-unit">วิ</span>
-                    </div>
+                    <span className="timer-badge-number">{timeLeft}</span>
+                    <span className="timer-badge-unit">วิ</span>
                   </div>
                 )
               })()}
