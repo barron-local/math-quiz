@@ -168,21 +168,6 @@ export default function App() {
               autoFocus
             />
 
-            {/* Quick cool title chips for fun */}
-            <div className="quick-titles-row">
-              <span className="quick-title-label">หรือเลือกฉายา:</span>
-              {['คนเก่ง', 'ยอดนักสืบจิ๋ว', 'กัปตัน', 'ฮีโร่'].map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  className="quick-tag-btn"
-                  onClick={() => setKidName(tag)}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-
             <button type="submit" className="notion-btn-primary pulse-btn">
               เริ่มทำแบบฝึกหัด (Start)
             </button>
