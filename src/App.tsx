@@ -1094,18 +1094,22 @@ export default function App() {
       {showQrModal && (
         <div className="modal-backdrop" onClick={() => setShowQrModal(false)}>
           <div className="notion-modal pop-in" onClick={(e) => e.stopPropagation()}>
+            {/* Top-Right Dedicated Floating Close Button */}
+            <button
+              type="button"
+              className="modal-corner-close-btn"
+              onClick={() => setShowQrModal(false)}
+              aria-label="ปิดหน้าต่าง"
+              title="ปิดหน้าต่าง"
+            >
+              <svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="2" y1="2" x2="12" y2="12" />
+                <line x1="12" y1="2" x2="2" y2="12" />
+              </svg>
+            </button>
+
             <div className="modal-header">
               <span className="badge badge-tag">สแกนเพื่อเข้าเล่น</span>
-              <button
-                type="button"
-                className="modal-close-btn"
-                onClick={() => setShowQrModal(false)}
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <line x1="2" y1="2" x2="12" y2="12" />
-                  <line x1="12" y1="2" x2="2" y2="12" />
-                </svg>
-              </button>
             </div>
             <div className="modal-body">
               <img
@@ -1150,19 +1154,21 @@ export default function App() {
       {showInstallModal && (
         <div className="modal-backdrop" onClick={() => setShowInstallModal(false)}>
           <div className="notion-modal pwa-modal-card pop-in" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-corner-close-btn"
+              onClick={() => setShowInstallModal(false)}
+              aria-label="ปิดหน้าต่าง"
+              title="ปิดหน้าต่าง"
+            >
+              <svg width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="2" y1="2" x2="12" y2="12" />
+                <line x1="12" y1="2" x2="2" y2="12" />
+              </svg>
+            </button>
+
             <div className="modal-header">
               <span className="badge badge-tag">ติดตั้งลงบนมือถือ</span>
-              <button
-                type="button"
-                className="modal-close-btn"
-                onClick={() => setShowInstallModal(false)}
-                aria-label="ปิดหน้าต่าง"
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <line x1="2" y1="2" x2="12" y2="12" />
-                  <line x1="12" y1="2" x2="2" y2="12" />
-                </svg>
-              </button>
             </div>
             <div className="modal-body">
               <div className="pwa-app-preview">

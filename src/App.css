@@ -177,29 +177,35 @@
   display: inline-flex;
 }
 
-.modal-close-btn {
+/* Dedicated Universal Corner Close Button */
+.modal-corner-close-btn {
   position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: var(--notion-text-muted);
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--notion-border);
+  background-color: var(--notion-hover);
+  color: var(--notion-text-muted);
   cursor: pointer;
-  transition: all 0.15s ease;
-  z-index: 2;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 10;
+  box-shadow: var(--shadow-subtle);
 }
 
-.modal-close-btn:hover {
-  background-color: var(--notion-hover);
+.modal-corner-close-btn:hover {
+  background-color: var(--notion-hover-active);
+  border-color: var(--notion-text-muted);
   color: var(--notion-text);
+  transform: rotate(90deg) scale(1.08);
+}
+
+.modal-corner-close-btn:active {
+  transform: scale(0.92);
 }
 
 .modal-body {
