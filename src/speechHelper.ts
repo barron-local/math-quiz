@@ -71,12 +71,31 @@ const THAI_NUMBER_WORDS: Record<number, string> = {
   16: 'สิบหก',
   17: 'สิบเจ็ด',
   18: 'สิบแปด',
+  19: 'สิบเก้า',
+  20: 'ยี่สิบ',
+  21: 'ยี่สิบเอ็ด',
+  22: 'ยี่สิบสอง',
+  23: 'ยี่สิบสาม',
+  24: 'ยี่สิบสี่',
+  25: 'ยี่สิบห้า',
+  26: 'ยี่สิบหก',
+  27: 'ยี่สิบเจ็ด',
 }
 
-export function formatProblemForSpeech(num1: number, operator: '+' | '-', num2: number): string {
+export function formatProblemForSpeech(
+  num1: number,
+  operator: '+' | '-',
+  num2: number,
+  num3?: number
+): string {
   const word1 = THAI_NUMBER_WORDS[num1] || String(num1)
   const word2 = THAI_NUMBER_WORDS[num2] || String(num2)
   const opWord = operator === '+' ? 'บวก' : 'ลบ'
+
+  if (typeof num3 === 'number') {
+    const word3 = THAI_NUMBER_WORDS[num3] || String(num3)
+    return `${word1} บวก ${word2} แล้วบวกอีก ${word3} ได้เท่ากับเท่าไหร่เอ่ย`
+  }
 
   return `${word1} ${opWord} ${word2} ได้เท่ากับเท่าไหร่เอ่ย`
 }

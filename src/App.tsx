@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react'
-import { generateQuestion, type Question } from './quizGenerator'
+import { generateQuestion, type Question, type ProblemType } from './quizGenerator'
 import { KidMascot } from './components/KidMascot'
 import { ConfettiEffect } from './components/ConfettiEffect'
 import {
@@ -14,11 +14,15 @@ import './App.css'
 
 type QuizState = 'name-input' | 'playing' | 'completed'
 
-const TOTAL_QUESTIONS = 10
-
 export default function App() {
   const [gameState, setGameState] = useState<QuizState>('name-input')
   const [kidName, setKidName] = useState('')
+  // Quiz configuration states
+  const [questionCountChoice, setQuestionCountChoice] = useState<10 | 20 | 30 | 'custom'>(10)
+  const [customQuestionCount, setCustomQuestionCount] = useState(15)
+  const [totalQuestions, setTotalQuestions] = useState(10)
+  const [problemType, setProblemType] = useState<ProblemType>('add-sub-2')
+
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
   const [score, setScore] = useState(0)
@@ -56,8 +60,8 @@ export default function App() {
 
   // Welcome speech intro text (cheerful & cute for children, guiding them on what to do)
   const welcomeSpeechText = isFromQr
-    ? 'เย้! สแกนคิวอาร์โค้ดเข้ามาแล้ว ยินดีต้อนรับนะคนเก่ง! หนูพิมพ์ชื่อเล่นหรือฉายาเท่ๆ ลงในช่องด้านล่าง แล้วกดปุ่มเริ่มเล่นได้เลยจ้า!'
-    : 'สวัสดีครับเพื่อนคนเก่ง! ยินดีต้อนรับนะคร้าบ ให้หนูพิมพ์ชื่อเล่นหรือฉายาเท่ๆ ลงในช่องด้านล่าง แล้วกดปุ่มเริ่มเล่นเพื่อไปลุยโจทย์เลขด้วยกันได้เลยจ้า!'
+    ? 'เย้! สแกนคิวอาร์โค้ดเข้ามาแล้ว ยินดีต้อนรับนะคนเก่ง! หนูพิมพ์ชื่อเล่นหรือฉายาเท่ๆ เลือกลักษณะโจทย์ แล้วกดปุ่มเริ่มเล่นได้เลยจ้า!'
+    : 'สวัสดีครับเพื่อนคนเก่ง! ยินดีต้อนรับนะคร้าบ ให้หนูพิมพ์ชื่อเล่น เลือกลักษณะโจทย์ที่ชอบ แล้วกดปุ่มเริ่มเล่นเพื่อไปลุยด้วยกันได้เลยจ้า!'
 
   const handleSpeakWelcome = () => {
     setIsSpeaking(true)
@@ -67,7 +71,6 @@ export default function App() {
       () => setIsSpeaking(false)
     )
   }
-
 
   // Auto-speak cute welcome message on first entry or user click
   useEffect(() => {
@@ -108,7 +111,8 @@ export default function App() {
     const textToSpeak = formatProblemForSpeech(
       questionToSpeak.num1,
       questionToSpeak.operator,
-      questionToSpeak.num2
+      questionToSpeak.num2,
+      questionToSpeak.num3
     )
     setIsSpeaking(true)
     speakThaiText(
@@ -184,11 +188,11 @@ export default function App() {
     setMascotMood('cheer')
 
     setTimeout(() => {
-      if (currentIndex < TOTAL_QUESTIONS) {
+      if (currentIndex < totalQuestions) {
         const nextIndex = currentIndex + 1
         setCurrentIndex(nextIndex)
         setTimeLeft(QUESTION_TIME_SECONDS)
-        const nextQ = generateQuestion(nextIndex, askedQuestions)
+        const nextQ = generateQuestion(nextIndex, problemType, askedQuestions)
         setCurrentQuestion(nextQ)
         setSelectedAnswer(null)
         setIsAnswered(false)
@@ -205,11 +209,18 @@ export default function App() {
     if (e) e.preventDefault()
     const nameToUse = kidName.trim() || 'คนเก่ง'
     setKidName(nameToUse)
+
+    // Calculate effective total questions
+    const activeTotal = questionCountChoice === 'custom'
+      ? Math.max(3, Math.min(50, Number(customQuestionCount) || 10))
+      : questionCountChoice
+    setTotalQuestions(activeTotal)
+
     setScore(0)
     setTimeLeft(QUESTION_TIME_SECONDS)
     setCurrentIndex(1)
     const newAskedSet = new Set<string>()
-    const firstQ = generateQuestion(1, newAskedSet)
+    const firstQ = generateQuestion(1, problemType, newAskedSet)
     setAskedQuestions(newAskedSet)
     setCurrentQuestion(firstQ)
     setSelectedAnswer(null)
@@ -248,12 +259,12 @@ export default function App() {
     // Auto proceed to next question
     setTimeout(() => {
       setShowConfetti(false)
-      if (currentIndex < TOTAL_QUESTIONS) {
+      if (currentIndex < totalQuestions) {
         const nextIndex = currentIndex + 1
         setCurrentIndex(nextIndex)
         setTimeLeft(QUESTION_TIME_SECONDS)
         // Ensure no repeat question in this round
-        const nextQ = generateQuestion(nextIndex, askedQuestions)
+        const nextQ = generateQuestion(nextIndex, problemType, askedQuestions)
         setCurrentQuestion(nextQ)
         setSelectedAnswer(null)
         setIsAnswered(false)
@@ -340,7 +351,7 @@ export default function App() {
           </div>
 
           <h1 className="page-title">Math Quiz</h1>
-          <p className="page-subtitle">เกมคณิตคิดเร็วแสนสนุก 10 ข้อ</p>
+          <p className="page-subtitle">เกมคณิตคิดเร็วแสนสนุกสำหรับเด็กๆ</p>
 
           <form onSubmit={handleStart} className="name-form">
             <label htmlFor="kidNameInput" className="name-label">
@@ -356,6 +367,94 @@ export default function App() {
               maxLength={15}
               autoFocus
             />
+
+            {/* Quiz Configuration Settings */}
+            <div className="quiz-config-section">
+              {/* Question Count Selector */}
+              <div className="config-group">
+                <div className="config-label-row">
+                  <span className="config-title">จำนวนข้อ</span>
+                </div>
+                <div className="config-options-row">
+                  <button
+                    type="button"
+                    className={`config-chip-btn ${questionCountChoice === 10 ? 'active' : ''}`}
+                    onClick={() => setQuestionCountChoice(10)}
+                  >
+                    <span>10 ข้อ</span>
+                    <span className="chip-desc">ด่วนเร็ว</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`config-chip-btn ${questionCountChoice === 20 ? 'active' : ''}`}
+                    onClick={() => setQuestionCountChoice(20)}
+                  >
+                    <span>20 ข้อ</span>
+                    <span className="chip-desc">มาตรฐาน</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`config-chip-btn ${questionCountChoice === 30 ? 'active' : ''}`}
+                    onClick={() => setQuestionCountChoice(30)}
+                  >
+                    <span>30 ข้อ</span>
+                    <span className="chip-desc">จัดเต็ม</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`config-chip-btn ${questionCountChoice === 'custom' ? 'active' : ''}`}
+                    onClick={() => setQuestionCountChoice('custom')}
+                  >
+                    <span>กำหนดเอง</span>
+                    <span className="chip-desc">เลือกเอง</span>
+                  </button>
+                </div>
+
+                {/* Custom count input if custom is chosen */}
+                {questionCountChoice === 'custom' && (
+                  <div className="custom-count-wrapper pop-in">
+                    <label htmlFor="customCountInput" className="custom-count-label">
+                      ใส่จำนวนข้อ:
+                    </label>
+                    <input
+                      id="customCountInput"
+                      type="number"
+                      min={3}
+                      max={50}
+                      className="custom-count-input"
+                      value={customQuestionCount}
+                      onChange={(e) => setCustomQuestionCount(Math.max(1, parseInt(e.target.value) || 0))}
+                    />
+                    <span className="custom-count-hint">(3 - 50 ข้อ)</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Problem Type Selector */}
+              <div className="config-group">
+                <div className="config-label-row">
+                  <span className="config-title">ประเภทโจทย์</span>
+                </div>
+                <div className="config-types-row">
+                  <button
+                    type="button"
+                    className={`config-chip-btn ${problemType === 'add-sub-2' ? 'active' : ''}`}
+                    onClick={() => setProblemType('add-sub-2')}
+                  >
+                    <span>บวก / ลบ 2 จำนวน</span>
+                    <span className="chip-desc">เช่น 7 + 2 หรือ 8 - 3</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`config-chip-btn ${problemType === 'add-3' ? 'active' : ''}`}
+                    onClick={() => setProblemType('add-3')}
+                  >
+                    <span>บวก 3 จำนวน</span>
+                    <span className="chip-desc">พร้อมเส้นโยงขั้นตอน</span>
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <button type="submit" className="notion-btn-primary pulse-btn kid-big-btn">
               เริ่มเล่นเลย (Start)
@@ -379,7 +478,7 @@ export default function App() {
                 เวลา: {timeLeft} วิ
               </span>
               <span className="badge badge-tag">
-                ข้อที่ {currentIndex} / {TOTAL_QUESTIONS}
+                ข้อที่ {currentIndex} / {totalQuestions}
               </span>
               <span className="badge badge-score">
                 คะแนน: {score}
@@ -391,7 +490,7 @@ export default function App() {
           <div className="progress-bar-bg" aria-hidden="true">
             <div
               className="progress-bar-fill"
-              style={{ width: `${(currentIndex / TOTAL_QUESTIONS) * 100}%` }}
+              style={{ width: `${(currentIndex / totalQuestions) * 100}%` }}
             />
           </div>
 
@@ -415,13 +514,113 @@ export default function App() {
           </div>
 
           <div className={`math-card ${isAnswered ? (currentFeedback?.isCorrect ? 'card-pulse-success' : 'card-shake') : ''}`}>
-            <div className="math-formula">
-              <span>{currentQuestion.num1}</span>
-              <span className="math-operator">{currentQuestion.operator}</span>
-              <span>{currentQuestion.num2}</span>
-              <span>=</span>
-              <span className="math-placeholder">?</span>
-            </div>
+            {currentQuestion.problemType === 'add-3' && typeof currentQuestion.num3 === 'number' ? (
+              /* 3-number addition with step-by-step connection lines */
+              <div className="addition-3-container">
+                <div className="step-flow-banner">
+                  <span>คิดทีละคู่: บวก 2 ตัวแรกก่อน แล้วบวกตัวที่สาม</span>
+                </div>
+                <div className="addition-guide-svg-wrapper">
+                  <svg
+                    viewBox="0 0 380 148"
+                    className="addition-guide-svg"
+                    role="img"
+                    aria-label={`โจทย์เลข 3 จำนวน: ${currentQuestion.num1} บวก ${currentQuestion.num2} บวก ${currentQuestion.num3}`}
+                  >
+                    {/* Top Row: Formula */}
+                    {/* Num1 */}
+                    <text x="36" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
+                      {currentQuestion.num1}
+                    </text>
+                    {/* Operator 1 */}
+                    <text x="76" y="48" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
+                      +
+                    </text>
+                    {/* Num2 */}
+                    <text x="116" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
+                      {currentQuestion.num2}
+                    </text>
+                    {/* Operator 2 */}
+                    <text x="156" y="48" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
+                      +
+                    </text>
+                    {/* Num3 */}
+                    <text x="196" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
+                      {currentQuestion.num3}
+                    </text>
+                    {/* Equals */}
+                    <text x="246" y="48" textAnchor="middle" fontSize="38" fontWeight="700" fill="var(--notion-text)">
+                      =
+                    </text>
+                    {/* Placeholder Question Mark */}
+                    <text x="296" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
+                      ?
+                    </text>
+
+                    {/* Step 1 Connecting Bracket: Linking Num1 (x=36) and Num2 (x=116) */}
+                    <path
+                      d="M 36 62 C 36 82, 76 84, 76 96 C 76 84, 116 82, 116 62"
+                      fill="none"
+                      stroke="var(--notion-blue)"
+                      strokeWidth="2.8"
+                      strokeLinecap="round"
+                    />
+
+                    {/* Intermediate Result Pill for Step 1 */}
+                    <g transform="translate(48, 96)">
+                      <rect
+                        width="56"
+                        height="30"
+                        rx="15"
+                        fill="var(--notion-blue-bg)"
+                        stroke="var(--notion-blue)"
+                        strokeWidth="2"
+                      />
+                      <text
+                        x="28"
+                        y="21"
+                        textAnchor="middle"
+                        fontSize="17"
+                        fontWeight="700"
+                        fill="var(--notion-blue)"
+                        fontFamily="var(--font-mono)"
+                      >
+                        {currentQuestion.num1 + currentQuestion.num2}
+                      </text>
+                    </g>
+
+                    {/* Step 2 Connecting Line: from Intermediate Pill (x=104, y=111) and Num3 (x=196, y=62) */}
+                    <path
+                      d="M 104 111 C 145 111, 160 138, 196 138"
+                      fill="none"
+                      stroke="var(--notion-green)"
+                      strokeWidth="2.5"
+                      strokeDasharray="4 3"
+                    />
+                    <path
+                      d="M 196 62 L 196 138"
+                      fill="none"
+                      stroke="var(--notion-green)"
+                      strokeWidth="2.5"
+                      strokeDasharray="4 3"
+                    />
+                    <circle cx="196" cy="138" r="4" fill="var(--notion-green)" />
+                    <text x="220" y="142" fontSize="13" fontWeight="700" fill="var(--notion-green)">
+                      + {currentQuestion.num3}
+                    </text>
+                  </svg>
+                </div>
+              </div>
+            ) : (
+              /* Standard 2-number formula */
+              <div className="math-formula">
+                <span>{currentQuestion.num1}</span>
+                <span className="math-operator">{currentQuestion.operator}</span>
+                <span>{currentQuestion.num2}</span>
+                <span>=</span>
+                <span className="math-placeholder">?</span>
+              </div>
+            )}
 
             {/* Read aloud / replay button for kids */}
             <button
@@ -476,7 +675,7 @@ export default function App() {
 
       {/* State 3: COMPLETED RESULTS */}
       {gameState === 'completed' && (() => {
-        const resultMsg = getCompletionMessage(kidName, score, TOTAL_QUESTIONS)
+        const resultMsg = getCompletionMessage(kidName, score, totalQuestions)
         return (
           <section aria-label="Results" className="screen-center">
             {/* Grand Confetti shower on completion */}
@@ -491,7 +690,7 @@ export default function App() {
 
             <div className="result-card pop-in">
               <div className="result-score">
-                {score} / {TOTAL_QUESTIONS}
+                {score} / {totalQuestions}
               </div>
               <p className="result-label">คะแนนรวมของน้อง{kidName}</p>
               <p className="result-subtext">{resultMsg.subtext}</p>

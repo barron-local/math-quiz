@@ -1,8 +1,14 @@
+export type ProblemType = 'add-sub-2' | 'add-3'
+
 export interface Question {
   id: number
+  problemType: ProblemType
   num1: number
-  num2: number
   operator: '+' | '-'
+  num2: number
+  // For 3-number addition: num1 + num2 + num3
+  num3?: number
+  operator2?: '+'
   correctAnswer: number
   choices: number[]
 }
@@ -21,33 +27,49 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 /**
- * Generate a dynamic single-digit math problem (addition or subtraction).
- * Single digit: 1 to 9.
- * Subtraction ensures num1 >= num2 so the answer is never negative.
- * @param id Question sequence number (1 to 10)
- * @param existingKeys Set of question signature strings (e.g. "3+4", "7-2") already used in this round
+ * Generate a math problem according to selected problemType:
+ * - 'add-sub-2': single-digit 1-9 addition or subtraction (non-negative)
+ * - 'add-3': single-digit 1-9 addition of 3 numbers (num1 + num2 + num3)
+ * @param id Question sequence number
+ * @param problemType 'add-sub-2' | 'add-3'
+ * @param existingKeys Set of question signature strings to prevent duplicates in the same round
  */
-export function generateQuestion(id: number, existingKeys?: Set<string>): Question {
+export function generateQuestion(
+  id: number,
+  problemType: ProblemType = 'add-sub-2',
+  existingKeys?: Set<string>
+): Question {
   let operator: '+' | '-' = '+'
   let num1 = 0
   let num2 = 0
+  let num3: number | undefined = undefined
+  let operator2: '+' | undefined = undefined
   let correctAnswer = 0
   let key = ''
 
   let attempts = 0
   do {
-    operator = Math.random() < 0.5 ? '+' : '-'
-    if (operator === '+') {
+    if (problemType === 'add-3') {
+      operator = '+'
+      operator2 = '+'
       num1 = getRandomInt(1, 9)
       num2 = getRandomInt(1, 9)
-      correctAnswer = num1 + num2
+      num3 = getRandomInt(1, 9)
+      correctAnswer = num1 + num2 + num3
+      key = `${num1}+${num2}+${num3}`
     } else {
-      num1 = getRandomInt(1, 9)
-      num2 = getRandomInt(1, num1) // num1 >= num2 to keep result >= 0
-      correctAnswer = num1 - num2
+      operator = Math.random() < 0.5 ? '+' : '-'
+      if (operator === '+') {
+        num1 = getRandomInt(1, 9)
+        num2 = getRandomInt(1, 9)
+        correctAnswer = num1 + num2
+      } else {
+        num1 = getRandomInt(1, 9)
+        num2 = getRandomInt(1, num1) // num1 >= num2 to keep result >= 0
+        correctAnswer = num1 - num2
+      }
+      key = `${num1}${operator}${num2}`
     }
-
-    key = `${num1}${operator}${num2}`
     attempts++
   } while (existingKeys && existingKeys.has(key) && attempts < 100)
 
@@ -74,22 +96,24 @@ export function generateQuestion(id: number, existingKeys?: Set<string>): Questi
   // Fallback in case set is not yet 3 items
   let fallbackDelta = 4
   while (distractors.size < 3) {
-    const candidate1 = correctAnswer + fallbackDelta
-    const candidate2 = correctAnswer - fallbackDelta
-    if (candidate1 !== correctAnswer) distractors.add(candidate1)
-    if (distractors.size < 3 && candidate2 >= 0 && candidate2 !== correctAnswer) {
-      distractors.add(candidate2)
-    }
+    const high = correctAnswer + fallbackDelta
+    const low = correctAnswer - fallbackDelta
+    if (high >= 0 && high !== correctAnswer) distractors.add(high)
+    if (distractors.size < 3 && low >= 0 && low !== correctAnswer) distractors.add(low)
     fallbackDelta++
   }
 
-  const choices = shuffleArray([correctAnswer, ...Array.from(distractors)])
+  // Final choices list of 4 options shuffled
+  const choices = shuffleArray([correctAnswer, ...Array.from(distractors).slice(0, 3)])
 
   return {
     id,
+    problemType,
     num1,
-    num2,
     operator,
+    num2,
+    num3,
+    operator2,
     correctAnswer,
     choices,
   }

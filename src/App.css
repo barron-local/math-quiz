@@ -1048,3 +1048,163 @@
   }
 }
 
+/* ===================================================
+   Home Config Selectors (จำนวนข้อ & ประเภทโจทย์)
+   =================================================== */
+.quiz-config-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: var(--notion-callout-bg);
+  border: 1px solid var(--notion-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  text-align: left;
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.config-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--notion-text);
+}
+
+.config-options-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.config-types-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.config-chip-btn {
+  background-color: var(--notion-bg);
+  border: 1.5px solid var(--notion-border);
+  border-radius: 8px;
+  padding: 10px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--notion-text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.config-chip-btn:hover {
+  border-color: var(--notion-blue);
+  background-color: var(--notion-blue-bg);
+}
+
+.config-chip-btn.active {
+  border-color: var(--notion-blue);
+  background-color: var(--notion-blue);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(35, 131, 226, 0.25);
+}
+
+.chip-desc {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.custom-count-wrapper {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--notion-bg);
+  border: 1px dashed var(--notion-blue);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.custom-count-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--notion-blue);
+  white-space: nowrap;
+}
+
+.custom-count-input {
+  width: 90px;
+  padding: 6px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  border: 1.5px solid var(--notion-border);
+  border-radius: 6px;
+  outline: none;
+  background: var(--notion-bg);
+  color: var(--notion-text);
+  text-align: center;
+}
+
+.custom-count-input:focus {
+  border-color: var(--notion-blue);
+}
+
+.custom-count-hint {
+  font-size: 12px;
+  color: var(--notion-text-muted);
+}
+
+/* ===================================================
+   3-Number Addition Visual Guide (เส้นโยงลำดับการบวก)
+   =================================================== */
+.addition-3-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.step-flow-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--notion-blue);
+  background-color: var(--notion-blue-bg);
+  border: 1px solid var(--notion-blue);
+  border-radius: 20px;
+  padding: 4px 14px;
+  margin-bottom: 14px;
+}
+
+.addition-guide-svg-wrapper {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  justify-content: center;
+  margin-top: -6px;
+}
+
+.addition-guide-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
