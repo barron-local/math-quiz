@@ -154,6 +154,7 @@ export default function App() {
   const [eliminatedChoices, setEliminatedChoices] = useState<number[]>([])
   const [demoStep, setDemoStep] = useState<0 | 1 | 2 | 3>(0) // 0: off, 1: pair 1, 2: add 3rd, 3: completed reveal
   const [isDemoRunning, setIsDemoRunning] = useState(false)
+  const [isExplained, setIsExplained] = useState(false) // Question was answered via explanation / demo
   const demoTimeoutRefs = useRef<Array<ReturnType<typeof setTimeout>>>([])
   const QUESTION_TIME_SECONDS = 60 // 1 minute per question
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_SECONDS)
@@ -257,6 +258,7 @@ export default function App() {
   useEffect(() => {
     hasWarnedTimeRef.current = false
     setDemoStep(0)
+    setIsExplained(false)
     clearDemoTimeouts()
   }, [currentIndex, currentQuestion?.id])
 
@@ -452,12 +454,45 @@ export default function App() {
     setIsDemoRunning(false)
   }
 
+  // Advance to the next question or complete game
+  const advanceToNextQuestion = () => {
+    clearDemoTimeouts()
+    setShowConfetti(false)
+    if (currentIndex < totalQuestions) {
+      const nextIndex = currentIndex + 1
+      setCurrentIndex(nextIndex)
+      setTimeLeft(QUESTION_TIME_SECONDS)
+      // Ensure no repeat question in this round
+      const nextQ = generateQuestion(nextIndex, problemType, askedQuestions)
+      setCurrentQuestion(nextQ)
+      setSelectedAnswer(null)
+      setIsAnswered(false)
+      setIsCalculating(false)
+      setHasEvaluated(false)
+      setEliminatedChoices([])
+      setCurrentFeedback(null)
+      setMascotMood('happy')
+      setDemoStep(0)
+      setIsExplained(false)
+    } else {
+      setGameState('completed')
+    }
+  }
+
   // Step-by-step solution demonstration with animation and cheerful Thai voice
   const handleExplainSolution = () => {
     if (!currentQuestion || currentQuestion.problemType !== 'add-3' || typeof currentQuestion.num3 !== 'number' || isAnswered || isDemoRunning) return
 
     clearDemoTimeouts()
     setIsDemoRunning(true)
+    setIsAnswered(true) // Lock answering
+    setIsExplained(true) // Mark as revealed/explained (no score)
+    setHasEvaluated(true) // Evaluated as incorrect / skipped for score
+    setCurrentFeedback({
+      isCorrect: false,
+      text: `ดูเฉลยและวิธีทำข้อนี้แล้วนะน้อง${kidName}! ข้อนี้ไม่คิดคะแนนจ้า ตั้งใจดูแล้วลุยข้อถัดไปกันเลย!`,
+    })
+
     const { num1, num2, num3 } = currentQuestion
 
     // Step 1: Animate pair 1 (num1 + num2) and speak
@@ -486,7 +521,7 @@ export default function App() {
                 // After Step 2 finishes speaking, pause 600ms then transition to Step 3 (final answer)
                 const t2 = setTimeout(() => {
                   setDemoStep(3)
-                  setMascotMood('celebrate')
+                  setMascotMood('cheer')
 
                   const step3Text = getAddition3StepSpeech(3, num1, num2, num3, kidName)
                   speakThaiText(
@@ -1111,9 +1146,9 @@ export default function App() {
                     </text>
 
                     {/* Placeholder / Answer Slot */}
-                    {demoStep === 3 ? (
+                    {demoStep === 3 || isExplained ? (
                       <g className="pop-success">
-                        <circle cx="296" cy="100" r="28" fill="var(--notion-green-bg)" stroke="var(--notion-green)" strokeWidth="2" />
+                        <circle cx="296" cy="100" r="28" fill="var(--notion-blue-bg)" stroke="var(--notion-blue)" strokeWidth="2" />
                         <text
                           x="296"
                           y="112"
@@ -1121,7 +1156,7 @@ export default function App() {
                           fontSize="42"
                           fontWeight="700"
                           fontFamily="var(--font-mono)"
-                          fill="var(--notion-green)"
+                          fill="var(--notion-blue)"
                         >
                           {currentQuestion.correctAnswer}
                         </text>
@@ -1229,38 +1264,57 @@ export default function App() {
 
           </div>
 
-          <div className="choices-grid">
-            {currentQuestion.choices.map((choice, index) => {
-              const isEliminated = eliminatedChoices.includes(choice)
-              let choiceClass = 'choice-btn'
-              if (isEliminated) {
-                choiceClass += ' choice-eliminated'
-              }
-              if (isAnswered) {
-                if (isCalculating && choice === selectedAnswer) {
-                  choiceClass += ' selected-calculating'
-                } else if (hasEvaluated) {
-                  if (choice === currentQuestion.correctAnswer) {
-                    choiceClass += ' selected-correct pop-success'
-                  } else if (choice === selectedAnswer) {
-                    choiceClass += ' selected-incorrect shake-error'
+          {/* Either show Next Question button (if solution was viewed/explained) OR regular choices grid */}
+          {isExplained ? (
+            <div className="explained-next-action-card pop-in">
+              <div className="explained-status-note">
+                <span className="explained-badge-tag">เฉลยข้อนี้แล้ว (ไม่นับคะแนน)</span>
+                <p className="explained-subtext">หนูๆ จำเทคนิคการจับคู่สองตัวแรกไว้ใช้นะจ๊ะ พร้อมแล้วกดไปลุยข้อถัดไปกันเลย!</p>
+              </div>
+              <button
+                type="button"
+                className="notion-btn-primary next-question-after-demo-btn pulse-btn"
+                onClick={advanceToNextQuestion}
+                disabled={isDemoRunning}
+              >
+                <span>{currentIndex < totalQuestions ? 'ไปข้อถัดไปเลย ➔' : 'ดูสรุปผลคะแนน 🎉'}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="choices-grid">
+              {currentQuestion.choices.map((choice, index) => {
+                const isEliminated = eliminatedChoices.includes(choice)
+                let choiceClass = 'choice-btn'
+                if (isEliminated) {
+                  choiceClass += ' choice-eliminated'
+                }
+                if (isAnswered) {
+                  if (isCalculating && choice === selectedAnswer) {
+                    choiceClass += ' selected-calculating'
+                  } else if (hasEvaluated) {
+                    if (choice === currentQuestion.correctAnswer) {
+                      choiceClass += ' selected-correct pop-success'
+                    } else if (choice === selectedAnswer) {
+                      choiceClass += ' selected-incorrect shake-error'
+                    }
                   }
                 }
-              }
 
-              return (
-                <button
-                  key={`${currentQuestion.id}-${index}-${choice}`}
-                  type="button"
-                  className={choiceClass}
-                  disabled={isAnswered || isEliminated}
-                  onClick={() => handleSelectChoice(choice)}
-                >
-                  {choice}
-                </button>
-              )
-            })}
-          </div>
+                return (
+                  <button
+                    key={`${currentQuestion.id}-${index}-${choice}`}
+                    type="button"
+                    className={choiceClass}
+                    disabled={isAnswered || isEliminated}
+                    onClick={() => handleSelectChoice(choice)}
+                  >
+                    {choice}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
           {/* Floating Skill Booster: 50-50 Lifeline Button positioned at bottom-left of the screen */}
           <aside className="skill-floating-pod pop-in" aria-label="สกิลพิเศษ">
             <button

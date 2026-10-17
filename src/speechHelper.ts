@@ -254,5 +254,5 @@ export function getAddition3StepSpeech(
   if (step === 2) {
     return `ขั้นที่สอง เอา ${step1SumWord} ที่ได้ ไปบวกกับตัวที่สาม คือบวกอีก ${n3} จ้า`
   }
-  return `ดังนั้น ${n1} บวก ${n2} บวก ${n3} ได้คำตอบคือ ${finalSumWord} จ้า${nameSuffix}! เก่งมากๆ เลย!`
+  return `ดังนั้น ${n1} บวก ${n2} บวก ${n3} ได้คำตอบคือ ${finalSumWord} จ้า! จำวิธีคิดแบบนี้ไว้ แล้วกดไปลุยข้อถัดไปกันเลยนะน้อง${nameSuffix}!`
 }
