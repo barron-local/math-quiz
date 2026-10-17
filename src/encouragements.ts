@@ -78,3 +78,17 @@ export function getRandomWelcomeMessage(): string {
   const index = Math.floor(Math.random() * GENERAL_WELCOME_MESSAGES.length)
   return GENERAL_WELCOME_MESSAGES[index]
 }
+
+// Fun kid-friendly reactions when tapping/poking the mascot
+export const MASCOT_POKE_REACTIONS = [
+  'จั๊กจี้จังเลย ฮ่าๆ! พร้อมลุยคิดเลขหรือยังเอ่ย?',
+  'ฮิๆ สะกิดเค้าเหรอ! สู้ๆ นะคนเก่ง เค้าคอยเชียร์อยู่นะ!',
+  'เย้! แตะตัวเค้าแล้ว ขอส่งพลังคณิตศาสตร์ให้หนูนะ!',
+  'จุ๊ๆ สมาธิดีมากๆ เลย ลุยข้อนี้กันต่อเลยครับ!',
+  'ฮ่าๆๆ จั๊กจี้จัง! หนูเก่งที่สุดเลยนะ!',
+]
+
+export function getRandomPokeMessage(): string {
+  const index = Math.floor(Math.random() * MASCOT_POKE_REACTIONS.length)
+  return MASCOT_POKE_REACTIONS[index]
+}

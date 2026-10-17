@@ -271,6 +271,34 @@
 .mascot-svg {
   display: block;
   overflow: visible;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mascot-clickable {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mascot-clickable:hover {
+  transform: scale(1.06);
+  filter: drop-shadow(0 6px 14px rgba(35, 131, 226, 0.25));
+}
+
+.mascot-clickable:active {
+  transform: scale(0.92);
+}
+
+/* Fun Squash & Stretch bounce when poked */
+.mascot-poked-bounce {
+  animation: mascotSquashBounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes mascotSquashBounce {
+  0% { transform: scale(1, 1); }
+  25% { transform: scale(1.15, 0.85); }
+  50% { transform: scale(0.9, 1.15) translateY(-14px); }
+  75% { transform: scale(1.05, 0.95) translateY(-4px); }
+  100% { transform: scale(1, 1) translateY(0); }
 }
 
 /* Eye Blinking Animation */

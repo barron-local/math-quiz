@@ -3,9 +3,16 @@ import React from 'react'
 interface CharacterProps {
   mood?: 'happy' | 'celebrate' | 'cheer' | 'think'
   size?: number
+  onClick?: () => void
+  isPoked?: boolean
 }
 
-export const KidMascot: React.FC<CharacterProps> = ({ mood = 'happy', size = 110 }) => {
+export const KidMascot: React.FC<CharacterProps> = ({
+  mood = 'happy',
+  size = 110,
+  onClick,
+  isPoked = false,
+}) => {
   return (
     <svg
       width={size}
@@ -13,8 +20,11 @@ export const KidMascot: React.FC<CharacterProps> = ({ mood = 'happy', size = 110
       viewBox="0 0 120 120"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`mascot-svg mood-${mood}`}
-      aria-hidden="true"
+      className={`mascot-svg mood-${mood} ${isPoked ? 'mascot-poked-bounce' : ''} ${onClick ? 'mascot-clickable' : ''}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? 'กดเพื่อทักทายตัวการ์ตูน' : undefined}
     >
       <defs>
         {/* Sparkle star for celebrations */}

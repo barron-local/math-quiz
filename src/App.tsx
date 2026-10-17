@@ -7,6 +7,7 @@ import {
   getRandomEncouragingMessage,
   getCompletionMessage,
   getRandomWelcomeMessage,
+  getRandomPokeMessage,
 } from './encouragements'
 import { speakThaiText, formatProblemForSpeech } from './speechHelper'
 import './App.css'
@@ -34,9 +35,27 @@ export default function App() {
     return false
   })
   const [showQrModal, setShowQrModal] = useState(false)
-  const [welcomeMessage] = useState(() => getRandomWelcomeMessage())
+  const [welcomeMessage, setWelcomeMessage] = useState(() => getRandomWelcomeMessage())
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
+  const [isPoked, setIsPoked] = useState(false)
+
+  // Interactive mascot poke handler (child taps the mascot)
+  const handlePokeMascot = () => {
+    setIsPoked(true)
+    const pokeMsg = getRandomPokeMessage()
+    setWelcomeMessage(pokeMsg)
+    setIsSpeaking(true)
+    speakThaiText(
+      pokeMsg,
+      () => setIsSpeaking(true),
+      () => {
+        setIsSpeaking(false)
+        setIsPoked(false)
+      }
+    )
+    setTimeout(() => setIsPoked(false), 600)
+  }
 
   // Welcome speech intro text (cheerful & cute for children)
   const welcomeSpeechText = isFromQr
@@ -51,6 +70,7 @@ export default function App() {
       () => setIsSpeaking(false)
     )
   }
+
 
   // Auto-speak cute welcome message on first entry or user click
   useEffect(() => {
@@ -211,7 +231,12 @@ export default function App() {
           </div>
 
           <div className="mascot-wrapper mascot-float">
-            <KidMascot mood="happy" size={140} />
+            <KidMascot
+              mood="happy"
+              size={140}
+              onClick={handlePokeMascot}
+              isPoked={isPoked}
+            />
           </div>
 
           {/* Cute mascot dialogue bubble for normal visitors (clickable to replay speech) */}
@@ -285,7 +310,12 @@ export default function App() {
           {/* Character and Speech feedback bubble with interactive animations */}
           <div className="mascot-status-area">
             <div className="mascot-mini">
-              <KidMascot mood={mascotMood} size={82} />
+              <KidMascot
+                mood={mascotMood}
+                size={82}
+                onClick={handlePokeMascot}
+                isPoked={isPoked}
+              />
             </div>
             <div className={`mascot-speech-bubble ${currentFeedback ? (currentFeedback.isCorrect ? 'bubble-correct pop-in' : 'bubble-try pop-in') : ''}`}>
               {currentFeedback ? (
