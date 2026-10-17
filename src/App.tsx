@@ -39,8 +39,8 @@ export default function App() {
   const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
   const [isPoked, setIsPoked] = useState(false)
   const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => new Set())
-  const TOTAL_TIME_MS = 1000 // 1 second total for 10 questions
-  const [timeLeftMs, setTimeLeftMs] = useState(TOTAL_TIME_MS)
+  const QUESTION_TIME_SECONDS = 60 // 1 minute per question
+  const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_SECONDS)
 
   // Interactive mascot poke handler (child taps the mascot - animation only, no voice)
   const handlePokeMascot = () => {
@@ -119,31 +119,58 @@ export default function App() {
   // Automatically read the math problem aloud when a new question appears
   useEffect(() => {
     if (gameState === 'playing' && currentQuestion && !isAnswered) {
-      // Small pause (100ms) before voice begins
+      // Small pause (250ms) before voice begins
       const timer = setTimeout(() => {
         handleSpeakProblem(currentQuestion)
-      }, 100)
+      }, 250)
       return () => clearTimeout(timer)
     }
   }, [currentQuestion?.id, gameState])
 
-  // 1-second total countdown timer for 10 questions
+  // 1-minute (60s) countdown timer per question
   useEffect(() => {
-    if (gameState !== 'playing') return
+    if (gameState !== 'playing' || isAnswered) return
 
     const interval = setInterval(() => {
-      setTimeLeftMs((prev) => {
-        if (prev <= 50) {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
           clearInterval(interval)
-          setGameState('completed')
+          // Time expired for this question: treat as unanswered/timeout and proceed
+          handleTimeExpired()
           return 0
         }
-        return prev - 50
+        return prev - 1
       })
-    }, 50)
+    }, 1000)
 
     return () => clearInterval(interval)
-  }, [gameState])
+  }, [gameState, isAnswered, currentIndex])
+
+  // Handle timeout for a question
+  const handleTimeExpired = () => {
+    setIsAnswered(true)
+    setCurrentFeedback({
+      isCorrect: false,
+      text: `หมดเวลาข้อนี้แล้วนะน้อง${kidName}! ไปลุยข้อถัดไปกันเลย!`,
+    })
+    setMascotMood('cheer')
+
+    setTimeout(() => {
+      if (currentIndex < TOTAL_QUESTIONS) {
+        const nextIndex = currentIndex + 1
+        setCurrentIndex(nextIndex)
+        setTimeLeft(QUESTION_TIME_SECONDS)
+        const nextQ = generateQuestion(nextIndex, askedQuestions)
+        setCurrentQuestion(nextQ)
+        setSelectedAnswer(null)
+        setIsAnswered(false)
+        setCurrentFeedback(null)
+        setMascotMood('think')
+      } else {
+        setGameState('completed')
+      }
+    }, 1200)
+  }
 
   // Start new game
   const handleStart = (e?: FormEvent) => {
@@ -151,7 +178,7 @@ export default function App() {
     const nameToUse = kidName.trim() || 'คนเก่ง'
     setKidName(nameToUse)
     setScore(0)
-    setTimeLeftMs(TOTAL_TIME_MS)
+    setTimeLeft(QUESTION_TIME_SECONDS)
     setCurrentIndex(1)
     const newAskedSet = new Set<string>()
     const firstQ = generateQuestion(1, newAskedSet)
@@ -190,12 +217,13 @@ export default function App() {
       setShowConfetti(false)
     }
 
-    // Auto proceed to next question rapidly (90ms)
+    // Auto proceed to next question
     setTimeout(() => {
       setShowConfetti(false)
       if (currentIndex < TOTAL_QUESTIONS) {
         const nextIndex = currentIndex + 1
         setCurrentIndex(nextIndex)
+        setTimeLeft(QUESTION_TIME_SECONDS)
         // Ensure no repeat question in this round
         const nextQ = generateQuestion(nextIndex, askedQuestions)
         setCurrentQuestion(nextQ)
@@ -206,7 +234,7 @@ export default function App() {
       } else {
         setGameState('completed')
       }
-    }, 90)
+    }, 1000)
   }
 
   // Change kid name / reset
@@ -319,8 +347,8 @@ export default function App() {
               สวัสดีน้อง <span className="highlight-name">{kidName}</span>
             </div>
             <div className="stats-badges">
-              <span className={`badge badge-timer ${timeLeftMs <= 300 ? 'timer-urgent' : ''}`}>
-                เวลา: {(timeLeftMs / 1000).toFixed(1)} วิ
+              <span className={`badge badge-timer ${timeLeft <= 10 ? 'timer-urgent' : ''}`}>
+                เวลา: {timeLeft} วิ
               </span>
               <span className="badge badge-tag">
                 ข้อที่ {currentIndex} / {TOTAL_QUESTIONS}
