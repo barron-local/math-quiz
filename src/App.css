@@ -654,6 +654,55 @@
   color: var(--notion-text-muted);
 }
 
+/* Speak Problem Button */
+.speak-problem-btn {
+  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--notion-blue);
+  background-color: var(--notion-blue-bg);
+  border: 1px solid var(--notion-blue);
+  border-radius: 20px;
+  padding: 8px 18px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--shadow-subtle);
+}
+
+.speak-problem-btn:hover {
+  background-color: var(--notion-blue);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.speak-problem-btn:active {
+  transform: scale(0.96);
+}
+
+.speak-problem-btn.speaking-active {
+  background-color: var(--notion-green-bg);
+  border-color: var(--notion-green);
+  color: var(--notion-green);
+  animation: audioPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes audioPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(15, 123, 108, 0.4);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 8px rgba(15, 123, 108, 0);
+  }
+}
+
+.math-placeholder {
+  color: var(--notion-text-muted);
+}
+
 /* Choice Buttons with bouncy spring transitions */
 .choices-grid {
   display: grid;
