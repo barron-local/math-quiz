@@ -2636,11 +2636,11 @@
 }
 
 /* ==========================================================================
-   Realtime Update Notification (Notion-Luxe Elevated Island Card)
+   Realtime Update Notification (Notion Minimalist Pill)
    ========================================================================== */
 .update-toast-container {
   position: fixed;
-  top: 16px;
+  top: 14px;
   left: 0;
   right: 0;
   display: flex;
@@ -2651,26 +2651,24 @@
   padding: 0 16px;
 }
 
-.notion-update-card {
+.notion-update-pill {
   pointer-events: auto;
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  max-width: 580px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   background: var(--notion-bg);
-  border: 1.5px solid var(--notion-blue);
-  border-radius: 16px;
-  box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.1),
-    0 2px 10px rgba(35, 131, 226, 0.18);
-  backdrop-filter: blur(16px);
-  animation: toastSlideDown 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  border: 1px solid var(--notion-border-dark);
+  border-radius: 30px;
+  padding: 6px 8px 6px 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  animation: pillSlideDown 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes toastSlideDown {
+@keyframes pillSlideDown {
   0% {
     opacity: 0;
-    transform: translateY(-24px) scale(0.97);
+    transform: translateY(-20px) scale(0.96);
   }
   100% {
     opacity: 1;
@@ -2678,202 +2676,78 @@
   }
 }
 
-.update-card-glow-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #2383e2, #60a5fa, #38bdf8, #2383e2);
-  background-size: 200% 100%;
-  animation: glowShift 3s linear infinite;
-}
-
-@keyframes glowShift {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
-.update-card-main {
+.update-pill-lead {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
+  gap: 8px;
+  white-space: nowrap;
 }
 
-.update-icon-badge {
-  position: relative;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: var(--notion-blue-bg);
-  color: var(--notion-blue);
-  display: flex;
+.update-pill-icon-wrap {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  color: var(--notion-blue);
 }
 
-.update-icon-halo {
-  position: absolute;
-  inset: -2px;
-  border-radius: 14px;
-  border: 1.5px solid rgba(35, 131, 226, 0.4);
-  animation: haloPulse 2s ease infinite alternate;
+.update-pill-icon.pill-spin {
+  animation: pillSpin 1s linear infinite;
 }
 
-@keyframes haloPulse {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.08); opacity: 1; border-color: rgba(35, 131, 226, 0.8); }
-}
-
-.update-icon-svg.pill-spin {
-  animation: iconSpin 0.9s linear infinite;
-}
-
-@keyframes iconSpin {
+@keyframes pillSpin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-.update-text-block {
-  flex: 1;
-  min-width: 0;
-}
-
-.update-header-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 3px;
-}
-
-.update-chip-badge {
-  font-size: 11px;
-  font-weight: 800;
-  color: #ffffff;
-  background: var(--notion-blue);
-  padding: 2px 7px;
-  border-radius: 6px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-
-.update-title-text {
-  font-size: 14.5px;
-  font-weight: 700;
+.update-pill-text {
+  font-size: 13.5px;
   color: var(--notion-text);
-  letter-spacing: -0.2px;
 }
 
-.update-sub-desc {
-  font-size: 12px;
-  color: var(--notion-text-muted);
-  line-height: 1.35;
+.update-pill-title {
+  font-weight: 700;
 }
 
-.quiz-safe-pill {
-  display: inline-flex;
+.update-pill-btns {
+  display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--notion-text);
-  font-weight: 500;
 }
 
-.green-pulse-dot {
-  width: 7.5px;
-  height: 7.5px;
-  border-radius: 50%;
-  background: #16a34a;
-  box-shadow: 0 0 0 rgba(22, 163, 74, 0.4);
-  animation: pulseGreenDot 1.8s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-@keyframes pulseGreenDot {
-  0% {
-    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
-  }
-}
-
-.general-desc {
-  color: var(--notion-text-muted);
-}
-
-.update-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.update-primary-btn {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  padding: 8px 16px !important;
-  font-size: 13px !important;
+.update-action-btn {
+  padding: 5px 12px !important;
+  font-size: 12.5px !important;
   font-weight: 700 !important;
-  border-radius: 20px !important;
-  box-shadow: 0 2px 10px rgba(35, 131, 226, 0.32);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-radius: 18px !important;
   white-space: nowrap;
 }
 
-.update-primary-btn:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 4px 16px rgba(35, 131, 226, 0.45);
-}
-
-.update-primary-btn:active {
-  transform: translateY(0);
-}
-
-.update-dismiss-icon-btn {
+.update-close-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 1px solid var(--notion-border);
+  border: none;
   background: transparent;
   color: var(--notion-text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
-  flex-shrink: 0;
 }
 
-.update-dismiss-icon-btn:hover {
+.update-close-btn:hover {
   background: var(--notion-bg-hover);
   color: var(--notion-text);
-  border-color: var(--notion-border-dark);
 }
 
-@media (max-width: 540px) {
-  .update-card-main {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 14px;
-  }
-
-  .update-card-actions {
-    justify-content: flex-end;
-  }
-
-  .update-primary-btn {
-    flex: 1;
-    justify-content: center;
+@media (max-width: 480px) {
+  .notion-update-pill {
+    padding: 6px 8px 6px 12px;
+    gap: 8px;
   }
 }
+
 
 
 
