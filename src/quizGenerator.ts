@@ -21,9 +21,9 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 /**
- * Generate a dynamic grade-school math problem (addition or subtraction).
- * Addition: sum <= 100, nice grade school numbers (e.g. 1 to 50 + 1 to 49).
- * Subtraction: num1 >= num2 to keep answer positive and natural.
+ * Generate a dynamic single-digit math problem (addition or subtraction).
+ * Single digit: 1 to 9.
+ * Subtraction ensures num1 >= num2 so the answer is never negative (0 to 8).
  */
 export function generateQuestion(id: number): Question {
   const operator: '+' | '-' = Math.random() < 0.5 ? '+' : '-'
@@ -32,20 +32,20 @@ export function generateQuestion(id: number): Question {
   let correctAnswer = 0
 
   if (operator === '+') {
-    num1 = getRandomInt(3, 48)
-    num2 = getRandomInt(2, 45)
+    num1 = getRandomInt(1, 9)
+    num2 = getRandomInt(1, 9)
     correctAnswer = num1 + num2
   } else {
-    num1 = getRandomInt(10, 85)
-    num2 = getRandomInt(2, num1 - 1)
+    num1 = getRandomInt(1, 9)
+    num2 = getRandomInt(1, num1) // num1 >= num2 to keep result >= 0
     correctAnswer = num1 - num2
   }
 
   // Generate 3 plausible distractors (choices)
   const distractors = new Set<number>()
   
-  // Possible common mistakes: +/- 1, +/- 10, +/- 2, off-by-one in tens/ones
-  const candidateOffsets = [-1, 1, -2, 2, -10, 10, -5, 5, -3, 3]
+  // Single-digit friendly offsets: +/- 1, +/- 2, +/- 3
+  const candidateOffsets = [-1, 1, -2, 2, -3, 3]
   const shuffledOffsets = shuffleArray(candidateOffsets)
 
   for (const offset of shuffledOffsets) {
@@ -57,11 +57,15 @@ export function generateQuestion(id: number): Question {
   }
 
   // Fallback in case set is not yet 3 items
+  let fallbackDelta = 4
   while (distractors.size < 3) {
-    const fallback = Math.max(0, correctAnswer + getRandomInt(-12, 12))
-    if (fallback !== correctAnswer) {
-      distractors.add(fallback)
+    const candidate1 = correctAnswer + fallbackDelta
+    const candidate2 = correctAnswer - fallbackDelta
+    if (candidate1 !== correctAnswer) distractors.add(candidate1)
+    if (distractors.size < 3 && candidate2 >= 0 && candidate2 !== correctAnswer) {
+      distractors.add(candidate2)
     }
+    fallbackDelta++
   }
 
   const choices = shuffleArray([correctAnswer, ...Array.from(distractors)])
