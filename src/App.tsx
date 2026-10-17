@@ -1154,20 +1154,18 @@ export default function App() {
 
                     {/* Placeholder / Answer Slot */}
                     {demoStep === 3 || isExplained ? (
-                      <g className="pop-success">
-                        <circle cx="335" cy="88" r="30" fill="var(--notion-blue-bg)" stroke="var(--notion-blue)" strokeWidth="2.5" />
-                        <text
-                          x="335"
-                          y="100"
-                          textAnchor="middle"
-                          fontSize="44"
-                          fontWeight="700"
-                          fontFamily="var(--font-mono)"
-                          fill="var(--notion-blue)"
-                        >
-                          {currentQuestion.correctAnswer}
-                        </text>
-                      </g>
+                      <text
+                        x="335"
+                        y="100"
+                        textAnchor="middle"
+                        fontSize="44"
+                        fontWeight="700"
+                        fontFamily="var(--font-mono)"
+                        fill="var(--notion-blue)"
+                        className="pop-success"
+                      >
+                        {currentQuestion.correctAnswer}
+                      </text>
                     ) : selectedAnswer === null ? (
                       <text x="335" y="100" textAnchor="middle" fontSize="44" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
                         ?
