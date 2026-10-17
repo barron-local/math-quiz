@@ -580,7 +580,7 @@
   animation: floatBob 3.5s ease-in-out 0.5s infinite alternate-reverse;
 }
 
-.badge-math-multiply {
+.badge-math-minus {
   bottom: -6px;
   right: -24px;
   background-color: var(--notion-red-bg);

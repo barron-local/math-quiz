@@ -29,9 +29,9 @@
   <circle cx="114" cy="118" r="32" fill="#EBF5FB" stroke="#2383E2" stroke-width="4" />
   <path d="M114 102V134M98 118H130" stroke="#2383E2" stroke-width="6" stroke-linecap="round" />
 
-  <!-- Multiply Badge (Top Right) -->
+  <!-- Minus Badge (Top Right) -->
   <circle cx="398" cy="118" r="32" fill="#FBE4E4" stroke="#E03E3E" stroke-width="4" />
-  <path d="M386 106L410 130M410 106L386 130" stroke="#E03E3E" stroke-width="6" stroke-linecap="round" />
+  <path d="M382 118H414" stroke="#E03E3E" stroke-width="6" stroke-linecap="round" />
 
   <!-- Golden Star Charm (Center Top) -->
   <g transform="translate(256, 102)" filter="url(#starGlow)">
