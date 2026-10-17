@@ -19,7 +19,7 @@ export default function App() {
   const [kidName, setKidName] = useState('')
   // Quiz configuration states
   const [questionCountChoice, setQuestionCountChoice] = useState<10 | 20 | 30 | 'custom'>(10)
-  const [customQuestionCount, setCustomQuestionCount] = useState(15)
+  const [customQuestionCount, setCustomQuestionCount] = useState('')
   const [totalQuestions, setTotalQuestions] = useState(10)
   const [problemType, setProblemType] = useState<ProblemType>('add-sub-2')
 
@@ -440,14 +440,16 @@ export default function App() {
                     </label>
                     <input
                       id="customCountInput"
-                      type="number"
+                      type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
-                      min={3}
-                      max={50}
                       className="custom-count-input"
+                      placeholder="เช่น 15"
                       value={customQuestionCount}
-                      onChange={(e) => setCustomQuestionCount(Math.max(1, parseInt(e.target.value) || 0))}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '')
+                        setCustomQuestionCount(val.slice(0, 3))
+                      }}
                       autoFocus
                     />
                     <span className="custom-count-hint">(3 - 50 ข้อ)</span>
