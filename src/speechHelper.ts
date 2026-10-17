@@ -110,11 +110,12 @@ export function stopSpeaking(): void {
  */
 function normalizeThaiText(text: string): string {
   return text
-    .replace(/สวัสดีครับ/g, 'สวัสดีจ้า')
+    .replace(/สวัสดีครับ/g, 'สวัสดี')
     .replace(/ครับ/g, 'คับ')
     .replace(/คร้าบ/g, 'ค้าบ')
-    .replace(/แล้วนะ/g, 'แล้วจ้า')
-    .replace(/แล้วน้า/g, 'แล้วจ้า')
+    .replace(/จ้า/g, '')
+    .replace(/จ้ะ/g, '')
+    .replace(/นะจ๊ะ/g, 'นะ')
     .replace(/\.\.\./g, ' ')
     .trim()
 }
@@ -127,7 +128,7 @@ function splitTextIntoChunks(text: string, maxLen = 150): string[] {
 
   const chunks: string[] = []
   // Split by natural clause delimiters
-  const segments = text.split(/([!?,;\n]|แล้ว|นะจ๊ะ|จ้า)/g)
+  const segments = text.split(/([!?,;\n]|แล้ว|นะคะ|นะ)/g)
   let current = ''
 
   for (const seg of segments) {
@@ -425,10 +426,10 @@ export function getAddition3StepSpeech(
   const displayName = kidName ? `น้อง${kidName}` : 'คนเก่ง'
 
   if (step === 1) {
-    return `ขั้นที่หนึ่ง จับคู่ ${n1} บวก ${n2} ได้ ${step1SumWord} จ้า`
+    return `ขั้นที่หนึ่ง จับคู่ ${n1} บวก ${n2} ได้ ${step1SumWord}`
   }
   if (step === 2) {
-    return `ขั้นที่สอง นำ ${step1SumWord} บวกอีก ${n3} จ้า`
+    return `ขั้นที่สอง นำ ${step1SumWord} บวกอีก ${n3}`
   }
-  return `คำตอบคือ ${finalSumWord} จ้า ${displayName}เก่งมากเลย!`
+  return `คำตอบคือ ${finalSumWord} ${displayName}เก่งมากเลย!`
 }

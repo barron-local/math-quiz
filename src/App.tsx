@@ -219,7 +219,7 @@ export default function App() {
     if (gameState === 'playing' && !isAnswered && timeLeft === 10 && !hasWarnedTimeRef.current && isVoiceEnabled) {
       hasWarnedTimeRef.current = true
       setIsSpeaking(true)
-      const warningText = `เหลือเวลาอีกสิบวินาทีแล้วจ้าน้อง${kidName || 'คนเก่ง'} สู้ๆ จ้า!`
+      const warningText = `เหลือเวลาอีกสิบวินาทีแล้วน้อง${kidName || 'คนเก่ง'} สู้ๆ นะ!`
       speakThaiText(
         warningText,
         () => setIsSpeaking(true),
@@ -442,7 +442,7 @@ export default function App() {
     setHasEvaluated(true) // Evaluated as incorrect / skipped for score
     setCurrentFeedback({
       isCorrect: false,
-      text: `ดูเฉลยและวิธีทำข้อนี้แล้วนะน้อง${kidName}! ข้อนี้ไม่คิดคะแนนจ้า ตั้งใจดูแล้วลุยข้อถัดไปกันเลย!`,
+      text: `ดูเฉลยและวิธีทำข้อนี้แล้วนะน้อง${kidName}! ข้อนี้ไม่คิดคะแนนนะ ตั้งใจดูแล้วลุยข้อถัดไปกันเลย!`,
     })
 
     const { num1, num2, num3 } = currentQuestion
@@ -653,7 +653,7 @@ export default function App() {
               id="kidNameInput"
               type="text"
               className="name-input"
-              placeholder="พิมพ์ชื่อตรงนี้ (หรือไม่พิมพ์ก็ได้จ้า)"
+              placeholder="พิมพ์ชื่อตรงนี้ (หรือไม่พิมพ์ก็ได้นะ)"
               value={kidName}
               onChange={(e) => setKidName(e.target.value)}
               maxLength={15}
