@@ -43,11 +43,41 @@ function thaiTtsPlugin(): Plugin {
   }
 }
 
+function versionTrackerPlugin(): Plugin {
+  // Use build-time ISO string or timestamp
+  const buildTime = new Date().toISOString()
+  return {
+    name: 'version-tracker',
+    config() {
+      return {
+        define: {
+          __APP_BUILD_TIME__: JSON.stringify(buildTime),
+        },
+      }
+    },
+    configureServer(server) {
+      server.middlewares.use('/version.json', (_req, res) => {
+        res.setHeader('Content-Type', 'application/json')
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+        res.end(JSON.stringify({ version: buildTime, timestamp: Date.now() }))
+      })
+    },
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: JSON.stringify({ version: buildTime, timestamp: Date.now() }, null, 2),
+      })
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     thaiTtsPlugin(),
+    versionTrackerPlugin(),
   ],
 })

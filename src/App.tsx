@@ -8,27 +8,54 @@ import {
   getRandomCorrectMessage,
   getRandomEncouragingMessage,
   getCompletionMessage,
+  formatChildName,
 } from './encouragements'
 import { speakThaiText, formatProblemForSpeech, getAddition3StepSpeech } from './speechHelper'
 import { soundEffects } from './soundEffects'
+import { useAppUpdate } from './useAppUpdate'
+import { UpdateNotificationToast } from './components/UpdateNotificationToast'
+import { saveQuizSession, loadQuizSession, clearQuizSession } from './quizSessionManager'
 import './App.css'
 
 type QuizState = 'name-input' | 'playing' | 'completed'
 
 export default function App() {
-  const [gameState, setGameState] = useState<QuizState>('name-input')
+  const [initialSession] = useState(() => loadQuizSession())
+  const { hasUpdate, isUpdating, dismissed, applyUpdate, dismissUpdate, checkNow } = useAppUpdate()
+
+  const [gameState, setGameState] = useState<QuizState>(() => {
+    return initialSession ? 'playing' : 'name-input'
+  })
 
   const [kidName, setKidName] = useState(() => {
+    if (initialSession?.kidName) return initialSession.kidName
     if (typeof window !== 'undefined') {
       return localStorage.getItem('math_quiz_kid_name') || ''
     }
     return ''
   })
   // Quiz configuration states
-  const [questionCountChoice, setQuestionCountChoice] = useState<10 | 20 | 30 | 'custom'>(10)
-  const [customQuestionCount, setCustomQuestionCount] = useState('')
-  const [totalQuestions, setTotalQuestions] = useState(10)
-  const [problemType, setProblemType] = useState<ProblemType>('add-sub-2')
+  const [questionCountChoice, setQuestionCountChoice] = useState<10 | 20 | 30 | 'custom'>(() => {
+    if (initialSession?.totalQuestions) {
+      const t = initialSession.totalQuestions
+      if (t === 10 || t === 20 || t === 30) return t
+      return 'custom'
+    }
+    return 10
+  })
+  const [customQuestionCount, setCustomQuestionCount] = useState(() => {
+    if (initialSession?.totalQuestions) {
+      const t = initialSession.totalQuestions
+      if (t !== 10 && t !== 20 && t !== 30) return String(t)
+    }
+    return ''
+  })
+  const [totalQuestions, setTotalQuestions] = useState(() => {
+    return initialSession?.totalQuestions || 10
+  })
+  const [problemType, setProblemType] = useState<ProblemType>(() => {
+    return initialSession?.problemType || 'add-sub-2'
+  })
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('math_quiz_voice_enabled')
@@ -61,9 +88,15 @@ export default function App() {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
   }
 
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
-  const [score, setScore] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    return initialSession?.currentIndex || 0
+  })
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(() => {
+    return initialSession?.currentQuestion || null
+  })
+  const [score, setScore] = useState(() => {
+    return initialSession?.score || 0
+  })
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
@@ -156,15 +189,23 @@ export default function App() {
     setMascotConfig(newConfig)
     saveMascotConfig(newConfig)
   }
-  const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => new Set())
-  const [hasUsedLifeline, setHasUsedLifeline] = useState(false)
-  const [eliminatedChoices, setEliminatedChoices] = useState<number[]>([])
+  const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => {
+    return initialSession?.askedQuestions ? new Set(initialSession.askedQuestions) : new Set()
+  })
+  const [hasUsedLifeline, setHasUsedLifeline] = useState(() => {
+    return initialSession?.hasUsedLifeline || false
+  })
+  const [eliminatedChoices, setEliminatedChoices] = useState<number[]>(() => {
+    return initialSession?.eliminatedChoices || []
+  })
   const [demoStep, setDemoStep] = useState<0 | 1 | 2 | 3>(0) // 0: off, 1: pair 1, 2: add 3rd, 3: completed reveal
   const [isDemoRunning, setIsDemoRunning] = useState(false)
   const [isExplained, setIsExplained] = useState(false) // Question was answered via explanation / demo
   const demoTimeoutRefs = useRef<Array<ReturnType<typeof setTimeout>>>([])
   const QUESTION_TIME_SECONDS = 60 // 1 minute per question
-  const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_SECONDS)
+  const [timeLeft, setTimeLeft] = useState(() => {
+    return initialSession?.timeLeft || QUESTION_TIME_SECONDS
+  })
   const hasWarnedTimeRef = useRef(false)
 
   // Interactive mascot poke handler (child taps the mascot - animation only, no voice)
@@ -323,6 +364,8 @@ export default function App() {
   // Handle choice selection with 2-step calculation animation
   const handleSelectChoice = (choice: number) => {
     if (isAnswered || !currentQuestion) return
+    // Check for realtime updates in background
+    checkNow().catch(() => {})
 
     // Phase 1: Lock answering immediately, put selected choice into the slot, and start calculation animation
     setSelectedAnswer(choice)
@@ -411,6 +454,7 @@ export default function App() {
   const advanceToNextQuestion = () => {
     clearDemoTimeouts()
     setShowConfetti(false)
+    checkNow().catch(() => {})
     if (currentIndex < totalQuestions) {
       const nextIndex = currentIndex + 1
       setCurrentIndex(nextIndex)
@@ -503,8 +547,41 @@ export default function App() {
     demoTimeoutRefs.current.push(initialT)
   }
 
+  // Auto-save ongoing quiz session to localStorage so updates or refreshes never lose progress
+  useEffect(() => {
+    if (gameState === 'playing' && currentQuestion) {
+      saveQuizSession({
+        kidName,
+        problemType,
+        totalQuestions,
+        currentIndex,
+        currentQuestion,
+        askedQuestions: Array.from(askedQuestions),
+        score,
+        hasUsedLifeline,
+        eliminatedChoices,
+        timeLeft,
+      })
+    } else if (gameState === 'completed') {
+      clearQuizSession()
+    }
+  }, [
+    gameState,
+    currentIndex,
+    currentQuestion,
+    score,
+    hasUsedLifeline,
+    eliminatedChoices,
+    totalQuestions,
+    problemType,
+    kidName,
+    askedQuestions,
+    timeLeft,
+  ])
+
   // Change kid name / reset
   const handleReset = () => {
+    clearQuizSession()
     setScore(0)
     setCurrentIndex(0)
     setCurrentQuestion(null)
@@ -523,6 +600,32 @@ export default function App() {
 
   return (
     <main className="notion-container">
+      {/* Realtime Version Update Toast Banner */}
+      {hasUpdate && !dismissed && (
+        <UpdateNotificationToast
+          onUpdate={() => {
+            applyUpdate(() => {
+              if (gameState === 'playing' && currentQuestion) {
+                saveQuizSession({
+                  kidName,
+                  problemType,
+                  totalQuestions,
+                  currentIndex,
+                  currentQuestion,
+                  askedQuestions: Array.from(askedQuestions),
+                  score,
+                  hasUsedLifeline,
+                  eliminatedChoices,
+                  timeLeft,
+                })
+              }
+            })
+          }}
+          onDismiss={dismissUpdate}
+          isUpdating={isUpdating}
+          isInQuiz={gameState === 'playing'}
+        />
+      )}
       {/* Header Actions Bar (Theme, Install, QR) */}
       <header className="global-top-bar">
         <div className="top-actions-left">
@@ -875,7 +978,7 @@ export default function App() {
               {currentFeedback ? (
                 <span>{currentFeedback.text}</span>
               ) : (
-                <span>ข้อนี้ตอบเท่าไหร่ดีนะน้อง{kidName}? ค่อยๆ คิดนะ!</span>
+                <span>ข้อนี้ตอบเท่าไหร่ดีนะ{formatChildName(kidName)}? ค่อยๆ คิดนะ!</span>
               )}
             </div>
           </div>
@@ -1297,7 +1400,7 @@ export default function App() {
               <div className="result-score">
                 {score} / {totalQuestions}
               </div>
-              <p className="result-label">คะแนนรวมของน้อง{kidName}</p>
+              <p className="result-label">คะแนนรวมของ{kidName.trim() ? `น้อง${kidName.trim()}` : 'คนเก่ง'}</p>
               <p className="result-subtext">{resultMsg.subtext}</p>
 
               <div className="result-actions">

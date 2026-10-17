@@ -39,6 +39,13 @@ self.addEventListener('activate', (event) => {
   self.clients.claim()
 })
 
+// Listen for skip waiting command when user taps update button
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
+})
+
 // Fetch event: network first, fallback to cache
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
@@ -46,6 +53,12 @@ self.addEventListener('fetch', (event) => {
 
   // Skip cross-origin or chrome extensions
   if (!event.request.url.startsWith(self.location.origin)) {
+    return
+  }
+
+  // Never cache version.json so realtime update checks are always instant
+  if (event.request.url.includes('version.json')) {
+    event.respondWith(fetch(event.request, { cache: 'no-store' }))
     return
   }
 

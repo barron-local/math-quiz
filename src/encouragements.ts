@@ -1,69 +1,80 @@
+// Helper to format child's title naturally (never awkward 'น้องคนเก่ง')
+export function formatChildName(name: string): string {
+  const trimmed = name.trim()
+  if (!trimmed || trimmed === 'คนเก่ง') return 'คนเก่ง'
+  return `น้อง${trimmed}`
+}
+
 // Encouragement messages for individual correct answers
 const CORRECT_TEMPLATES = [
-  (name: string) => `เก่งมากเลยน้อง${name}! คิดเลขได้ไวสุดๆ`,
-  (name: string) => `ถูกต้องนะคร้าบ! ยอดเยี่ยมมากน้อง${name}`,
-  (name: string) => `ว้าว น้อง${name} ตอบเป๊ะมาก! ปรบมือรัวๆ`,
-  (name: string) => `สุดยอดเลยน้อง${name}! ข้อนี้ไม่ยากสำหรับเราเลย`,
-  (name: string) => `น้อง${name} ทำได้ดีมาก! กำลังมาแรงเลย`,
-  (name: string) => `ตอบถูกอีกแล้ว! น้อง${name} สุดยอดนักคิดเลข`,
-  (name: string) => `เท่มากน้อง${name}! สมาธิดีมากๆ`,
+  (child: string) => `เก่งมากเลย${child}! คิดเลขได้ไวสุดๆ`,
+  (child: string) => `ถูกต้องนะคร้าบ! ยอดเยี่ยมมาก${child}`,
+  (child: string) => `ว้าว ${child} ตอบเป๊ะมาก! ปรบมือรัวๆ`,
+  (child: string) => `สุดยอดเลย${child}! ข้อนี้ไม่ยากสำหรับเราเลย`,
+  (child: string) => `${child} ทำได้ดีมาก! กำลังมาแรงเลย`,
+  (child: string) => `ตอบถูกอีกแล้ว! ${child} สุดยอดนักคิดเลข`,
+  (child: string) => `เท่มาก${child}! สมาธิดีมากๆ`,
 ]
 
 // Encouragement messages for when answered incorrect (to motivate them)
 const TRY_AGAIN_TEMPLATES = [
-  (name: string) => `ไม่เป็นไรนะน้อง${name} ข้อนี้เกือบถูกแล้ว ลองลุยข้อถัดไปกัน!`,
-  (name: string) => `ฝึกฝนเรื่อยๆ นะน้อง${name} ค่อยๆ คิด เดี๋ยวก็เก่งขึ้นแน่นอน`,
-  (name: string) => `สู้ๆ ครับน้อง${name} ตั้งสมาธิแล้วไปลุยข้อใหม่ด้วยกัน!`,
+  (child: string) => `ไม่เป็นไรนะ${child} ข้อนี้เกือบถูกแล้ว ลองลุยข้อถัดไปกัน!`,
+  (child: string) => `ฝึกฝนเรื่อยๆ นะ${child} ค่อยๆ คิด เดี๋ยวก็เก่งขึ้นแน่นอน`,
+  (child: string) => `สู้ๆ ครับ${child} ตั้งสมาธิแล้วไปลุยข้อใหม่ด้วยกัน!`,
 ]
 
-// Completion messages based on score
+// Completion messages based on score and total questions
 export function getCompletionMessage(name: string, score: number, total: number): {
   headline: string
   subtext: string
   mood: 'celebrate' | 'happy' | 'cheer'
 } {
-  const safeName = name.trim() || 'คนเก่ง'
-  if (score === total) {
+  const child = formatChildName(name)
+  const safeTotal = Math.max(1, total)
+  const percent = score / safeTotal
+
+  if (score >= safeTotal) {
+    const fullScoreDesc = safeTotal === 1 ? 'ตอบถูกเป๊ะ ได้คะแนนเต็มเลย!' : `ได้คะแนนเต็ม ${safeTotal} คะแนนเลย!`
     return {
-      headline: `สมบูรณ์แบบมากน้อง${safeName}! ได้คะแนนเต็มสิบเลย!`,
-      subtext: `น้อง${safeName} เก่งคณิตศาสตร์มากๆ เลยครับ วันนี้พร้อมลุยโจทย์ใหม่ๆ อีกรอบไหมเอ่ย?`,
+      headline: `สมบูรณ์แบบมาก${child}! ${fullScoreDesc}`,
+      subtext: `${child} เก่งคณิตศาสตร์มากๆ เลยครับ วันนี้พร้อมลุยโจทย์ใหม่ๆ อีกรอบไหมเอ่ย?`,
       mood: 'celebrate',
     }
   }
 
-  if (score >= 8) {
+  if (percent >= 0.8) {
     return {
-      headline: `สุดยอดไปเลยน้อง${safeName}! ทำได้ยอดเยี่ยมมากๆ`,
+      headline: `สุดยอดไปเลย${child}! ทำได้ยอดเยี่ยมมากๆ`,
       subtext: `คิดเลขได้แม่นยำและคล่องแคล่วมาก ฝึกบ่อยๆ แบบนี้รับรองเก่งขึ้นทุกวันแน่นอน!`,
       mood: 'celebrate',
     }
   }
 
-  if (score >= 5) {
+  if (percent >= 0.5) {
     return {
-      headline: `ทำได้ดีมากครับน้อง${safeName}! ผ่านเกณฑ์สบายๆ`,
-      subtext: `น้อง${safeName} เก่งมากแล้วนะ ลองเล่นอีกรอบเพื่อเก็บคะแนนเต็มสิบกันเลยดีไหม!`,
+      headline: `ทำได้ดีมากครับ${child}! ผ่านเกณฑ์สบายๆ`,
+      subtext: `${child} เก่งมากแล้วนะ ลองเล่นอีกรอบเพื่อเก็บคะแนนเต็มกันเลยดีไหม!`,
       mood: 'cheer',
     }
   }
 
   return {
-    headline: `เก่งมากที่พยายามจนจบนะน้อง${safeName}!`,
+    headline: `เก่งมากที่พยายามจนจบนะ${child}!`,
     subtext: `คณิตศาสตร์ต้องค่อยๆ ฝึกฝนนะคนเก่ง ลองเล่นใหม่อีกสักรอบ รับรองว่าจะทำได้ดีขึ้นแน่นอนครับ!`,
     mood: 'happy',
   }
 }
 
 export function getRandomCorrectMessage(name: string): string {
-  const safeName = name.trim() || 'คนเก่ง'
+  const child = formatChildName(name)
   const index = Math.floor(Math.random() * CORRECT_TEMPLATES.length)
-  return CORRECT_TEMPLATES[index](safeName)
+  return CORRECT_TEMPLATES[index](child)
 }
 
 export function getRandomEncouragingMessage(name: string): string {
-  const safeName = name.trim() || 'คนเก่ง'
+  const child = formatChildName(name)
   const index = Math.floor(Math.random() * TRY_AGAIN_TEMPLATES.length)
-  return TRY_AGAIN_TEMPLATES[index](safeName)
+  return TRY_AGAIN_TEMPLATES[index](child)
 }
 
 // Welcoming messages for standard visits
