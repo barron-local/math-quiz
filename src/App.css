@@ -646,6 +646,7 @@
 .logo-word-math {
   background: linear-gradient(135deg, #2383e2 0%, #0f7b6c 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   transform: rotate(-2deg);
 }
@@ -653,6 +654,7 @@
 .logo-word-quiz {
   background: linear-gradient(135deg, #dfab01 0%, #e03e3e 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   transform: rotate(3deg);
 }
