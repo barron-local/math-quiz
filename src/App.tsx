@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react'
 import { generateQuestion, type Question, type ProblemType } from './quizGenerator'
 import { KidMascot } from './components/KidMascot'
-import { AppLogo } from './components/AppLogo'
 import { ConfettiEffect } from './components/ConfettiEffect'
 import {
   getRandomCorrectMessage,
@@ -553,9 +552,6 @@ export default function App() {
                 : welcomeMessage}
             </span>
           </div>
-
-          {/* Vibrant & Playful Kid-Friendly Game Logo */}
-          <AppLogo />
 
           <form onSubmit={handleStart} className="name-form">
             <label htmlFor="kidNameInput" className="name-label">
