@@ -321,8 +321,8 @@ export default function App() {
 
   return (
     <main className="notion-container">
-      {/* Cute Welcome Banner for QR Scanners */}
-      {isFromQr && (
+      {/* Cute Welcome Banner for QR Scanners (Only on Home/First page) */}
+      {isFromQr && gameState === 'name-input' && (
         <aside className="qr-welcome-banner pop-in" role="status">
           <div className="qr-welcome-badge">ยินดีต้อนรับเพื่อนใหม่</div>
           <div className="qr-welcome-text">
