@@ -12,7 +12,7 @@ export function UpdateNotificationToast({
   isInQuiz,
 }: UpdateNotificationToastProps) {
   return (
-    <aside className="update-toast-container toast-spring-in" role="alert" aria-live="polite">
+    <aside className="update-toast-container" role="alert" aria-live="polite">
       <div className="notion-update-card">
         {/* Ambient Top Glow Line */}
         <div className="update-card-glow-bar" aria-hidden="true" />
