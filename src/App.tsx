@@ -27,6 +27,13 @@ export default function App() {
   const [customQuestionCount, setCustomQuestionCount] = useState('')
   const [totalQuestions, setTotalQuestions] = useState(10)
   const [problemType, setProblemType] = useState<ProblemType>('add-sub-2')
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('math_quiz_voice_enabled')
+      return saved !== null ? saved === 'true' : true
+    }
+    return true
+  })
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
@@ -71,6 +78,7 @@ export default function App() {
     : 'สวัสดีครับเพื่อนคนเก่ง! ยินดีต้อนรับนะคร้าบ ให้หนูพิมพ์ชื่อเล่น เลือกลักษณะโจทย์ที่ชอบ แล้วกดปุ่มเริ่มเล่นเพื่อไปลุยด้วยกันได้เลยจ้า!'
 
   const handleSpeakWelcome = () => {
+    if (!isVoiceEnabled) return
     setIsSpeaking(true)
     speakThaiText(
       welcomeSpeechText,
@@ -81,10 +89,10 @@ export default function App() {
 
   // Auto-speak cute welcome message on first entry or user click
   useEffect(() => {
-    if (gameState !== 'name-input' || hasSpokenWelcome) return
+    if (gameState !== 'name-input' || hasSpokenWelcome || !isVoiceEnabled) return
 
     const tryAutoSpeak = () => {
-      if (!hasSpokenWelcome) {
+      if (!hasSpokenWelcome && isVoiceEnabled) {
         setHasSpokenWelcome(true)
         handleSpeakWelcome()
       }
@@ -110,11 +118,11 @@ export default function App() {
       window.removeEventListener('click', handleFirstGesture)
       window.removeEventListener('touchstart', handleFirstGesture)
     }
-  }, [gameState, hasSpokenWelcome])
+  }, [gameState, hasSpokenWelcome, isVoiceEnabled])
 
   // Read math problem aloud with cheerful Thai speech
   const handleSpeakProblem = (questionToSpeak = currentQuestion) => {
-    if (!questionToSpeak) return
+    if (!questionToSpeak || !isVoiceEnabled) return
     const textToSpeak = formatProblemForSpeech(
       questionToSpeak.num1,
       questionToSpeak.operator,
@@ -131,14 +139,14 @@ export default function App() {
 
   // Automatically read the math problem aloud when a new question appears
   useEffect(() => {
-    if (gameState === 'playing' && currentQuestion && !isAnswered) {
+    if (gameState === 'playing' && currentQuestion && !isAnswered && isVoiceEnabled) {
       // Small pause (250ms) before voice begins
       const timer = setTimeout(() => {
         handleSpeakProblem(currentQuestion)
       }, 250)
       return () => clearTimeout(timer)
     }
-  }, [currentQuestion?.id, gameState])
+  }, [currentQuestion?.id, gameState, isVoiceEnabled])
 
   // Reset time warning flag when a new question starts
   useEffect(() => {
@@ -147,7 +155,7 @@ export default function App() {
 
   // Spoken voice warning when time is running low (10 seconds remaining)
   useEffect(() => {
-    if (gameState === 'playing' && !isAnswered && timeLeft === 10 && !hasWarnedTimeRef.current) {
+    if (gameState === 'playing' && !isAnswered && timeLeft === 10 && !hasWarnedTimeRef.current && isVoiceEnabled) {
       hasWarnedTimeRef.current = true
       setIsSpeaking(true)
       const warningText = `เหลือเวลาอีกสิบวินาทีแล้วนะน้อง${kidName || 'คนเก่ง'} สู้ๆ จ้า!`
@@ -157,7 +165,7 @@ export default function App() {
         () => setIsSpeaking(false)
       )
     }
-  }, [timeLeft, gameState, isAnswered, kidName])
+  }, [timeLeft, gameState, isAnswered, kidName, isVoiceEnabled])
 
   // Play grand celebration fireworks sound when completing the quiz
   useEffect(() => {
@@ -485,6 +493,45 @@ export default function App() {
                   >
                     <span>บวก 3 จำนวน</span>
                     <span className="chip-desc">พร้อมเส้นโยงขั้นตอน</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Voice Setting Toggle */}
+              <div className="config-group">
+                <div className="config-label-row">
+                  <span className="config-title">เสียงพูดอ่านโจทย์และเตือนเวลา</span>
+                </div>
+                <div className="config-types-row">
+                  <button
+                    type="button"
+                    className={`config-chip-btn ${isVoiceEnabled ? 'active' : ''}`}
+                    onClick={() => {
+                      setIsVoiceEnabled(true)
+                      if (typeof window !== 'undefined') {
+                        localStorage.setItem('math_quiz_voice_enabled', 'true')
+                      }
+                    }}
+                  >
+                    <span>เปิดเสียงพูด</span>
+                    <span className="chip-desc">อ่านโจทย์และเตือนเวลา</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`config-chip-btn ${!isVoiceEnabled ? 'active' : ''}`}
+                    onClick={() => {
+                      setIsVoiceEnabled(false)
+                      if (typeof window !== 'undefined') {
+                        localStorage.setItem('math_quiz_voice_enabled', 'false')
+                        if ('speechSynthesis' in window) {
+                          window.speechSynthesis.cancel()
+                        }
+                      }
+                      setIsSpeaking(false)
+                    }}
+                  >
+                    <span>ปิดเสียงพูด</span>
+                    <span className="chip-desc">คิดเลขเงียบๆ มีสมาธิ</span>
                   </button>
                 </div>
               </div>
