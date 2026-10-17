@@ -166,7 +166,15 @@
   justify-content: center;
   margin-bottom: 16px;
   width: 100%;
-  min-height: 32px;
+  min-height: 36px;
+  text-align: center;
+}
+
+.modal-header .badge {
+  margin: 0 auto;
+  text-align: center;
+  justify-content: center;
+  display: inline-flex;
 }
 
 .modal-close-btn {
