@@ -19,15 +19,23 @@ export function speakThaiText(
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.lang = 'th-TH'
 
-  // Cheerful, cute child-friendly pitch & pacing
-  utterance.pitch = 1.25 // Higher, cuter pitch
-  utterance.rate = 0.92 // Slightly relaxed pacing so kids can listen clearly
+  // Soft, warm, and gentle kid-friendly speech tuning
+  utterance.volume = 0.78 // Soften volume slightly (not too loud)
+  utterance.pitch = 1.08 // Warm, friendly, and natural pitch (not shrill)
+  utterance.rate = 0.88 // Gentle, comfortable pacing for young ears
 
-  // Try to pick a Thai voice if available
+  // Select the smoothest/most natural Thai voice available (e.g., Premwadee, Niwat, Achara, Google Thai)
   const voices = window.speechSynthesis.getVoices()
-  const thaiVoice = voices.find((v) => v.lang.includes('th') || v.lang.includes('TH'))
-  if (thaiVoice) {
-    utterance.voice = thaiVoice
+  const thaiVoices = voices.filter((v) => v.lang.includes('th') || v.lang.includes('TH'))
+  
+  // Prioritize premium/natural neural voices if available
+  const preferredVoice =
+    thaiVoices.find((v) => v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('online')) ||
+    thaiVoices.find((v) => v.name.includes('Premwadee') || v.name.includes('Achara')) ||
+    thaiVoices[0]
+
+  if (preferredVoice) {
+    utterance.voice = preferredVoice
   }
 
   if (onStart) utterance.onstart = onStart
