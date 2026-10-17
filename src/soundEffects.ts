@@ -40,23 +40,23 @@ class SoundEffectsManager {
   }
 
   /**
-   * Cheerful Ta-da celebration fanfare (เสียงแต๊นแต้นฉลองชัยชนะ)
+   * Cheerful Ta-da celebration fanfare (เสียงแต๊นแต้นฉลองชัยชนะ สดใส นุ่มนวล)
    */
-  public playTada(delayMs = 0, volume = 0.8): void {
+  public playTada(delayMs = 0, volume = 0.45): void {
     this.playSound('/sounds/tada.mp3', volume, delayMs)
   }
 
   /**
    * Full victory fanfare (เสียงดนตรีฉลองชัยชนะ)
    */
-  public playVictory(delayMs = 0, volume = 0.75): void {
+  public playVictory(delayMs = 0, volume = 0.45): void {
     this.playSound('/sounds/victory.mp3', volume, delayMs)
   }
 
   /**
    * Web animation firework burst (from fireworks-js library)
    */
-  public playWebFirework(burstIndex = 0, delayMs = 0, volume = 0.65): void {
+  public playWebFirework(burstIndex = 0, delayMs = 0, volume = 0.45): void {
     const files = [
       '/sounds/explosion0.mp3',
       '/sounds/explosion1.mp3',
@@ -68,14 +68,10 @@ class SoundEffectsManager {
 
   /**
    * Grand finale celebration sound played when finishing the quiz (ฉากจบเกมเมื่อทำครบ 10 ข้อ):
-   * Combines friendly Confetti Pop + Ta-da Fanfare that makes kids smile and feel proud!
+   * Uses Victory Fanfare alone at a gentle, comfortable volume (0.42) that is pleasant and not too loud.
    */
   public playGrandFireworks(): void {
-    // 1. Festive Confetti / Party Popper Pop right as confetti showers down
-    this.playConfettiPop(0, 0.9)
-
-    // 2. Uplifting Ta-da fanfare chiming right after
-    this.playTada(380, 0.85)
+    this.playVictory(0, 0.42)
   }
 
   /**

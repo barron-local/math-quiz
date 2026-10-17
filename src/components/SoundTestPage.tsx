@@ -13,12 +13,12 @@ export function SoundTestPage({ onBack }: SoundTestPageProps) {
 
   const handlePlayGrandFinale = () => {
     setIsPlaying(true)
-    setLastPlayedName('เสียงฉลองจบเกม (Confetti Pop + Ta-da)')
+    setLastPlayedName('เสียงฉลองจบเกม (Victory Fanfare - นุ่มนวลพอดี)')
     soundEffects.playGrandFireworks()
 
     setTimeout(() => {
       setIsPlaying(false)
-    }, 2000)
+    }, 2200)
   }
 
   const handlePlayConfetti = () => {
@@ -73,9 +73,9 @@ export function SoundTestPage({ onBack }: SoundTestPageProps) {
 
       <main className="sound-test-card">
         <div className="sound-test-title-group">
-          <h1 className="sound-test-title">ทดสอบเสียงฉลองพลุบนเว็บไซต์</h1>
+          <h1 className="sound-test-title">ทดสอบเสียงฉลองตอนจบเกม</h1>
           <p className="sound-test-desc">
-            เสียงสไตล์เว็บไซต์และแอพเพื่อการศึกษา (เช่น Duolingo / Khan Academy) สดใส เป็นมิตร เด็กไม่ตกใจ
+            เสียงดนตรีชัยชนะ Victory Fanfare รื่นเริง อบอุ่น พอดี ไม่ดังเกินไป เหมาะสำหรับเด็ก
           </p>
         </div>
 
@@ -90,10 +90,10 @@ export function SoundTestPage({ onBack }: SoundTestPageProps) {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
-            <span>{isPlaying ? 'กำลังเล่นเสียงฉลอง...' : 'กดฟังเสียงฉลองตอนจบเกม (Confetti + Ta-da)'}</span>
+            <span>{isPlaying ? 'กำลังเล่นเสียงฉลอง...' : 'กดฟังเสียงฉลองตอนจบเกม (Victory Fanfare)'}</span>
           </button>
           <div className="test-hint">
-            เสียงพลุกระดาษ Party Popper / Confetti Pop นุ่มนวลร่าเริง + เสียงแตรเฉลิมฉลอง Ta-da ชัยชนะ
+            เสียงดนตรีแฟนแฟร์ฉลองชัยชนะ (ระดับเสียงนุ่มนวลพอดี ไม่ดังแสบหู)
           </div>
         </div>
 
