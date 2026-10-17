@@ -1,14 +1,14 @@
 // Service Worker for Math Quiz PWA
-const CACHE_NAME = 'math-quiz-v1'
+const CACHE_NAME = 'math-quiz-v2'
 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './favicon.svg',
-  './pwa-192x192.png',
-  './pwa-512x512.png',
-  './pwa-icon.svg'
+  './pwa-192x192.png?v=2',
+  './pwa-512x512.png?v=2',
+  './pwa-icon.svg?v=2'
 ]
 
 // Install event: cache core shell files
