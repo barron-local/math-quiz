@@ -556,43 +556,75 @@ export default function App() {
                 </div>
                 <div className="addition-guide-svg-wrapper">
                   <svg
-                    viewBox="0 0 380 148"
+                    viewBox="0 0 380 120"
                     className="addition-guide-svg"
                     role="img"
                     aria-label={`โจทย์เลข 3 จำนวน: ${currentQuestion.num1} บวก ${currentQuestion.num2} บวก ${currentQuestion.num3}`}
                   >
-                    {/* Top Row: Formula */}
+                    {/* Top Connecting Arc: Linking Num1 (x=36) and Num2 (x=116) from above */}
+                    <path
+                      d="M 36 46 C 36 18, 76 16, 76 6 C 76 16, 116 18, 116 46"
+                      fill="none"
+                      stroke="var(--notion-blue)"
+                      strokeWidth="2.8"
+                      strokeLinecap="round"
+                    />
+
+                    {/* Step Guide label on top: indicate adding first pair without giving answer */}
+                    <g transform="translate(54, -2)">
+                      <rect
+                        width="44"
+                        height="20"
+                        rx="10"
+                        fill="var(--notion-blue-bg)"
+                        stroke="var(--notion-blue)"
+                        strokeWidth="1.5"
+                      />
+                      <text
+                        x="22"
+                        y="14"
+                        textAnchor="middle"
+                        fontSize="12"
+                        fontWeight="700"
+                        fill="var(--notion-blue)"
+                      >
+                        คู่ที่ 1
+                      </text>
+                    </g>
+
+                    {/* Main Formula Row (y=92) */}
                     {/* Num1 */}
-                    <text x="36" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
+                    <text x="36" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
                       {currentQuestion.num1}
                     </text>
                     {/* Operator 1 */}
-                    <text x="76" y="48" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
+                    <text x="76" y="90" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
                       +
                     </text>
                     {/* Num2 */}
-                    <text x="116" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
+                    <text x="116" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
                       {currentQuestion.num2}
                     </text>
                     {/* Operator 2 */}
-                    <text x="156" y="48" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
+                    <text x="156" y="90" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
                       +
                     </text>
                     {/* Num3 */}
-                    <text x="196" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
+                    <text x="196" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
                       {currentQuestion.num3}
                     </text>
                     {/* Equals */}
-                    <text x="246" y="48" textAnchor="middle" fontSize="38" fontWeight="700" fill="var(--notion-text)">
+                    <text x="246" y="90" textAnchor="middle" fontSize="38" fontWeight="700" fill="var(--notion-text)">
                       =
                     </text>
-                    {/* Placeholder / Answer Slot with Animation */}
+
+                    {/* Placeholder / Answer Slot with Animation (y=56 to y=104) */}
                     {selectedAnswer === null ? (
-                      <text x="296" y="50" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
+                      <text x="296" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
                         ?
                       </text>
                     ) : (
-                      <g transform="translate(266, 14)">
+                      <g transform="translate(266, 56)">
                         <rect
                           width="60"
                           height="48"
@@ -633,58 +665,6 @@ export default function App() {
                         </text>
                       </g>
                     )}
-
-                    {/* Step 1 Connecting Bracket: Linking Num1 (x=36) and Num2 (x=116) */}
-                    <path
-                      d="M 36 62 C 36 82, 76 84, 76 96 C 76 84, 116 82, 116 62"
-                      fill="none"
-                      stroke="var(--notion-blue)"
-                      strokeWidth="2.8"
-                      strokeLinecap="round"
-                    />
-
-                    {/* Intermediate Result Pill for Step 1 */}
-                    <g transform="translate(48, 96)">
-                      <rect
-                        width="56"
-                        height="30"
-                        rx="15"
-                        fill="var(--notion-blue-bg)"
-                        stroke="var(--notion-blue)"
-                        strokeWidth="2"
-                      />
-                      <text
-                        x="28"
-                        y="21"
-                        textAnchor="middle"
-                        fontSize="17"
-                        fontWeight="700"
-                        fill="var(--notion-blue)"
-                        fontFamily="var(--font-mono)"
-                      >
-                        {currentQuestion.num1 + currentQuestion.num2}
-                      </text>
-                    </g>
-
-                    {/* Step 2 Connecting Line: from Intermediate Pill (x=104, y=111) and Num3 (x=196, y=62) */}
-                    <path
-                      d="M 104 111 C 145 111, 160 138, 196 138"
-                      fill="none"
-                      stroke="var(--notion-green)"
-                      strokeWidth="2.5"
-                      strokeDasharray="4 3"
-                    />
-                    <path
-                      d="M 196 62 L 196 138"
-                      fill="none"
-                      stroke="var(--notion-green)"
-                      strokeWidth="2.5"
-                      strokeDasharray="4 3"
-                    />
-                    <circle cx="196" cy="138" r="4" fill="var(--notion-green)" />
-                    <text x="220" y="142" fontSize="13" fontWeight="700" fill="var(--notion-green)">
-                      + {currentQuestion.num3}
-                    </text>
                   </svg>
                 </div>
                 {isCalculating && (
