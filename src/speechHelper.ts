@@ -148,8 +148,11 @@ function splitTextIntoChunks(text: string, maxLen = 150): string[] {
 /**
  * Generate Google TTS URL (Returns sweet neural Thai female voice)
  */
-function getGoogleTtsUrl(text: string): string {
-  return `https://translate.google.com/translate_tts?ie=UTF-8&tl=th&client=tw-ob&q=${encodeURIComponent(text)}`
+/**
+ * Generate audio stream URL using our /api/tts proxy (works on any device, zero CORS/Referer issues)
+ */
+function getAudioUrl(text: string): string {
+  return `/api/tts?text=${encodeURIComponent(text)}`
 }
 
 /**
@@ -179,8 +182,6 @@ function speakViaWebSpeech(
   activeUtterance = utterance
   utterance.lang = 'th-TH'
   utterance.volume = 1.0
-  utterance.pitch = 1.15 // Slightly elevated pitch for sweet cheerful tone
-  utterance.rate = typeof customRate === 'number' ? customRate : 0.92
 
   let voices = window.speechSynthesis.getVoices()
   if (!voices || voices.length === 0) {
@@ -196,19 +197,39 @@ function speakViaWebSpeech(
       v.lang.toLowerCase().startsWith('th')
   )
 
+  let isKnownMale = false
   if (thaiVoices.length > 0) {
-    const preferredVoice =
-      thaiVoices.find((v) => {
-        const name = v.name.toLowerCase()
-        return name.includes('premwadee') || name.includes('achara') || name.includes('natural') || name.includes('neural')
-      }) ||
-      thaiVoices.find((v) => v.name.toLowerCase().includes('google')) ||
-      thaiVoices[0]
+    // Specifically prioritize female voices (Premwadee, Achara, Google Thai Female)
+    const femaleVoice = thaiVoices.find((v) => {
+      const name = v.name.toLowerCase()
+      return (
+        name.includes('premwadee') ||
+        name.includes('achara') ||
+        name.includes('kanya') ||
+        (name.includes('google') && !name.includes('male'))
+      )
+    })
+
+    // Filter out known male voices (Pattara, Niwat)
+    const nonMaleVoice = thaiVoices.find((v) => {
+      const name = v.name.toLowerCase()
+      return !name.includes('pattara') && !name.includes('niwat') && !name.includes('male')
+    })
+
+    const preferredVoice = femaleVoice || nonMaleVoice || thaiVoices[0]
 
     if (preferredVoice) {
       utterance.voice = preferredVoice
+      const lowName = preferredVoice.name.toLowerCase()
+      if (lowName.includes('pattara') || lowName.includes('niwat') || lowName.includes('male')) {
+        isKnownMale = true
+      }
     }
   }
+
+  // If only a male voice is installed on Windows, pitch it up to 1.35 to sound cute and friendly
+  utterance.pitch = isKnownMale ? 1.35 : 1.15
+  utterance.rate = typeof customRate === 'number' ? customRate : 0.92
 
   const cleanup = () => {
     if (activeUtterance === utterance) {
@@ -271,7 +292,7 @@ export function speakThaiText(
     }
 
     const chunk = chunks[chunkIndex]
-    const url = getGoogleTtsUrl(chunk)
+    const url = getAudioUrl(chunk)
 
     // Check memory cache or create new Audio element
     let audio = audioCache.get(chunk)
