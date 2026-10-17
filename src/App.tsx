@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, useEffect, useRef, type FormEvent } from 'react'
 import { generateQuestion, type Question } from './quizGenerator'
 import { KidMascot } from './components/KidMascot'
 import { ConfettiEffect } from './components/ConfettiEffect'
@@ -41,6 +41,7 @@ export default function App() {
   const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => new Set())
   const QUESTION_TIME_SECONDS = 60 // 1 minute per question
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_SECONDS)
+  const hasWarnedTimeRef = useRef(false)
 
   // Interactive mascot poke handler (child taps the mascot - animation only, no voice)
   const handlePokeMascot = () => {
@@ -126,6 +127,25 @@ export default function App() {
       return () => clearTimeout(timer)
     }
   }, [currentQuestion?.id, gameState])
+
+  // Reset time warning flag when a new question starts
+  useEffect(() => {
+    hasWarnedTimeRef.current = false
+  }, [currentIndex, currentQuestion?.id])
+
+  // Spoken voice warning when time is running low (10 seconds remaining)
+  useEffect(() => {
+    if (gameState === 'playing' && !isAnswered && timeLeft === 10 && !hasWarnedTimeRef.current) {
+      hasWarnedTimeRef.current = true
+      setIsSpeaking(true)
+      const warningText = `เหลือเวลาอีกสิบวินาทีแล้วนะน้อง${kidName || 'คนเก่ง'} สู้ๆ จ้า!`
+      speakThaiText(
+        warningText,
+        () => setIsSpeaking(true),
+        () => setIsSpeaking(false)
+      )
+    }
+  }, [timeLeft, gameState, isAnswered, kidName])
 
   // 1-minute (60s) countdown timer per question
   useEffect(() => {
