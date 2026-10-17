@@ -9,6 +9,7 @@ import {
   getRandomWelcomeMessage,
 } from './encouragements'
 import { speakThaiText, formatProblemForSpeech } from './speechHelper'
+import { soundEffects } from './soundEffects'
 import './App.css'
 
 type QuizState = 'name-input' | 'playing' | 'completed'
@@ -146,6 +147,13 @@ export default function App() {
       )
     }
   }, [timeLeft, gameState, isAnswered, kidName])
+
+  // Play grand celebration fireworks sound when completing the quiz
+  useEffect(() => {
+    if (gameState === 'completed') {
+      soundEffects.playGrandFireworks()
+    }
+  }, [gameState])
 
   // 1-minute (60s) countdown timer per question
   useEffect(() => {
