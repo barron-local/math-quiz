@@ -36,7 +36,7 @@ export default function App() {
       setScore((prev) => prev + 1)
     }
 
-    // Auto proceed to next question or finished screen after short delay
+    // Auto proceed to next question or finished screen
     setTimeout(() => {
       if (currentIndex < TOTAL_QUESTIONS) {
         const nextIndex = currentIndex + 1
@@ -47,24 +47,17 @@ export default function App() {
       } else {
         setGameState('completed')
       }
-    }, 700)
+    }, 850)
   }
 
   return (
     <main className="notion-container">
       {/* State: START SCREEN */}
       {gameState === 'start' && (
-        <section aria-label="Welcome">
-          <div className="page-icon">📐</div>
+        <section aria-label="Start screen">
+          <div className="title-tag">คณิตศาสตร์ประถม</div>
           <h1 className="page-title">Math Quiz</h1>
-          <p className="page-subtitle">แบบฝึกหัดคณิตคิดเร็วสำหรับประถมศึกษา (บวก-ลบ)</p>
-
-          <div className="notion-callout">
-            <span className="notion-callout-icon">💡</span>
-            <div>
-              ระบบจะสุ่มโจทย์อัตโนมัติ 10 ข้อ มีตัวเลือกคำตอบ 4 ข้อ
-            </div>
-          </div>
+          <p className="page-subtitle">ฝึกคิดเลขเร็ว บวกและลบ 10 ข้อ</p>
 
           <button
             type="button"
@@ -72,21 +65,29 @@ export default function App() {
             onClick={handleStart}
             autoFocus
           >
-            Start Quiz
+            เริ่มทำแบบฝึกหัด (Start)
           </button>
         </section>
       )}
 
       {/* State: PLAYING */}
       {gameState === 'playing' && currentQuestion && (
-        <section aria-label="Quiz in progress">
+        <section aria-label="Quiz question">
           <div className="quiz-top-bar">
             <span className="badge badge-tag">
-              Question {currentIndex} of {TOTAL_QUESTIONS}
+              ข้อที่ {currentIndex} / {TOTAL_QUESTIONS}
             </span>
             <span className="badge badge-score">
-              Score: {score}
+              คะแนน: {score}
             </span>
+          </div>
+
+          {/* Progress Indicator */}
+          <div className="progress-bar-bg" aria-hidden="true">
+            <div
+              className="progress-bar-fill"
+              style={{ width: `${(currentIndex / TOTAL_QUESTIONS) * 100}%` }}
+            />
           </div>
 
           <div className="math-card">
@@ -95,7 +96,7 @@ export default function App() {
               <span className="math-operator">{currentQuestion.operator}</span>
               <span>{currentQuestion.num2}</span>
               <span>=</span>
-              <span>?</span>
+              <span className="math-placeholder">?</span>
             </div>
           </div>
 
@@ -127,9 +128,11 @@ export default function App() {
           <div className="feedback-bar">
             {isAnswered && (
               selectedAnswer === currentQuestion.correctAnswer ? (
-                <span className="feedback-bar correct">✓ ถูกต้อง</span>
+                <span className="feedback-text correct">ถูกต้อง</span>
               ) : (
-                <span className="feedback-bar incorrect">✕ คำตอบที่ถูกต้องคือ {currentQuestion.correctAnswer}</span>
+                <span className="feedback-text incorrect">
+                  คำตอบคือ {currentQuestion.correctAnswer}
+                </span>
               )
             )}
           </div>
@@ -139,29 +142,22 @@ export default function App() {
       {/* State: COMPLETED */}
       {gameState === 'completed' && (
         <section aria-label="Results">
-          <div className="page-icon">
-            {score >= 8 ? '🌟' : score >= 5 ? '👍' : '🌱'}
-          </div>
-          <h1 className="page-title">สรุปผลคะแนน</h1>
+          <div className="title-tag">ผลการทดสอบ</div>
+          <h1 className="page-title">สรุปคะแนน</h1>
 
           <div className="result-card">
             <div className="result-score">
               {score} / {TOTAL_QUESTIONS}
             </div>
-            <p className="result-percentage">
-              {score >= 8
-                ? 'ยอดเยี่ยมมาก! คิดเลขได้แม่นยำมาก'
-                : score >= 5
-                ? 'ทำได้ดีแล้ว ฝึกฝนสม่ำเสมอจะเก่งขึ้นแน่นอน'
-                : 'ลองใหม่อีกครั้งเพื่อฝึกทบทวนนะ'}
-            </p>
+            <p className="result-label">คะแนนรวม</p>
 
             <button
               type="button"
               className="notion-btn-primary"
               onClick={handleStart}
+              autoFocus
             >
-              ทำแบบทดสอบอีกครั้ง
+              ทำใหม่อีกครั้ง
             </button>
           </div>
         </section>
