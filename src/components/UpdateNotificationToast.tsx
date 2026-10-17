@@ -2,14 +2,12 @@ interface UpdateNotificationToastProps {
   onUpdate: () => void
   onDismiss: () => void
   isUpdating: boolean
-  isInQuiz: boolean
 }
 
 export function UpdateNotificationToast({
   onUpdate,
   onDismiss,
   isUpdating,
-  isInQuiz,
 }: UpdateNotificationToastProps) {
   return (
     <aside className="update-toast-container" role="alert" aria-live="polite">
@@ -18,7 +16,7 @@ export function UpdateNotificationToast({
         <div className="update-card-glow-bar" aria-hidden="true" />
 
         <div className="update-card-main">
-          {/* Animated Mascot / Badge Icon */}
+          {/* Animated Badge Icon */}
           <div className="update-icon-badge" aria-hidden="true">
             <div className="update-icon-halo" />
             <svg
@@ -44,16 +42,7 @@ export function UpdateNotificationToast({
             </div>
 
             <div className="update-sub-desc">
-              {isInQuiz ? (
-                <span className="quiz-safe-pill">
-                  <span className="green-pulse-dot" aria-hidden="true" />
-                  <span>บันทึกข้อสอบไว้แล้ว อัปเดตแล้วทำต่อข้อเดิมได้ทันที</span>
-                </span>
-              ) : (
-                <span className="general-desc">
-                  ปรับปรุงระบบและเพิ่มความเสถียรในการใช้งาน
-                </span>
-              )}
+              กดเพื่ออัปเดตและรับการปรับปรุงล่าสุดทันที
             </div>
           </div>
 

@@ -623,7 +623,6 @@ export default function App() {
           }}
           onDismiss={dismissUpdate}
           isUpdating={isUpdating}
-          isInQuiz={gameState === 'playing'}
         />
       )}
       {/* Header Actions Bar (Theme, Install, QR) */}
