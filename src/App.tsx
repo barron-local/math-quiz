@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { generateQuestion, type Question } from './quizGenerator'
 import { KidMascot } from './components/KidMascot'
 import { ConfettiEffect } from './components/ConfettiEffect'
@@ -36,6 +36,54 @@ export default function App() {
   const [showQrModal, setShowQrModal] = useState(false)
   const [welcomeMessage] = useState(() => getRandomWelcomeMessage())
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
+
+  // Welcome speech intro text (cheerful & cute for children)
+  const welcomeSpeechText = isFromQr
+    ? 'เย้! สแกนคิวอาร์โค้ดเข้ามาแล้ว ยินดีต้อนรับสู่อาณาจักรคณิตคิดเร็วนะคนเก่ง มาฝึกคิดเลขเร็วสนุกๆ กันเลย!'
+    : `สวัสดีครับเพื่อนคนเก่ง! ยินดีต้อนรับสู่เกมคณิตคิดเร็วแสนสนุก วันนี้เรามาโชว์พลังสมองคิดเลขเร็วไปด้วยกันนะ!`
+
+  const handleSpeakWelcome = () => {
+    setIsSpeaking(true)
+    speakThaiText(
+      welcomeSpeechText,
+      () => setIsSpeaking(true),
+      () => setIsSpeaking(false)
+    )
+  }
+
+  // Auto-speak cute welcome message on first entry or user click
+  useEffect(() => {
+    if (gameState !== 'name-input' || hasSpokenWelcome) return
+
+    const tryAutoSpeak = () => {
+      if (!hasSpokenWelcome) {
+        setHasSpokenWelcome(true)
+        handleSpeakWelcome()
+      }
+    }
+
+    // Try speaking after short gentle delay
+    const timer = setTimeout(() => {
+      tryAutoSpeak()
+    }, 600)
+
+    // Browsers require a user gesture if auto-speech is blocked: listen to first click/tap
+    const handleFirstGesture = () => {
+      tryAutoSpeak()
+      window.removeEventListener('click', handleFirstGesture)
+      window.removeEventListener('touchstart', handleFirstGesture)
+    }
+
+    window.addEventListener('click', handleFirstGesture, { once: true })
+    window.addEventListener('touchstart', handleFirstGesture, { once: true })
+
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('click', handleFirstGesture)
+      window.removeEventListener('touchstart', handleFirstGesture)
+    }
+  }, [gameState, hasSpokenWelcome])
 
   // Read math problem aloud with cheerful Thai speech
   const handleSpeakProblem = () => {
@@ -52,6 +100,7 @@ export default function App() {
       () => setIsSpeaking(false)
     )
   }
+
 
   // Start new game
   const handleStart = (e?: FormEvent) => {
@@ -165,8 +214,18 @@ export default function App() {
             <KidMascot mood="happy" size={140} />
           </div>
 
-          {/* Cute mascot dialogue bubble for normal visitors */}
-          <div className="mascot-home-speech pop-in">
+          {/* Cute mascot dialogue bubble for normal visitors (clickable to replay speech) */}
+          <div
+            className={`mascot-home-speech pop-in ${isSpeaking ? 'speech-bubble-speaking' : ''}`}
+            onClick={handleSpeakWelcome}
+            title="กดเพื่อฟังเสียงแนะนำอีกครั้ง"
+            role="button"
+            tabIndex={0}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="speech-icon" aria-hidden="true">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
             <span className="mascot-speech-text">{welcomeMessage}</span>
           </div>
 
