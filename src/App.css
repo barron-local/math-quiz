@@ -216,6 +216,47 @@
   gap: 14px;
 }
 
+/* Quick Title Chips */
+.quick-titles-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
+.quick-title-label {
+  font-size: 13px;
+  color: var(--notion-text-muted);
+}
+
+.quick-tag-btn {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 10px;
+  background-color: var(--notion-callout-bg);
+  border: 1px solid var(--notion-border);
+  border-radius: 20px;
+  color: var(--notion-text);
+  transition: all 0.15s ease;
+}
+
+.quick-tag-btn:hover {
+  background-color: var(--notion-blue-bg);
+  border-color: var(--notion-blue);
+  color: var(--notion-blue);
+  transform: translateY(-1px);
+}
+
+.privacy-note {
+  font-size: 12px;
+  color: var(--notion-text-light);
+  line-height: 1.4;
+  margin-top: 4px;
+  text-align: center;
+}
+
 .name-label {
   font-size: 15px;
   font-weight: 600;

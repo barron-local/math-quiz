@@ -110,21 +110,41 @@ export default function App() {
 
           <form onSubmit={handleStart} className="name-form">
             <label htmlFor="kidNameInput" className="name-label">
-              พิมพ์ชื่อเล่นของหนูตรงนี้เลยครับ
+              อยากให้ระบบเรียกว่าอะไรดีเอ่ย?
             </label>
             <input
               id="kidNameInput"
               type="text"
               className="name-input"
-              placeholder="กรอกชื่อเล่นของคุณที่นี่..."
+              placeholder="พิมพ์ชื่อเล่น หรือฉายาเท่ๆ ได้เลย..."
               value={kidName}
               onChange={(e) => setKidName(e.target.value)}
-              maxLength={20}
+              maxLength={15}
               autoFocus
             />
+
+            {/* Quick cool title chips for fun */}
+            <div className="quick-titles-row">
+              <span className="quick-title-label">หรือเลือกฉายา:</span>
+              {['คนเก่ง', 'ยอดนักสืบจิ๋ว', 'กัปตัน', 'ฮีโร่'].map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  className="quick-tag-btn"
+                  onClick={() => setKidName(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+
             <button type="submit" className="notion-btn-primary pulse-btn">
               เริ่มทำแบบฝึกหัด (Start)
             </button>
+
+            <p className="privacy-note">
+              ใช้เพื่อแสดงผลให้กำลังใจบนหน้าจอนี้เท่านั้น ไม่มีการส่งหรือบันทึกข้อมูลส่วนตัวใดๆ
+            </p>
           </form>
         </section>
       )}
