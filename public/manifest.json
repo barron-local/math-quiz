@@ -1,0 +1,34 @@
+{
+  "name": "Math Quiz - แบบฝึกหัดคณิตคิดเร็ว",
+  "short_name": "Math Quiz",
+  "description": "เกมคณิตคิดเร็วแสนสนุกสำหรับเด็กๆ สไตล์ Notion พร้อมเสียงพูดและมาสคอต",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#2383e2",
+  "lang": "th",
+  "dir": "ltr",
+  "categories": ["education", "games", "kids"],
+  "icons": [
+    {
+      "src": "./pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./pwa-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -77,6 +77,58 @@ export default function App() {
     return false
   })
   const [showQrModal, setShowQrModal] = useState(false)
+  const [showInstallModal, setShowInstallModal] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [isAppInstalled, setIsAppInstalled] = useState(false)
+
+  // Listen for beforeinstallprompt event for PWA installation
+  useEffect(() => {
+    // Check if already launched in standalone mode
+    if (typeof window !== 'undefined') {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone
+      if (isStandalone) {
+        setIsAppInstalled(true)
+      }
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
+
+    const handleAppInstalled = () => {
+      setIsAppInstalled(true)
+      setDeferredPrompt(null)
+      setShowInstallModal(false)
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
+    }
+  }, [])
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      try {
+        deferredPrompt.prompt()
+        const choiceResult = await deferredPrompt.userChoice
+        if (choiceResult.outcome === 'accepted') {
+          setIsAppInstalled(true)
+        }
+        setDeferredPrompt(null)
+      } catch (err) {
+        console.warn('Install prompt error:', err)
+      }
+    } else {
+      // If browser doesn't support deferred prompt (e.g. iOS Safari), show the manual guide modal
+      setShowInstallModal(true)
+    }
+  }
+
   const [welcomeMessage] = useState(() => getRandomWelcomeMessage())
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
@@ -445,6 +497,21 @@ export default function App() {
       {gameState === 'name-input' && (
         <section aria-label="Welcome and name input" className="screen-center">
           <div className="top-actions-bar">
+            {!isAppInstalled && (
+              <button
+                type="button"
+                className="install-app-btn"
+                onClick={handleInstallClick}
+                title="ติดตั้ง Math Quiz ไว้บนหน้าจอมือถือเพื่อเข้าเล่นได้สะดวกรวดเร็ว"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>ติดตั้ง App บนมือถือ</span>
+              </button>
+            )}
             <button
               type="button"
               className="view-qr-btn"
@@ -973,6 +1040,69 @@ export default function App() {
               <p className="qr-hint">
                 เปิดกล้องมือถือหรือแท็บเล็ตแล้วสแกนเพื่อเข้าเล่นพร้อมลูกเล่นต้อนรับได้ทันที!
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PWA Install Modal Dialog */}
+      {showInstallModal && (
+        <div className="modal-backdrop" onClick={() => setShowInstallModal(false)}>
+          <div className="notion-modal pwa-modal-card pop-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="badge badge-tag">ติดตั้งลงบนมือถือ</span>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setShowInstallModal(false)}
+                aria-label="ปิดหน้าต่าง"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="2" y1="2" x2="12" y2="12" />
+                  <line x1="12" y1="2" x2="2" y2="12" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="pwa-app-preview">
+                <img
+                  src="/pwa-192x192.png"
+                  alt="Math Quiz Icon"
+                  className="pwa-preview-icon"
+                />
+                <div className="pwa-preview-info">
+                  <span className="pwa-preview-title">Math Quiz</span>
+                  <span className="pwa-preview-desc">เกมคณิตคิดเร็วสำหรับเด็กๆ</span>
+                </div>
+              </div>
+
+              <div className="pwa-steps-list">
+                <div className="pwa-step-item">
+                  <div className="pwa-step-num">1</div>
+                  <div>
+                    <strong>สำหรับ iPhone / iPad (Safari):</strong>
+                    <br />
+                    แตะปุ่มแชร์ <span className="pwa-highlight-tag">Share</span> ที่แถบเมนูด้านล่าง แล้วเลือก <span className="pwa-highlight-tag">เพิ่มไปยังหน้าจอโฮม (Add to Home Screen)</span>
+                  </div>
+                </div>
+
+                <div className="pwa-step-item">
+                  <div className="pwa-step-num">2</div>
+                  <div>
+                    <strong>สำหรับ Android (Chrome):</strong>
+                    <br />
+                    แตะจุดสามจุด <span className="pwa-highlight-tag">...</span> มุมบนขวา แล้วเลือก <span className="pwa-highlight-tag">ติดตั้งแอป (Install App)</span> หรือ <span className="pwa-highlight-tag">เพิ่มลงในหน้าจอหลัก</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="notion-btn-primary pwa-install-cta-btn"
+                onClick={() => setShowInstallModal(false)}
+              >
+                เข้าใจแล้ว พร้อมใช้งาน
+              </button>
             </div>
           </div>
         </div>

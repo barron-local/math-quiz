@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2383E2" />
+      <stop offset="100%" stop-color="#0F7B6C" />
+    </linearGradient>
+    <!-- Inner Card Shadow -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Base Rounded App Icon Frame -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Glass Inner Card -->
+  <rect x="56" y="56" width="400" height="400" rx="72" fill="#FFFFFF" filter="url(#cardShadow)" />
+
+  <!-- Math & Fun Symbols: Clean, No Emojis -->
+  <!-- Plus Symbol (Top Left) -->
+  <path d="M148 116V164M124 140H172" stroke="#2383E2" stroke-width="12" stroke-linecap="round" />
+
+  <!-- Multiply Symbol (Top Right) -->
+  <path d="M344 120L376 152M376 120L344 152" stroke="#DFAB01" stroke-width="10" stroke-linecap="round" />
+
+  <!-- Mascot Body (Centered Kid Mascot from App) -->
+  <g transform="translate(136, 110) scale(2.0)">
+    <!-- Mascot Hoodie -->
+    <path d="M38 88C38 74 46 66 60 66C74 66 82 74 82 88L84 104C84 106 82 108 80 108H40C38 108 36 106 36 104L38 88Z" fill="#2383E2" />
+    <!-- Collar Strings -->
+    <path d="M52 68L60 76L68 68" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Face / Head -->
+    <ellipse cx="60" cy="46" rx="28" ry="26" fill="#FFE2C6" />
+
+    <!-- Cute Hair -->
+    <path d="M32 44C32 28 42 20 60 20C78 20 88 28 88 44C88 34 82 25 72 23C64 21 54 22 46 25C38 28 34 35 32 44Z" fill="#37352F" />
+    <!-- Hair Bangs -->
+    <path d="M42 27C48 33 54 33 58 29C64 34 72 32 76 27" stroke="#37352F" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Rosy Cheeks -->
+    <ellipse cx="42" cy="51" rx="4.5" ry="3" fill="#FF9A9E" opacity="0.65" />
+    <ellipse cx="78" cy="51" rx="4.5" ry="3" fill="#FF9A9E" opacity="0.65" />
+
+    <!-- Cheerful Eyes (Arcs) -->
+    <path d="M44 43C46 39 50 39 52 43" stroke="#37352F" stroke-width="3.5" stroke-linecap="round" />
+    <path d="M68 43C70 39 74 39 76 43" stroke="#37352F" stroke-width="3.5" stroke-linecap="round" />
+
+    <!-- Big Happy Smile -->
+    <path d="M52 50C54 58 66 58 68 50" stroke="#37352F" stroke-width="3" stroke-linecap="round" />
+    <path d="M54 53C56 57 64 57 66 53" fill="#E03E3E" opacity="0.8" />
+  </g>
+
+  <!-- Bottom Title Badge -->
+  <rect x="120" y="380" width="272" height="62" rx="31" fill="#2383E2" />
+  <text x="256" y="422" font-family="'Inter', -apple-system, sans-serif" font-size="30" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">
+    MATH QUIZ
+  </text>
+</svg>
