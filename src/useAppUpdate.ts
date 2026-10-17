@@ -19,9 +19,10 @@ export function useAppUpdate(): AppUpdateState {
   const waitingWorkerRef = useRef<ServiceWorker | null>(null)
   const isCheckingRef = useRef(false)
 
-  // Realtime version check function
-  const checkVersion = useCallback(async () => {
+  // Realtime version check function (only queries when tab is visible to conserve Vercel quota)
+  const checkVersion = useCallback(async (force = false) => {
     if (isCheckingRef.current || typeof window === 'undefined') return
+    if (!force && document.visibilityState !== 'visible') return
     isCheckingRef.current = true
 
     try {
@@ -111,22 +112,22 @@ export function useAppUpdate(): AppUpdateState {
     // Initial check on mount
     checkVersion()
 
-    // 12-second active heartbeat polling for near-instant realtime detection
-    const interval = setInterval(checkVersion, 12000)
+    // 15-second active heartbeat polling while tab is visible (near-instant realtime detection)
+    const interval = setInterval(() => checkVersion(false), 15000)
 
     // Check instantly when tab becomes visible or receives focus
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
-        checkVersion()
+        checkVersion(true)
       }
     }
 
     const handleFocus = () => {
-      checkVersion()
+      checkVersion(true)
     }
 
     const handleOnline = () => {
-      checkVersion()
+      checkVersion(true)
     }
 
     document.addEventListener('visibilitychange', handleVisibility)

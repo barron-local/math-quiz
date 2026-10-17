@@ -37,7 +37,7 @@ export function saveQuizSession(session: Omit<ActiveQuizSession, 'savedAt'>): vo
  */
 export function loadQuizSession(): ActiveQuizSession | null {
   try {
-    if (typeof window === 'undefined') return null
+    if (typeof localStorage === 'undefined') return null
     const raw = localStorage.getItem(SESSION_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as ActiveQuizSession
@@ -61,7 +61,7 @@ export function loadQuizSession(): ActiveQuizSession | null {
  */
 export function clearQuizSession(): void {
   try {
-    if (typeof window === 'undefined') return
+    if (typeof localStorage === 'undefined') return
     localStorage.removeItem(SESSION_KEY)
   } catch (err) {
     console.warn('Failed to clear quiz session:', err)

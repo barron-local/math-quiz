@@ -12,46 +12,57 @@ export function UpdateNotificationToast({
   isInQuiz,
 }: UpdateNotificationToastProps) {
   return (
-    <div className="update-toast-container pop-in" role="alert" aria-live="polite">
-      <div className="update-toast-card">
-        <div className="update-toast-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-          </svg>
+    <aside className="update-toast-container pop-in" role="alert" aria-live="polite">
+      <div className="notion-update-pill">
+        <div className="update-pill-lead">
+          <span className="update-pill-icon-wrap" aria-hidden="true">
+            <svg
+              className={`update-pill-icon ${isUpdating ? 'pill-spin' : ''}`}
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+          </span>
+
+          <span className="update-pill-text">
+            <span className="update-pill-title">มีอัปเดตใหม่</span>
+            {isInQuiz && (
+              <span className="update-pill-hint"> (ทำต่อข้อเดิมได้เลย)</span>
+            )}
+          </span>
         </div>
 
-        <div className="update-toast-content">
-          <div className="update-toast-title">
-            มีการอัปเดตเวอร์ชันใหม่
-          </div>
-          <div className="update-toast-subtext">
-            {isInQuiz
-              ? 'กดเพื่ออัปเดตทันที (ระบบจะจำข้อปัจจุบันไว้ให้ ทำต่อได้เลยไม่ต้องเริ่มใหม่)'
-              : 'มีฟีเจอร์และการปรับปรุงใหม่พร้อมใช้งานแล้ว'}
-          </div>
-        </div>
-
-        <div className="update-toast-actions">
+        <div className="update-pill-btns">
           <button
             type="button"
-            className="notion-btn-primary update-btn"
+            className="notion-btn-primary update-action-btn"
             onClick={onUpdate}
             disabled={isUpdating}
           >
-            {isUpdating ? 'กำลังโหลด...' : 'อัปเดตเลย'}
+            {isUpdating ? 'กำลังโหลด...' : 'อัปเดตทันที'}
           </button>
 
           <button
             type="button"
-            className="update-dismiss-btn"
+            className="update-close-btn"
             onClick={onDismiss}
+            aria-label="ปิดการแจ้งเตือน"
             title="ไว้ทีหลัง"
-            disabled={isUpdating}
           >
-            ไว้ก่อน
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <line x1="2" y1="2" x2="12" y2="12" />
+              <line x1="12" y1="2" x2="2" y2="12" />
+            </svg>
           </button>
         </div>
       </div>
-    </div>
+    </aside>
   )
 }

@@ -1400,7 +1400,7 @@ export default function App() {
               <div className="result-score">
                 {score} / {totalQuestions}
               </div>
-              <p className="result-label">คะแนนรวมของ{kidName.trim() ? `น้อง${kidName.trim()}` : 'คนเก่ง'}</p>
+              <p className="result-label">คะแนนรวมของ{formatChildName(kidName)}</p>
               <p className="result-subtext">{resultMsg.subtext}</p>
 
               <div className="result-actions">

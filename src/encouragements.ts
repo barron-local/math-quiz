@@ -1,7 +1,8 @@
-// Helper to format child's title naturally (never awkward 'น้องคนเก่ง')
+// Helper to format child's title naturally (never awkward 'น้องคนเก่ง' or 'น้องน้อง...')
 export function formatChildName(name: string): string {
   const trimmed = name.trim()
   if (!trimmed || trimmed === 'คนเก่ง') return 'คนเก่ง'
+  if (trimmed.startsWith('น้อง')) return trimmed
   return `น้อง${trimmed}`
 }
 
