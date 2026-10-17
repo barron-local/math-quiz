@@ -341,7 +341,7 @@ export default function App() {
             </div>
             <div className="modal-body">
               <img
-                src="/qrcode.png"
+                src="/qrcode/qrcode.png"
                 alt="QR Code สำหรับเข้าเล่น Math Quiz"
                 className="qr-image"
               />
