@@ -1141,11 +1141,10 @@
 
 /* Speak Problem Button */
 .speak-problem-btn {
-  margin-top: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  font-size: 16px;
+  gap: 8px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--notion-blue);
   background-color: var(--notion-blue-bg);
@@ -1576,14 +1575,32 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--notion-blue);
   background-color: var(--notion-blue-bg);
-  border: 1px solid var(--notion-blue);
+  border: 1.5px solid var(--notion-blue);
   border-radius: 20px;
-  padding: 4px 14px;
+  padding: 5px 16px;
   margin-bottom: 14px;
+  transition: all 0.25s ease;
+}
+
+.step-flow-banner.step-flow-active {
+  background: linear-gradient(135deg, rgba(35, 131, 226, 0.15) 0%, rgba(15, 123, 108, 0.15) 100%);
+  border-color: var(--notion-green);
+  color: var(--notion-text);
+  box-shadow: 0 2px 10px rgba(15, 123, 108, 0.2);
+  animation: bannerPulse 1.6s infinite ease-in-out;
+}
+
+@keyframes bannerPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
 }
 
 .addition-guide-svg-wrapper {
@@ -1598,6 +1615,105 @@
   width: 100%;
   height: auto;
   overflow: visible;
+}
+
+/* Walkthrough SVG Interactive Animations */
+.guide-arc-pulsing {
+  stroke-dasharray: 6 3;
+  animation: arcMarch 1.2s linear infinite;
+}
+
+@keyframes arcMarch {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -18;
+  }
+}
+
+.step2-arc-pulse {
+  animation: arcMarchGreen 1.2s linear infinite;
+}
+
+@keyframes arcMarchGreen {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -16;
+  }
+}
+
+.num-highlight-pulse circle {
+  animation: highlightGlow 1s ease-in-out infinite alternate;
+}
+
+@keyframes highlightGlow {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.08);
+    opacity: 0.85;
+  }
+}
+
+/* Math Card Actions Row (Center-aligned bottom controls) */
+.math-card-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+/* Explain Solution Button */
+.explain-solution-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2383e2 0%, #1765b8 100%);
+  border: 2px solid transparent;
+  border-radius: 24px;
+  padding: 10px 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(35, 131, 226, 0.35);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.explain-solution-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 18px rgba(35, 131, 226, 0.45);
+}
+
+.explain-solution-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.explain-solution-btn.demo-active {
+  background: linear-gradient(135deg, #0f7b6c 0%, #0b5e52 100%);
+  box-shadow: 0 4px 16px rgba(15, 123, 108, 0.4);
+  animation: demoBtnPulse 1.2s infinite ease-in-out;
+  cursor: default;
+}
+
+@keyframes demoBtnPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(15, 123, 108, 0.4);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 8px rgba(15, 123, 108, 0);
+  }
 }
 
 /* ===================================================

@@ -207,20 +207,52 @@ const THAI_NUMBER_WORDS: Record<number, string> = {
   27: 'ยี่สิบเจ็ด',
 }
 
+export function formatThaiNumber(n: number): string {
+  return THAI_NUMBER_WORDS[n] || String(n)
+}
+
 export function formatProblemForSpeech(
   num1: number,
   operator: '+' | '-',
   num2: number,
   num3?: number
 ): string {
-  const word1 = THAI_NUMBER_WORDS[num1] || String(num1)
-  const word2 = THAI_NUMBER_WORDS[num2] || String(num2)
+  const word1 = formatThaiNumber(num1)
+  const word2 = formatThaiNumber(num2)
   const opWord = operator === '+' ? 'บวก' : 'ลบ'
 
   if (typeof num3 === 'number') {
-    const word3 = THAI_NUMBER_WORDS[num3] || String(num3)
+    const word3 = formatThaiNumber(num3)
     return `${word1} บวก ${word2} แล้วบวกอีก ${word3} ได้เท่ากับเท่าไหร่เอ่ย`
   }
 
   return `${word1} ${opWord} ${word2} ได้เท่ากับเท่าไหร่เอ่ย`
+}
+
+/**
+ * Step explanation text for 3-number addition
+ */
+export function getAddition3StepSpeech(
+  step: 1 | 2 | 3,
+  num1: number,
+  num2: number,
+  num3: number,
+  kidName?: string
+): string {
+  const n1 = formatThaiNumber(num1)
+  const n2 = formatThaiNumber(num2)
+  const n3 = formatThaiNumber(num3)
+  const step1Sum = num1 + num2
+  const step1SumWord = formatThaiNumber(step1Sum)
+  const finalSum = step1Sum + num3
+  const finalSumWord = formatThaiNumber(finalSum)
+  const nameSuffix = kidName ? `น้อง${kidName}` : 'คนเก่ง'
+
+  if (step === 1) {
+    return `ขั้นที่หนึ่งจ้า เราจับคู่สองตัวแรกก่อน เอา ${n1} บวกกับ ${n2} ได้เท่ากับ ${step1SumWord} จ้า`
+  }
+  if (step === 2) {
+    return `ขั้นที่สอง เอา ${step1SumWord} ที่ได้ ไปบวกกับตัวที่สาม คือบวกอีก ${n3} จ้า`
+  }
+  return `ดังนั้น ${n1} บวก ${n2} บวก ${n3} ได้คำตอบคือ ${finalSumWord} จ้า${nameSuffix}! เก่งมากๆ เลย!`
 }

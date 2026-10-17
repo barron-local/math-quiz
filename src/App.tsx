@@ -8,7 +8,7 @@ import {
   getCompletionMessage,
   getRandomWelcomeMessage,
 } from './encouragements'
-import { speakThaiText, formatProblemForSpeech, warmUpSpeech } from './speechHelper'
+import { speakThaiText, formatProblemForSpeech, warmUpSpeech, getAddition3StepSpeech } from './speechHelper'
 import { soundEffects } from './soundEffects'
 import './App.css'
 
@@ -152,6 +152,9 @@ export default function App() {
   const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => new Set())
   const [hasUsedLifeline, setHasUsedLifeline] = useState(false)
   const [eliminatedChoices, setEliminatedChoices] = useState<number[]>([])
+  const [demoStep, setDemoStep] = useState<0 | 1 | 2 | 3>(0) // 0: off, 1: pair 1, 2: add 3rd, 3: completed reveal
+  const [isDemoRunning, setIsDemoRunning] = useState(false)
+  const demoTimeoutRefs = useRef<Array<ReturnType<typeof setTimeout>>>([])
   const QUESTION_TIME_SECONDS = 60 // 1 minute per question
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_SECONDS)
   const hasWarnedTimeRef = useRef(false)
@@ -250,9 +253,11 @@ export default function App() {
     }
   }, [currentQuestion?.id, gameState, isVoiceEnabled])
 
-  // Reset time warning flag when a new question starts
+  // Reset time warning flag & solution demonstration when a new question starts
   useEffect(() => {
     hasWarnedTimeRef.current = false
+    setDemoStep(0)
+    clearDemoTimeouts()
   }, [currentIndex, currentQuestion?.id])
 
   // Spoken voice warning when time is running low (10 seconds remaining)
@@ -276,9 +281,9 @@ export default function App() {
     }
   }, [gameState])
 
-  // 1-minute (60s) countdown timer per question
+  // 1-minute (60s) countdown timer per question (paused during step-by-step solution demo)
   useEffect(() => {
-    if (gameState !== 'playing' || isAnswered) return
+    if (gameState !== 'playing' || isAnswered || isDemoRunning) return
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
@@ -438,6 +443,73 @@ export default function App() {
     if (isVoiceEnabled) {
       speakThaiText('ใช้ตัวช่วยตัดสองข้อแล้ว!')
     }
+  }
+
+  // Clear running demo timeouts when changing questions or unmounting
+  const clearDemoTimeouts = () => {
+    demoTimeoutRefs.current.forEach((t) => clearTimeout(t))
+    demoTimeoutRefs.current = []
+    setIsDemoRunning(false)
+  }
+
+  // Step-by-step solution demonstration with animation and cheerful Thai voice
+  const handleExplainSolution = () => {
+    if (!currentQuestion || currentQuestion.problemType !== 'add-3' || typeof currentQuestion.num3 !== 'number' || isAnswered || isDemoRunning) return
+
+    clearDemoTimeouts()
+    setIsDemoRunning(true)
+    const { num1, num2, num3 } = currentQuestion
+
+    // Step 1: Animate pair 1 (num1 + num2) and speak
+    setDemoStep(1)
+    setMascotMood('think')
+
+    const speakStep1 = () => {
+      const step1Text = getAddition3StepSpeech(1, num1, num2, num3, kidName)
+      speakThaiText(
+        step1Text,
+        () => setIsSpeaking(true),
+        () => {
+          setIsSpeaking(false)
+          // After Step 1 finishes speaking, pause 600ms then transition to Step 2
+          const t1 = setTimeout(() => {
+            // Step 2: Animate adding intermediate sum with num3
+            setDemoStep(2)
+            setMascotMood('cheer')
+
+            const step2Text = getAddition3StepSpeech(2, num1, num2, num3, kidName)
+            speakThaiText(
+              step2Text,
+              () => setIsSpeaking(true),
+              () => {
+                setIsSpeaking(false)
+                // After Step 2 finishes speaking, pause 600ms then transition to Step 3 (final answer)
+                const t2 = setTimeout(() => {
+                  setDemoStep(3)
+                  setMascotMood('celebrate')
+
+                  const step3Text = getAddition3StepSpeech(3, num1, num2, num3, kidName)
+                  speakThaiText(
+                    step3Text,
+                    () => setIsSpeaking(true),
+                    () => {
+                      setIsSpeaking(false)
+                      setIsDemoRunning(false)
+                    }
+                  )
+                }, 600)
+                demoTimeoutRefs.current.push(t2)
+              }
+            )
+          }, 600)
+          demoTimeoutRefs.current.push(t1)
+        }
+      )
+    }
+
+    // Small delay to let initial UI state settle
+    const initialT = setTimeout(speakStep1, 150)
+    demoTimeoutRefs.current.push(initialT)
   }
 
   // Change kid name / reset
@@ -836,34 +908,52 @@ export default function App() {
 
           <div className={`math-card ${hasEvaluated ? (currentFeedback?.isCorrect ? 'card-pulse-success' : 'card-shake') : ''}`}>
             {currentQuestion.problemType === 'add-3' && typeof currentQuestion.num3 === 'number' ? (
-              /* 3-number addition with step-by-step connection lines */
+              /* 3-number addition with step-by-step connection lines & walkthrough demonstration */
               <div className="addition-3-container">
-                <div className="step-flow-banner">
-                  <span>คิดทีละคู่: บวก 2 ตัวแรกก่อน แล้วบวกตัวที่สาม</span>
+                <div className={`step-flow-banner ${demoStep > 0 ? 'step-flow-active' : ''}`}>
+                  {demoStep === 1 ? (
+                    <span>💡 ขั้นที่ 1: นำ {currentQuestion.num1} + {currentQuestion.num2} = {currentQuestion.num1 + currentQuestion.num2}</span>
+                  ) : demoStep === 2 ? (
+                    <span>✨ ขั้นที่ 2: นำผลลัพธ์ {currentQuestion.num1 + currentQuestion.num2} + {currentQuestion.num3} = {currentQuestion.correctAnswer}</span>
+                  ) : demoStep === 3 ? (
+                    <span>🎉 ได้คำตอบแล้ว: {currentQuestion.correctAnswer} เก่งมาก!</span>
+                  ) : (
+                    <span>คิดทีละคู่: บวก 2 ตัวแรกก่อน แล้วบวกตัวที่สาม</span>
+                  )}
                 </div>
                 <div className="addition-guide-svg-wrapper">
                   <svg
-                    viewBox="0 0 380 120"
+                    viewBox="0 0 380 156"
                     className="addition-guide-svg"
                     role="img"
                     aria-label={`โจทย์เลข 3 จำนวน: ${currentQuestion.num1} บวก ${currentQuestion.num2} บวก ${currentQuestion.num3}`}
                   >
-                    {/* Top Connecting Arc: Linking Num1 (x=36) and Num2 (x=116) from above */}
+                    <defs>
+                      <filter id="demoGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="var(--notion-blue)" floodOpacity="0.4" />
+                      </filter>
+                      <filter id="sumBubbleShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="rgba(0,0,0,0.15)" />
+                      </filter>
+                    </defs>
+
+                    {/* Top Connecting Arc: Linking Num1 (x=36) and Num2 (x=116) */}
                     <path
-                      d="M 36 46 C 36 18, 76 16, 76 6 C 76 16, 116 18, 116 46"
+                      d="M 36 68 C 36 34, 76 30, 76 18 C 76 30, 116 34, 116 68"
                       fill="none"
-                      stroke="var(--notion-blue)"
-                      strokeWidth="2.8"
+                      stroke={demoStep === 1 ? 'var(--notion-blue)' : demoStep > 1 ? 'var(--notion-green)' : 'var(--notion-blue)'}
+                      strokeWidth={demoStep >= 1 ? '3.5' : '2.8'}
                       strokeLinecap="round"
+                      className={demoStep === 1 ? 'guide-arc-pulsing' : ''}
                     />
 
-                    {/* Step Guide label on top: indicate adding first pair without giving answer */}
-                    <g transform="translate(54, -2)">
+                    {/* Step Guide label on top of Pair 1 */}
+                    <g transform="translate(54, 8)">
                       <rect
                         width="44"
                         height="20"
                         rx="10"
-                        fill="var(--notion-blue-bg)"
+                        fill={demoStep >= 1 ? 'var(--notion-blue)' : 'var(--notion-blue-bg)'}
                         stroke="var(--notion-blue)"
                         strokeWidth="1.5"
                       />
@@ -873,47 +963,177 @@ export default function App() {
                         textAnchor="middle"
                         fontSize="12"
                         fontWeight="700"
-                        fill="var(--notion-blue)"
+                        fill={demoStep >= 1 ? '#ffffff' : 'var(--notion-blue)'}
                       >
                         คู่ที่ 1
                       </text>
                     </g>
 
-                    {/* Main Formula Row (y=92) */}
+                    {/* Intermediate Sum Badge below the first pair */}
+                    {demoStep >= 1 && (
+                      <g className="intermediate-badge-group pop-in">
+                        {/* Connecting bracket down from num1 & num2 */}
+                        <path
+                          d="M 40 128 C 40 144, 76 142, 76 148 C 76 142, 112 144, 112 128"
+                          fill="none"
+                          stroke="var(--notion-blue)"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                        />
+                        {/* Intermediate sum pill bubble */}
+                        <rect
+                          x="54"
+                          y="136"
+                          width="44"
+                          height="24"
+                          rx="12"
+                          fill="var(--notion-blue)"
+                          filter="url(#sumBubbleShadow)"
+                        />
+                        <text
+                          x="76"
+                          y="152"
+                          textAnchor="middle"
+                          fontSize="15"
+                          fontWeight="800"
+                          fill="#ffffff"
+                          fontFamily="var(--font-mono)"
+                        >
+                          {currentQuestion.num1 + currentQuestion.num2}
+                        </text>
+                      </g>
+                    )}
+
+                    {/* Step 2 Arc: Linking Intermediate Sum to Num3 */}
+                    {demoStep >= 2 && (
+                      <g className="step2-arc-group pop-in">
+                        <path
+                          d="M 98 148 C 146 166, 172 154, 196 128"
+                          fill="none"
+                          stroke="var(--notion-green)"
+                          strokeWidth="3.2"
+                          strokeDasharray="4 4"
+                          strokeLinecap="round"
+                          className="step2-arc-pulse"
+                        />
+                        {/* Badge for Step 2 */}
+                        <g transform="translate(130, 136)">
+                          <rect
+                            width="48"
+                            height="18"
+                            rx="9"
+                            fill="var(--notion-green-bg)"
+                            stroke="var(--notion-green)"
+                            strokeWidth="1.2"
+                          />
+                          <text
+                            x="24"
+                            y="13"
+                            textAnchor="middle"
+                            fontSize="11"
+                            fontWeight="700"
+                            fill="var(--notion-green)"
+                          >
+                            + ตัวที่ 3
+                          </text>
+                        </g>
+                      </g>
+                    )}
+
+                    {/* Main Formula Row (y=112) */}
                     {/* Num1 */}
-                    <text x="36" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
-                      {currentQuestion.num1}
-                    </text>
+                    <g className={demoStep === 1 ? 'num-highlight-pulse' : ''}>
+                      {demoStep === 1 && (
+                        <circle cx="36" cy="100" r="28" fill="var(--notion-blue-bg)" opacity="0.6" />
+                      )}
+                      <text
+                        x="36"
+                        y="112"
+                        textAnchor="middle"
+                        fontSize="42"
+                        fontWeight="700"
+                        fill={demoStep === 1 ? 'var(--notion-blue)' : 'var(--notion-text)'}
+                        fontFamily="var(--font-mono)"
+                      >
+                        {currentQuestion.num1}
+                      </text>
+                    </g>
+
                     {/* Operator 1 */}
-                    <text x="76" y="90" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
+                    <text x="76" y="110" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
                       +
                     </text>
+
                     {/* Num2 */}
-                    <text x="116" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
-                      {currentQuestion.num2}
-                    </text>
+                    <g className={demoStep === 1 ? 'num-highlight-pulse' : ''}>
+                      {demoStep === 1 && (
+                        <circle cx="116" cy="100" r="28" fill="var(--notion-blue-bg)" opacity="0.6" />
+                      )}
+                      <text
+                        x="116"
+                        y="112"
+                        textAnchor="middle"
+                        fontSize="42"
+                        fontWeight="700"
+                        fill={demoStep === 1 ? 'var(--notion-blue)' : 'var(--notion-text)'}
+                        fontFamily="var(--font-mono)"
+                      >
+                        {currentQuestion.num2}
+                      </text>
+                    </g>
+
                     {/* Operator 2 */}
-                    <text x="156" y="90" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
+                    <text x="156" y="110" textAnchor="middle" fontSize="34" fontWeight="700" fill="var(--notion-blue)">
                       +
                     </text>
+
                     {/* Num3 */}
-                    <text x="196" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text)" fontFamily="var(--font-mono)">
-                      {currentQuestion.num3}
-                    </text>
+                    <g className={demoStep === 2 ? 'num-highlight-pulse' : ''}>
+                      {demoStep === 2 && (
+                        <circle cx="196" cy="100" r="28" fill="var(--notion-green-bg)" opacity="0.6" />
+                      )}
+                      <text
+                        x="196"
+                        y="112"
+                        textAnchor="middle"
+                        fontSize="42"
+                        fontWeight="700"
+                        fill={demoStep === 2 ? 'var(--notion-green)' : 'var(--notion-text)'}
+                        fontFamily="var(--font-mono)"
+                      >
+                        {currentQuestion.num3}
+                      </text>
+                    </g>
+
                     {/* Equals */}
-                    <text x="246" y="90" textAnchor="middle" fontSize="38" fontWeight="700" fill="var(--notion-text)">
+                    <text x="246" y="110" textAnchor="middle" fontSize="38" fontWeight="700" fill="var(--notion-text)">
                       =
                     </text>
 
-                    {/* Placeholder / Answer Slot (renders pure number text cleanly without box or dashed border) */}
-                    {selectedAnswer === null ? (
-                      <text x="296" y="92" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
+                    {/* Placeholder / Answer Slot */}
+                    {demoStep === 3 ? (
+                      <g className="pop-success">
+                        <circle cx="296" cy="100" r="28" fill="var(--notion-green-bg)" stroke="var(--notion-green)" strokeWidth="2" />
+                        <text
+                          x="296"
+                          y="112"
+                          textAnchor="middle"
+                          fontSize="42"
+                          fontWeight="700"
+                          fontFamily="var(--font-mono)"
+                          fill="var(--notion-green)"
+                        >
+                          {currentQuestion.correctAnswer}
+                        </text>
+                      </g>
+                    ) : selectedAnswer === null ? (
+                      <text x="296" y="112" textAnchor="middle" fontSize="42" fontWeight="700" fill="var(--notion-text-muted)" fontFamily="var(--font-mono)">
                         ?
                       </text>
                     ) : (
                       <text
                         x="296"
-                        y="92"
+                        y="112"
                         textAnchor="middle"
                         fontSize="42"
                         fontWeight="700"
@@ -969,23 +1189,44 @@ export default function App() {
               </div>
             )}
 
+            {/* Action buttons row under math card: Solution walkthrough & Voice replay */}
+            <div className="math-card-actions-row">
+              {/* Show step-by-step solution walkthrough button for 3-number addition */}
+              {currentQuestion.problemType === 'add-3' && typeof currentQuestion.num3 === 'number' && !isAnswered && (
+                <button
+                  type="button"
+                  className={`explain-solution-btn ${isDemoRunning ? 'demo-active' : ''}`}
+                  onClick={handleExplainSolution}
+                  disabled={isDemoRunning}
+                  title="กดดูวิธีคิดทีละขั้นตอนพร้อมเสียงอธิบายแอนิเมชัน"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  <span>{isDemoRunning ? 'กำลังสาธิตวิธีทำ...' : 'กดดูวิธีทำและเฉลย'}</span>
+                </button>
+              )}
 
+              {/* Read aloud / replay button for kids (Only shown when voice is enabled) */}
+              {isVoiceEnabled && (
+                <button
+                  type="button"
+                  className={`speak-problem-btn ${isSpeaking ? 'speaking-active' : ''}`}
+                  onClick={() => handleSpeakProblem(currentQuestion)}
+                  disabled={isDemoRunning}
+                  title="กดเพื่อฟังเสียงอ่านโจทย์ซ้ำอีกครั้ง"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                  <span>{isSpeaking ? 'กำลังอ่านโจทย์...' : 'กดฟังเสียงซ้ำ'}</span>
+                </button>
+              )}
+            </div>
 
-            {/* Read aloud / replay button for kids (Only shown when voice is enabled) */}
-            {isVoiceEnabled && (
-              <button
-                type="button"
-                className={`speak-problem-btn ${isSpeaking ? 'speaking-active' : ''}`}
-                onClick={() => handleSpeakProblem(currentQuestion)}
-                title="กดเพื่อฟังเสียงอ่านโจทย์ซ้ำอีกครั้ง"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                </svg>
-                <span>{isSpeaking ? 'กำลังอ่านโจทย์...' : 'กดฟังเสียงซ้ำ'}</span>
-              </button>
-            )}
           </div>
 
           <div className="choices-grid">
