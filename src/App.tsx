@@ -114,6 +114,7 @@ export default function App() {
   const [showQrModal, setShowQrModal] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
+  const [showQuitModal, setShowQuitModal] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [isAppInstalled, setIsAppInstalled] = useState(false)
 
@@ -597,6 +598,17 @@ export default function App() {
     setGameState('name-input')
   }
 
+  // Confirm exit from ongoing quiz
+  const handleConfirmQuit = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+    }
+    clearDemoTimeouts()
+    clearQuizSession()
+    setShowQuitModal(false)
+    handleReset()
+  }
+
 
   return (
     <main className="notion-container">
@@ -628,7 +640,22 @@ export default function App() {
       {/* Header Actions Bar (Theme, Install, QR) */}
       <header className="global-top-bar">
         <div className="top-actions-left">
-          {/* Cute QR Welcome indicator or empty spacer */}
+          {gameState === 'playing' && (
+            <button
+              type="button"
+              className="exit-quiz-btn"
+              onClick={() => setShowQuitModal(true)}
+              title="ออกจากแบบฝึกหัด กลับสู่หน้าหลัก"
+              aria-label="ออกจากแบบฝึกหัด"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>ออกจากแบบฝึกหัด</span>
+            </button>
+          )}
         </div>
 
         <div className="top-actions-right">
@@ -1549,6 +1576,54 @@ export default function App() {
               >
                 เข้าใจแล้ว พร้อมใช้งาน
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quit Quiz Confirmation Modal */}
+      {showQuitModal && (
+        <div className="modal-backdrop" onClick={() => setShowQuitModal(false)}>
+          <div className="notion-modal quit-modal-card pop-in" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-corner-close-btn"
+              onClick={() => setShowQuitModal(false)}
+              aria-label="ปิดหน้าต่าง"
+              title="ปิดหน้าต่าง"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="2" y1="2" x2="12" y2="12" />
+                <line x1="12" y1="2" x2="2" y2="12" />
+              </svg>
+            </button>
+
+            <div className="modal-header">
+              <h2>ต้องการออกจากแบบฝึกหัดใช่ไหม?</h2>
+            </div>
+
+            <div className="modal-body">
+              <p style={{ margin: '0 0 20px 0', color: 'var(--notion-text-muted)', fontSize: '14px', lineHeight: 1.5 }}>
+                หากออกตอนนี้ คะแนนและความคืบหน้าของรอบนี้จะถูกยกเลิก และกลับสู่หน้าเริ่มต้น
+              </p>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="notion-btn-primary"
+                  onClick={() => setShowQuitModal(false)}
+                  autoFocus
+                >
+                  ทำแบบฝึกหัดต่อ
+                </button>
+                <button
+                  type="button"
+                  className="notion-btn-secondary danger-hover-btn"
+                  onClick={handleConfirmQuit}
+                >
+                  ยืนยันออกจากแบบฝึกหัด
+                </button>
+              </div>
             </div>
           </div>
         </div>
