@@ -7,7 +7,6 @@ import {
   getRandomEncouragingMessage,
   getCompletionMessage,
   getRandomWelcomeMessage,
-  getRandomPokeMessage,
 } from './encouragements'
 import { speakThaiText, formatProblemForSpeech } from './speechHelper'
 import './App.css'
@@ -35,26 +34,19 @@ export default function App() {
     return false
   })
   const [showQrModal, setShowQrModal] = useState(false)
-  const [welcomeMessage, setWelcomeMessage] = useState(() => getRandomWelcomeMessage())
+  const [welcomeMessage] = useState(() => getRandomWelcomeMessage())
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [hasSpokenWelcome, setHasSpokenWelcome] = useState(false)
   const [isPoked, setIsPoked] = useState(false)
 
-  // Interactive mascot poke handler (child taps the mascot)
+  // Interactive mascot poke handler (child taps the mascot - animation only, no voice)
   const handlePokeMascot = () => {
-    setIsPoked(true)
-    const pokeMsg = getRandomPokeMessage()
-    setWelcomeMessage(pokeMsg)
-    setIsSpeaking(true)
-    speakThaiText(
-      pokeMsg,
-      () => setIsSpeaking(true),
-      () => {
-        setIsSpeaking(false)
-        setIsPoked(false)
-      }
-    )
-    setTimeout(() => setIsPoked(false), 600)
+    setIsPoked(false)
+    // Small timeout to allow re-triggering animation on multiple rapid clicks
+    setTimeout(() => {
+      setIsPoked(true)
+      setTimeout(() => setIsPoked(false), 550)
+    }, 10)
   }
 
   // Welcome speech intro text (cheerful & cute for children, guiding them on what to do)
