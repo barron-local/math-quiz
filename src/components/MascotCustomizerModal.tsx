@@ -8,12 +8,15 @@ import {
   DEFAULT_MASCOT_CONFIG,
 } from '../mascotTypes'
 import { KidMascot } from './KidMascot'
+import { type HandStyle } from './MysteriousHand'
 
 interface MascotCustomizerModalProps {
   isOpen: boolean
   currentConfig: MascotConfig
   onSave: (config: MascotConfig) => void
   onClose: () => void
+  handStyle?: HandStyle
+  onSelectHandStyle?: (style: HandStyle) => void
 }
 
 export const MascotCustomizerModal: React.FC<MascotCustomizerModalProps> = ({
@@ -21,6 +24,8 @@ export const MascotCustomizerModal: React.FC<MascotCustomizerModalProps> = ({
   currentConfig,
   onSave,
   onClose,
+  handStyle = 'cartoon-glove',
+  onSelectHandStyle,
 }) => {
   const [config, setConfig] = useState<MascotConfig>(currentConfig)
   const [previewMood, setPreviewMood] = useState<'happy' | 'celebrate' | 'cheer' | 'think'>('happy')
@@ -307,6 +312,39 @@ export const MascotCustomizerModal: React.FC<MascotCustomizerModalProps> = ({
                           </svg>
                         </span>
                       )}
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+
+            {/* Step 4: Mysterious Hand Style */}
+            <section className="custom-section">
+              <div className="custom-section-header">
+                <span className="section-step-num">4</span>
+                <div>
+                  <h3 className="custom-section-title">สไตล์มือปริศนา (สกิลตัด 2 ชอยส์)</h3>
+                  <p className="custom-section-desc">เลือกลายมือที่มาดึงคำตอบหนีตอนใช้สกิล</p>
+                </div>
+              </div>
+
+              <div className="hand-style-options-grid">
+                {[
+                  { id: 'cartoon-glove' as HandStyle, icon: '🧤', name: 'ถุงมือการ์ตูน', desc: 'สีขาวจอมซน' },
+                  { id: 'monster-paw' as HandStyle, icon: '🐾', name: 'อุ้งเท้ามอนสเตอร์', desc: 'ขนนุ่มสีม่วง' },
+                  { id: 'robot-claw' as HandStyle, icon: '🤖', name: 'ก้ามปูหุ่นยนต์', desc: 'จักรกลงับไว' },
+                ].map((item) => {
+                  const isSelected = (handStyle || 'cartoon-glove') === item.id
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`hand-style-btn ${isSelected ? 'active' : ''}`}
+                      onClick={() => onSelectHandStyle?.(item.id)}
+                    >
+                      <span className="hand-style-icon" aria-hidden="true">{item.icon}</span>
+                      <span className="hand-style-name">{item.name}</span>
+                      <span className="hand-style-desc">{item.desc}</span>
                     </button>
                   )
                 })}

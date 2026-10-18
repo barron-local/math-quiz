@@ -10,17 +10,28 @@ import {
   getCompletionMessage,
   formatChildName,
 } from './encouragements'
-import { speakThaiText, formatProblemForSpeech, getAddition3StepSpeech } from './speechHelper'
+import { speakThaiText, stopSpeaking, formatProblemForSpeech, getAddition3StepSpeech } from './speechHelper'
 import { soundEffects } from './soundEffects'
 import { useAppUpdate } from './useAppUpdate'
 import { UpdateNotificationToast } from './components/UpdateNotificationToast'
 import { saveQuizSession, loadQuizSession, clearQuizSession } from './quizSessionManager'
+import { MysteriousHand, type HandStyle } from './components/MysteriousHand'
+import { ThemeFrameDecorations } from './components/ThemeFrameDecorations'
+import { ThemeSelectorModal } from './components/ThemeSelectorModal'
+import { InlineVisualCounter } from './components/InlineVisualCounter'
+import { type QuizTheme, loadSavedTheme, saveTheme } from './themeTypes'
 import './App.css'
 
 type QuizState = 'name-input' | 'playing' | 'completed'
 
 export default function App() {
-  const [initialSession] = useState(() => loadQuizSession())
+  const [initialSession] = useState(() => {
+    const session = loadQuizSession()
+    if (session) {
+      clearQuizSession()
+    }
+    return session
+  })
   const { hasUpdate, isUpdating, dismissed, applyUpdate, dismissUpdate, checkNow } = useAppUpdate()
 
   const [gameState, setGameState] = useState<QuizState>(() => {
@@ -34,22 +45,15 @@ export default function App() {
     }
     return ''
   })
-  // Quiz configuration states
+  // Quiz configuration states (Default always to 10 questions on home screen, custom input starts completely empty)
   const [questionCountChoice, setQuestionCountChoice] = useState<10 | 20 | 30 | 'custom'>(() => {
     if (initialSession?.totalQuestions) {
       const t = initialSession.totalQuestions
       if (t === 10 || t === 20 || t === 30) return t
-      return 'custom'
     }
     return 10
   })
-  const [customQuestionCount, setCustomQuestionCount] = useState(() => {
-    if (initialSession?.totalQuestions) {
-      const t = initialSession.totalQuestions
-      if (t !== 10 && t !== 20 && t !== 30) return String(t)
-    }
-    return ''
-  })
+  const [customQuestionCount, setCustomQuestionCount] = useState('')
   const [totalQuestions, setTotalQuestions] = useState(() => {
     return initialSession?.totalQuestions || 10
   })
@@ -193,12 +197,35 @@ export default function App() {
   const [askedQuestions, setAskedQuestions] = useState<Set<string>>(() => {
     return initialSession?.askedQuestions ? new Set(initialSession.askedQuestions) : new Set()
   })
-  const [hasUsedLifeline, setHasUsedLifeline] = useState(() => {
-    return initialSession?.hasUsedLifeline || false
+  const [lifelineUses, setLifelineUses] = useState(() => {
+    return initialSession?.lifelineUses ?? 0
   })
+  const [counterUses, setCounterUses] = useState(() => {
+    return initialSession?.counterUses ?? 0
+  })
+  // Track whether lifeline was used on this specific question
+  const [usedLifelineOnCurrentQ, setUsedLifelineOnCurrentQ] = useState(false)
+  const [showVisualCounter, setShowVisualCounter] = useState(false)
   const [eliminatedChoices, setEliminatedChoices] = useState<number[]>(() => {
     return initialSession?.eliminatedChoices || []
   })
+  const [snatchingMap, setSnatchingMap] = useState<Record<number, { side: 'left' | 'right'; active: boolean }>>({})
+  const [handStyle, setHandStyle] = useState<HandStyle>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('math_quiz_hand_style') as HandStyle
+      if (saved === 'cartoon-glove' || saved === 'monster-paw' || saved === 'robot-claw') {
+        return saved
+      }
+    }
+    return 'cartoon-glove'
+  })
+  const [quizTheme, setQuizTheme] = useState<QuizTheme>(() => loadSavedTheme())
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false)
+
+  const handleSelectTheme = (newTheme: QuizTheme) => {
+    setQuizTheme(newTheme)
+    saveTheme(newTheme)
+  }
   const [demoStep, setDemoStep] = useState<0 | 1 | 2 | 3>(0) // 0: off, 1: pair 1, 2: add 3rd, 3: completed reveal
   const [isDemoRunning, setIsDemoRunning] = useState(false)
   const [isExplained, setIsExplained] = useState(false) // Question was answered via explanation / demo
@@ -208,6 +235,21 @@ export default function App() {
     return initialSession?.timeLeft || QUESTION_TIME_SECONDS
   })
   const hasWarnedTimeRef = useRef(false)
+  const questionSpeechTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lifelineSpeechTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (questionSpeechTimerRef.current) {
+        clearTimeout(questionSpeechTimerRef.current)
+      }
+      if (lifelineSpeechTimerRef.current) {
+        clearTimeout(lifelineSpeechTimerRef.current)
+      }
+      stopSpeaking()
+    }
+  }, [])
 
   // Interactive mascot poke handler (child taps the mascot - animation only, no voice)
   const handlePokeMascot = () => {
@@ -218,8 +260,6 @@ export default function App() {
       setTimeout(() => setIsPoked(false), 550)
     }, 10)
   }
-
-
 
   // Read math problem aloud with cheerful Thai speech
   const handleSpeakProblem = (questionToSpeak = currentQuestion) => {
@@ -241,11 +281,19 @@ export default function App() {
   // Automatically read the math problem aloud when a new question appears
   useEffect(() => {
     if (gameState === 'playing' && currentQuestion && !isAnswered && isVoiceEnabled) {
+      if (questionSpeechTimerRef.current) {
+        clearTimeout(questionSpeechTimerRef.current)
+      }
       // Small pause (250ms) before voice begins
-      const timer = setTimeout(() => {
+      questionSpeechTimerRef.current = setTimeout(() => {
         handleSpeakProblem(currentQuestion)
       }, 250)
-      return () => clearTimeout(timer)
+      return () => {
+        if (questionSpeechTimerRef.current) {
+          clearTimeout(questionSpeechTimerRef.current)
+          questionSpeechTimerRef.current = null
+        }
+      }
     }
   }, [currentQuestion?.id, gameState, isVoiceEnabled])
 
@@ -299,6 +347,17 @@ export default function App() {
 
   // Handle timeout for a question
   const handleTimeExpired = () => {
+    if (questionSpeechTimerRef.current) {
+      clearTimeout(questionSpeechTimerRef.current)
+      questionSpeechTimerRef.current = null
+    }
+    if (lifelineSpeechTimerRef.current) {
+      clearTimeout(lifelineSpeechTimerRef.current)
+      lifelineSpeechTimerRef.current = null
+    }
+    stopSpeaking()
+    setIsSpeaking(false)
+
     setIsAnswered(true)
     setIsCalculating(false)
     setHasEvaluated(true)
@@ -322,6 +381,8 @@ export default function App() {
         setEliminatedChoices([])
         setCurrentFeedback(null)
         setMascotMood('happy')
+        setShowVisualCounter(false)
+        setUsedLifelineOnCurrentQ(false)
       } else {
         setGameState('completed')
       }
@@ -336,6 +397,17 @@ export default function App() {
     if (typeof window !== 'undefined' && kidName.trim()) {
       localStorage.setItem('math_quiz_kid_name', kidName.trim())
     }
+
+    if (questionSpeechTimerRef.current) {
+      clearTimeout(questionSpeechTimerRef.current)
+      questionSpeechTimerRef.current = null
+    }
+    if (lifelineSpeechTimerRef.current) {
+      clearTimeout(lifelineSpeechTimerRef.current)
+      lifelineSpeechTimerRef.current = null
+    }
+    stopSpeaking()
+    setIsSpeaking(false)
 
     // Calculate effective total questions
     const activeTotal = questionCountChoice === 'custom'
@@ -354,7 +426,10 @@ export default function App() {
     setIsAnswered(false)
     setIsCalculating(false)
     setHasEvaluated(false)
-    setHasUsedLifeline(false)
+    setLifelineUses(0)
+    setCounterUses(0)
+    setUsedLifelineOnCurrentQ(false)
+    setShowVisualCounter(false)
     setEliminatedChoices([])
     setCurrentFeedback(null)
     setShowConfetti(false)
@@ -367,6 +442,18 @@ export default function App() {
     if (isAnswered || !currentQuestion) return
     // Check for realtime updates in background
     checkNow().catch(() => {})
+
+    // Cancel any pending speeches when choice is clicked
+    if (questionSpeechTimerRef.current) {
+      clearTimeout(questionSpeechTimerRef.current)
+      questionSpeechTimerRef.current = null
+    }
+    if (lifelineSpeechTimerRef.current) {
+      clearTimeout(lifelineSpeechTimerRef.current)
+      lifelineSpeechTimerRef.current = null
+    }
+    stopSpeaking()
+    setIsSpeaking(false)
 
     // Phase 1: Lock answering immediately, put selected choice into the slot, and start calculation animation
     setSelectedAnswer(choice)
@@ -415,6 +502,8 @@ export default function App() {
           setEliminatedChoices([])
           setCurrentFeedback(null)
           setMascotMood('happy')
+          setShowVisualCounter(false)
+          setUsedLifelineOnCurrentQ(false)
         } else {
           setGameState('completed')
         }
@@ -422,9 +511,20 @@ export default function App() {
     }, 850)
   }
 
-  // Handle special booster lifeline (50-50: cut 2 incorrect choices, usable once per round)
+  // Dynamic Skill quota: 1 use per 10 questions (e.g. 10 questions = 1 use, 20 questions = 2 uses)
+  const maxSkillUses = Math.max(1, Math.round(totalQuestions / 10))
+
+  // Handle special booster lifeline (50-50: cut 2 incorrect choices with mysterious cartoon hand)
   const handleUseLifeline = () => {
-    if (hasUsedLifeline || isAnswered || !currentQuestion || eliminatedChoices.length > 0) return
+    if (
+      lifelineUses >= maxSkillUses ||
+      usedLifelineOnCurrentQ ||
+      isAnswered ||
+      !currentQuestion ||
+      eliminatedChoices.length > 0 ||
+      Object.keys(snatchingMap).length > 0
+    )
+      return
 
     // Find all incorrect choices in current question
     const incorrectChoices = currentQuestion.choices.filter(
@@ -434,13 +534,70 @@ export default function App() {
     // Pick 2 random incorrect choices to eliminate
     const shuffledIncorrect = [...incorrectChoices].sort(() => Math.random() - 0.5)
     const toEliminate = shuffledIncorrect.slice(0, 2)
+    if (toEliminate.length < 2) return
 
-    setEliminatedChoices(toEliminate)
-    setHasUsedLifeline(true)
+    const [firstChoice, secondChoice] = toEliminate
+
+    // Immediately stop pending question speech & any active voice playback!
+    if (questionSpeechTimerRef.current) {
+      clearTimeout(questionSpeechTimerRef.current)
+      questionSpeechTimerRef.current = null
+    }
+    if (lifelineSpeechTimerRef.current) {
+      clearTimeout(lifelineSpeechTimerRef.current)
+      lifelineSpeechTimerRef.current = null
+    }
+    stopSpeaking()
+    setIsSpeaking(false)
+
+    setLifelineUses((prev) => prev + 1)
+    setUsedLifelineOnCurrentQ(true)
     setMascotMood('cheer')
 
-    if (isVoiceEnabled) {
-      speakThaiText('ใช้ตัวช่วยตัดสองข้อแล้ว!')
+    // Determine direction for each choice based on its position in the 2x2 grid
+    // index 0 (top-left), index 1 (top-right), index 2 (bottom-left), index 3 (bottom-right)
+    const getSideForChoice = (choiceVal: number): 'left' | 'right' => {
+      const idx = currentQuestion.choices.indexOf(choiceVal)
+      return idx % 2 === 0 ? 'left' : 'right'
+    }
+
+    const firstSide = getSideForChoice(firstChoice)
+    const secondSide = getSideForChoice(secondChoice)
+
+    // Staggered Snatch Animation:
+    // 1. Hand 1 swoops in and snatches the first incorrect choice!
+    soundEffects.playYoink(70)
+    setSnatchingMap({ [firstChoice]: { side: firstSide, active: true } })
+
+    // 2. Hand 2 swoops in and snatches the second incorrect choice!
+    setTimeout(() => {
+      soundEffects.playYoink(70)
+      setSnatchingMap((prev) => ({
+        ...prev,
+        [secondChoice]: { side: secondSide, active: true },
+      }))
+    }, 280)
+
+    // 3. Mark both as eliminated once snatching animations finish
+    setTimeout(() => {
+      setEliminatedChoices(toEliminate)
+      setSnatchingMap({})
+    }, 850)
+  }
+
+  // Handle special booster skill: Visual Counters (ลูกคิดวิเศษ & นิ้วช่วยนับ)
+  const handleUseVisualCounter = () => {
+    if (isAnswered || !currentQuestion || isDemoRunning) return
+    if (!showVisualCounter) {
+      // If not yet opened on this question, check quota
+      if (counterUses >= maxSkillUses) return
+      setShowVisualCounter(true)
+      setCounterUses((prev) => prev + 1)
+      if (isVoiceEnabled) {
+        speakThaiText('แตะที่ลูกแอปเปิลเพื่อนับได้เลยนะ!')
+      }
+    } else {
+      setShowVisualCounter(false)
     }
   }
 
@@ -449,10 +606,22 @@ export default function App() {
     demoTimeoutRefs.current.forEach((t) => clearTimeout(t))
     demoTimeoutRefs.current = []
     setIsDemoRunning(false)
+    stopSpeaking()
+    setIsSpeaking(false)
   }
 
   // Advance to the next question or complete game
   const advanceToNextQuestion = () => {
+    if (questionSpeechTimerRef.current) {
+      clearTimeout(questionSpeechTimerRef.current)
+      questionSpeechTimerRef.current = null
+    }
+    if (lifelineSpeechTimerRef.current) {
+      clearTimeout(lifelineSpeechTimerRef.current)
+      lifelineSpeechTimerRef.current = null
+    }
+    stopSpeaking()
+    setIsSpeaking(false)
     clearDemoTimeouts()
     setShowConfetti(false)
     checkNow().catch(() => {})
@@ -468,10 +637,13 @@ export default function App() {
       setIsCalculating(false)
       setHasEvaluated(false)
       setEliminatedChoices([])
+      setSnatchingMap({})
       setCurrentFeedback(null)
       setMascotMood('happy')
       setDemoStep(0)
       setIsExplained(false)
+      setShowVisualCounter(false)
+      setUsedLifelineOnCurrentQ(false)
     } else {
       setGameState('completed')
     }
@@ -548,9 +720,9 @@ export default function App() {
     demoTimeoutRefs.current.push(initialT)
   }
 
-  // Auto-save ongoing quiz session to localStorage so updates or refreshes never lose progress
+  // Only save quiz session when update notification is showing, so that normal refreshes return to start
   useEffect(() => {
-    if (gameState === 'playing' && currentQuestion) {
+    if (hasUpdate && !dismissed && gameState === 'playing' && currentQuestion) {
       saveQuizSession({
         kidName,
         problemType,
@@ -559,19 +731,23 @@ export default function App() {
         currentQuestion,
         askedQuestions: Array.from(askedQuestions),
         score,
-        hasUsedLifeline,
+        lifelineUses,
+        counterUses,
         eliminatedChoices,
         timeLeft,
       })
-    } else if (gameState === 'completed') {
+    } else {
       clearQuizSession()
     }
   }, [
+    hasUpdate,
+    dismissed,
     gameState,
     currentIndex,
     currentQuestion,
     score,
-    hasUsedLifeline,
+    lifelineUses,
+    counterUses,
     eliminatedChoices,
     totalQuestions,
     problemType,
@@ -590,8 +766,12 @@ export default function App() {
     setIsAnswered(false)
     setIsCalculating(false)
     setHasEvaluated(false)
-    setHasUsedLifeline(false)
+    setLifelineUses(0)
+    setCounterUses(0)
+    setUsedLifelineOnCurrentQ(false)
+    setShowVisualCounter(false)
     setEliminatedChoices([])
+    setSnatchingMap({})
     setCurrentFeedback(null)
     setShowConfetti(false)
     setMascotMood('happy')
@@ -626,7 +806,8 @@ export default function App() {
                   currentQuestion,
                   askedQuestions: Array.from(askedQuestions),
                   score,
-                  hasUsedLifeline,
+                  lifelineUses,
+                  counterUses,
                   eliminatedChoices,
                   timeLeft,
                 })
@@ -760,20 +941,31 @@ export default function App() {
             />
           </div>
 
-          {/* Button to dress up mascot in Notion style without emoji */}
-          <button
-            type="button"
-            className="mascot-customize-pill pop-in"
-            onClick={() => setIsCustomizerOpen(true)}
-            title="กดเพื่อแต่งตัวและเปลี่ยนมาสคอต"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2a7 7 0 0 1 7 7c0 2-1 3.5-2 4.5s-1.5 2-1 3.5a1.5 1.5 0 0 1-2.5 1.5c-1-.5-2.5-1-4.5-1A7 7 0 0 1 12 2z" />
-            </svg>
-            <span>แต่งตัวมาสคอต</span>
-            <span className="customize-tag">เปลี่ยนตัว & สีเสื้อ</span>
-          </button>
+          {/* Mascot & Theme Customization Buttons Row */}
+          <div className="home-custom-pills-row">
+            <button
+              type="button"
+              className="mascot-customize-pill pop-in"
+              onClick={() => setIsCustomizerOpen(true)}
+              title="กดเพื่อแต่งตัวมาสคอต"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a7 7 0 0 1 7 7c0 2-1 3.5-2 4.5s-1.5 2-1 3.5a1.5 1.5 0 0 1-2.5 1.5c-1-.5-2.5-1-4.5-1A7 7 0 0 1 12 2z" />
+              </svg>
+              <span>แต่งตัวการ์ตูน</span>
+            </button>
+
+            <button
+              type="button"
+              className="theme-select-home-pill pop-in"
+              onClick={() => setIsThemeModalOpen(true)}
+              title="กดเพื่อเลือกธีมและกรอบรูป"
+            >
+              <span className="theme-home-icon" aria-hidden="true">🎨</span>
+              <span>เลือกธีม</span>
+            </button>
+          </div>
 
 
           <form onSubmit={handleStart} className="name-form">
@@ -802,57 +994,89 @@ export default function App() {
                   <button
                     type="button"
                     className={`config-chip-btn ${questionCountChoice === 10 ? 'active' : ''}`}
-                    onClick={() => setQuestionCountChoice(10)}
+                    onClick={() => {
+                      setQuestionCountChoice(10)
+                      setCustomQuestionCount('')
+                    }}
                   >
-                    <span>10 ข้อ</span>
-                    <span className="chip-desc">ด่วนเร็ว</span>
+                    <span className="chip-main-text">10 ข้อ</span>
                   </button>
                   <button
                     type="button"
                     className={`config-chip-btn ${questionCountChoice === 20 ? 'active' : ''}`}
-                    onClick={() => setQuestionCountChoice(20)}
+                    onClick={() => {
+                      setQuestionCountChoice(20)
+                      setCustomQuestionCount('')
+                    }}
                   >
-                    <span>20 ข้อ</span>
-                    <span className="chip-desc">มาตรฐาน</span>
+                    <span className="chip-main-text">20 ข้อ</span>
                   </button>
                   <button
                     type="button"
                     className={`config-chip-btn ${questionCountChoice === 30 ? 'active' : ''}`}
-                    onClick={() => setQuestionCountChoice(30)}
+                    onClick={() => {
+                      setQuestionCountChoice(30)
+                      setCustomQuestionCount('')
+                    }}
                   >
-                    <span>30 ข้อ</span>
-                    <span className="chip-desc">จัดเต็ม</span>
+                    <span className="chip-main-text">30 ข้อ</span>
                   </button>
                   <button
                     type="button"
                     className={`config-chip-btn ${questionCountChoice === 'custom' ? 'active' : ''}`}
-                    onClick={() => setQuestionCountChoice('custom')}
+                    onClick={() => {
+                      setQuestionCountChoice('custom')
+                      setCustomQuestionCount('')
+                    }}
                   >
-                    <span>กำหนดเอง</span>
-                    <span className="chip-desc">เลือกเอง</span>
+                    <span className="chip-main-text">กำหนดเอง</span>
                   </button>
                 </div>
 
-                {/* Custom count input if custom is chosen */}
+                {/* Custom count input only if custom is chosen */}
                 {questionCountChoice === 'custom' && (
                   <div className="custom-count-wrapper pop-in">
-                    <label htmlFor="customCountInput" className="custom-count-label">
-                      ใส่จำนวนข้อ:
-                    </label>
-                    <input
-                      id="customCountInput"
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      className="custom-count-input"
-                      placeholder="เช่น 15"
-                      value={customQuestionCount}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '')
-                        setCustomQuestionCount(val)
-                      }}
-                      autoFocus
-                    />
+                    <span className="custom-count-title">ระบุจำนวนข้อ:</span>
+                    <div className="custom-stepper-box">
+                      <button
+                        type="button"
+                        className="stepper-btn"
+                        onClick={() => {
+                          const current = parseInt(customQuestionCount, 10) || 10
+                          setCustomQuestionCount(String(Math.max(1, current - 1)))
+                        }}
+                        title="ลด 1 ข้อ"
+                        aria-label="ลด 1 ข้อ"
+                      >
+                        −
+                      </button>
+                      <input
+                        id="customCountInput"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        className="custom-count-input"
+                        value={customQuestionCount}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '')
+                          setCustomQuestionCount(val)
+                        }}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        className="stepper-btn"
+                        onClick={() => {
+                          const current = parseInt(customQuestionCount, 10) || 10
+                          setCustomQuestionCount(String(Math.min(100, current + 1)))
+                        }}
+                        title="เพิ่ม 1 ข้อ"
+                        aria-label="เพิ่ม 1 ข้อ"
+                      >
+                        +
+                      </button>
+                      <span className="custom-count-unit">ข้อ</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -865,19 +1089,19 @@ export default function App() {
                 <div className="config-types-row">
                   <button
                     type="button"
-                    className={`config-chip-btn ${problemType === 'add-sub-2' ? 'active' : ''}`}
+                    className={`config-chip-btn config-type-card ${problemType === 'add-sub-2' ? 'active' : ''}`}
                     onClick={() => setProblemType('add-sub-2')}
                   >
-                    <span>บวก / ลบ 2 จำนวน</span>
-                    <span className="chip-desc">เช่น 7 + 2 หรือ 8 - 3</span>
+                    <span className="chip-main-text">บวก-ลบ 2 ตัว</span>
+                    <span className="chip-example-badge">7 + 2 หรือ 8 - 3</span>
                   </button>
                   <button
                     type="button"
-                    className={`config-chip-btn ${problemType === 'add-3' ? 'active' : ''}`}
+                    className={`config-chip-btn config-type-card ${problemType === 'add-3' ? 'active' : ''}`}
                     onClick={() => setProblemType('add-3')}
                   >
-                    <span>บวก 3 จำนวน</span>
-                    <span className="chip-desc">พร้อมเส้นโยงขั้นตอน</span>
+                    <span className="chip-main-text">บวก 3 ตัว</span>
+                    <span className="chip-example-badge">2 + 3 + 4</span>
                   </button>
                 </div>
               </div>
@@ -885,12 +1109,12 @@ export default function App() {
               {/* Voice Setting Toggle */}
               <div className="config-group">
                 <div className="config-label-row">
-                  <span className="config-title">เสียงพูดอ่านโจทย์และเตือนเวลา</span>
+                  <span className="config-title">เสียงอ่านโจทย์</span>
                 </div>
                 <div className="config-types-row">
                   <button
                     type="button"
-                    className={`config-chip-btn ${isVoiceEnabled ? 'active' : ''}`}
+                    className={`config-chip-btn config-voice-card ${isVoiceEnabled ? 'active' : ''}`}
                     onClick={() => {
                       setIsVoiceEnabled(true)
                       if (typeof window !== 'undefined') {
@@ -898,12 +1122,11 @@ export default function App() {
                       }
                     }}
                   >
-                    <span>เปิดเสียงพูด</span>
-                    <span className="chip-desc">อ่านโจทย์และเตือนเวลา</span>
+                    <span className="chip-main-text">🔊 เปิดเสียง</span>
                   </button>
                   <button
                     type="button"
-                    className={`config-chip-btn ${!isVoiceEnabled ? 'active' : ''}`}
+                    className={`config-chip-btn config-voice-card ${!isVoiceEnabled ? 'active' : ''}`}
                     onClick={() => {
                       setIsVoiceEnabled(false)
                       if (typeof window !== 'undefined') {
@@ -915,8 +1138,7 @@ export default function App() {
                       setIsSpeaking(false)
                     }}
                   >
-                    <span>ปิดเสียงพูด</span>
-                    <span className="chip-desc">คิดเลขเงียบๆ มีสมาธิ</span>
+                    <span className="chip-main-text">🔇 ปิดเสียง</span>
                   </button>
                 </div>
               </div>
@@ -989,8 +1211,11 @@ export default function App() {
             />
           </div>
 
-          {/* Character and Speech feedback bubble with interactive animations */}
-          <div className="mascot-status-area">
+          {/* Character and Speech feedback bubble with custom themes and frame decorations */}
+          <div className={`mascot-status-area theme-${quizTheme}`}>
+            {/* Thematic frame decorations & vector art (Halloween, Christmas, Space, CandyLand) */}
+            <ThemeFrameDecorations theme={quizTheme} />
+
             <div className="mascot-mini">
               <KidMascot
                 mood={mascotMood}
@@ -1294,6 +1519,17 @@ export default function App() {
               </div>
             )}
 
+            {/* Inline Visual Counter Panel (นิ้วช่วยนับใต้โจทย์ แสดงแอปเปิลให้นับได้โดยตรง) */}
+            {showVisualCounter && (
+              <InlineVisualCounter
+                num1={currentQuestion.num1}
+                operator={currentQuestion.operator}
+                num2={currentQuestion.num2}
+                num3={currentQuestion.num3}
+                onClose={() => setShowVisualCounter(false)}
+              />
+            )}
+
             {/* Action buttons row under math card: Solution walkthrough & Voice replay */}
             <div className="math-card-actions-row">
               {/* Show step-by-step solution walkthrough button for 3-number addition */}
@@ -1349,9 +1585,15 @@ export default function App() {
             <div className="choices-grid">
               {currentQuestion.choices.map((choice, index) => {
                 const isEliminated = eliminatedChoices.includes(choice)
+                const snatchData = snatchingMap[choice]
+                const isBeingSnatched = !!snatchData?.active
+
                 let choiceClass = 'choice-btn'
                 if (isEliminated) {
                   choiceClass += ' choice-eliminated'
+                }
+                if (isBeingSnatched) {
+                  choiceClass += snatchData.side === 'left' ? ' card-snatched-left' : ' card-snatched-right'
                 }
                 if (isAnswered) {
                   if (isCalculating && choice === selectedAnswer) {
@@ -1366,43 +1608,100 @@ export default function App() {
                 }
 
                 return (
-                  <button
+                  <div
                     key={`${currentQuestion.id}-${index}-${choice}`}
-                    type="button"
-                    className={choiceClass}
-                    disabled={isAnswered || isEliminated}
-                    onClick={() => handleSelectChoice(choice)}
+                    className="choice-slot-wrapper"
                   >
-                    {choice}
-                  </button>
+                    <button
+                      type="button"
+                      className={choiceClass}
+                      disabled={isAnswered || isEliminated || isBeingSnatched}
+                      onClick={() => handleSelectChoice(choice)}
+                    >
+                      {choice}
+                    </button>
+
+                    {isBeingSnatched && (
+                      <MysteriousHand
+                        side={snatchData.side}
+                        style={handStyle}
+                      />
+                    )}
+                  </div>
                 )
               })}
             </div>
           )}
 
-          {/* Floating Skill Booster: 50-50 Lifeline Button positioned at bottom-left of the screen */}
+          {/* Floating Skill Boosters: 50-50 Lifeline & Visual Counters Button */}
           <aside className="skill-floating-pod pop-in" aria-label="สกิลพิเศษ">
-            <button
-              type="button"
-              className={`skill-btn ${hasUsedLifeline ? 'skill-used' : 'pulse-btn'}`}
-              disabled={hasUsedLifeline || isAnswered}
-              onClick={handleUseLifeline}
-              title={hasUsedLifeline ? 'ใช้สิทธิ์สกิลตัด 2 ตัวเลือกในรอบนี้ไปแล้ว' : 'กดเพื่อตัดตัวเลือกที่ผิดออก 2 ข้อ (ใช้ได้ 1 ครั้งต่อรอบ)'}
-              aria-label="สกิลพิเศษ ตัด 2 ตัวเลือก"
-            >
-              <div className="skill-icon-gem" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-              </div>
-              <div className="skill-info">
-                <div className="skill-name-row">
-                  <span className="skill-name">ตัด 2 ชอยส์</span>
-                  <span className="skill-badge">{hasUsedLifeline ? '0/1' : '1/1'}</span>
-                </div>
-                <span className="skill-desc">Skill พิเศษช่วยคิด</span>
-              </div>
-            </button>
+            {/* Skill 1: Cut 2 choices */}
+            {(() => {
+              const remainingLifeline = Math.max(0, maxSkillUses - lifelineUses)
+              const isLifelineDepleted = remainingLifeline === 0
+              const isLifelineDisabled = isLifelineDepleted || usedLifelineOnCurrentQ || isAnswered
+              return (
+                <button
+                  type="button"
+                  className={`skill-btn ${isLifelineDepleted ? 'skill-used' : ''}`}
+                  disabled={isLifelineDisabled}
+                  onClick={handleUseLifeline}
+                  title={
+                    isLifelineDepleted
+                      ? `ใช้สิทธิ์ตัดชอยส์ครบโควตาแล้ว (${maxSkillUses}/${maxSkillUses} ครั้ง)`
+                      : usedLifelineOnCurrentQ
+                      ? 'ข้อนี้ใช้สกิลตัดชอยส์ไปแล้ว'
+                      : `กดเพื่อตัดตัวเลือกที่ผิดออก 2 ข้อ (เหลือ ${remainingLifeline}/${maxSkillUses} ครั้ง)`
+                  }
+                  aria-label="สกิลพิเศษ ตัด 2 ตัวเลือก"
+                >
+                  <div className="skill-icon-gem" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                  </div>
+                  <div className="skill-info">
+                    <div className="skill-name-row">
+                      <span className="skill-name">ตัด 2 ชอยส์</span>
+                      <span className="skill-badge">{remainingLifeline}/{maxSkillUses}</span>
+                    </div>
+                    <span className="skill-desc">ดึงคำตอบที่ไม่ใช่ออก</span>
+                  </div>
+                </button>
+              )
+            })()}
+
+            {/* Skill 2: Visual Counters (ลูกคิดวิเศษ & นิ้วช่วยนับ) */}
+            {(() => {
+              const remainingCounter = Math.max(0, maxSkillUses - counterUses)
+              const isCounterDepleted = remainingCounter === 0 && !showVisualCounter
+              const isCounterDisabled = isAnswered || (isCounterDepleted && !showVisualCounter)
+              return (
+                <button
+                  type="button"
+                  className={`skill-btn skill-btn-counter ${isCounterDepleted ? 'skill-used' : ''}`}
+                  disabled={isCounterDisabled}
+                  onClick={handleUseVisualCounter}
+                  title={
+                    isCounterDepleted
+                      ? `ใช้สิทธิ์นิ้วช่วยนับครบโควตาแล้ว (${maxSkillUses}/${maxSkillUses} ครั้ง)`
+                      : `กดเพื่อเปิดนิ้วช่วยนับ แตะลูกแอปเปิลเพื่อนับ (เหลือ ${remainingCounter}/${maxSkillUses} ครั้ง)`
+                  }
+                  aria-label="สกิลพิเศษ นิ้วช่วยนับ"
+                >
+                  <div className="skill-icon-gem" aria-hidden="true">
+                    🍎
+                  </div>
+                  <div className="skill-info">
+                    <div className="skill-name-row">
+                      <span className="skill-name">นิ้วช่วยนับ</span>
+                      <span className="skill-badge">{remainingCounter}/{maxSkillUses}</span>
+                    </div>
+                    <span className="skill-desc">แตะรูปเพื่อนับ</span>
+                  </div>
+                </button>
+              )
+            })()}
           </aside>
         </section>
       )}
@@ -1635,6 +1934,23 @@ export default function App() {
         currentConfig={mascotConfig}
         onSave={handleSaveMascotConfig}
         onClose={() => setIsCustomizerOpen(false)}
+        handStyle={handStyle}
+        onSelectHandStyle={(style) => {
+          setHandStyle(style)
+          try {
+            localStorage.setItem('math_quiz_hand_style', style)
+          } catch {}
+        }}
+      />
+
+      {/* Theme Selector Modal */}
+      <ThemeSelectorModal
+        isOpen={isThemeModalOpen}
+        currentTheme={quizTheme}
+        onSelectTheme={handleSelectTheme}
+        onClose={() => setIsThemeModalOpen(false)}
+        mascotConfig={mascotConfig}
+        kidName={kidName}
       />
     </main>
   )

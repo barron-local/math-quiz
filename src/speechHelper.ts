@@ -13,8 +13,44 @@ let activeUtterance: SpeechSynthesisUtterance | null = null
 let cachedVoices: SpeechSynthesisVoice[] = []
 let isWarmedUp = false
 
-// In-memory audio cache for instant playback of repeated phrases & numbers
-const audioCache = new Map<string, HTMLAudioElement>()
+// In-memory audio Blob cache (maps normalized text to object URL string)
+const audioBlobCache = new Map<string, string>()
+const pendingFetches = new Map<string, Promise<string | null>>()
+
+/**
+ * Pre-fetch and cache sweet Thai female audio in memory as a Blob URL.
+ * Eliminates network latency and prevents connection drops during gameplay.
+ */
+export async function prefetchAudio(text: string): Promise<string | null> {
+  if (!text || typeof window === 'undefined') return null
+  const normalized = normalizeThaiText(text)
+  if (audioBlobCache.has(normalized)) {
+    return audioBlobCache.get(normalized)!
+  }
+  if (pendingFetches.has(normalized)) {
+    return pendingFetches.get(normalized)!
+  }
+
+  const fetchPromise = (async () => {
+    try {
+      const url = getAudioUrl(normalized)
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      audioBlobCache.set(normalized, blobUrl)
+      return blobUrl
+    } catch (err) {
+      console.warn('Audio prefetch failed for:', normalized, err)
+      return null
+    } finally {
+      pendingFetches.delete(normalized)
+    }
+  })()
+
+  pendingFetches.set(normalized, fetchPromise)
+  return fetchPromise
+}
 
 /**
  * Pre-warm and unlock audio context for iOS Safari and mobile devices
@@ -23,7 +59,7 @@ export function warmUpSpeech(): void {
   if (typeof window === 'undefined' || isWarmedUp) return
   isWarmedUp = true
 
-  // 1. Warm up HTML5 Audio (bypasses mobile auto-play restrictions)
+  // Warm up HTML5 Audio (bypasses mobile auto-play restrictions)
   try {
     const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A')
     silentAudio.volume = 0.01
@@ -33,18 +69,6 @@ export function warmUpSpeech(): void {
     }
   } catch {
     // Ignore warmup error
-  }
-
-  // 2. Warm up SpeechSynthesis if available
-  if ('speechSynthesis' in window) {
-    try {
-      const emptyUtterance = new SpeechSynthesisUtterance(' ')
-      emptyUtterance.volume = 0.01
-      window.speechSynthesis.speak(emptyUtterance)
-      window.speechSynthesis.resume()
-    } catch {
-      // Ignore
-    }
   }
 }
 
@@ -87,6 +111,10 @@ export function stopSpeaking(): void {
 
   if (currentAudio) {
     try {
+      // Detach all listeners before pausing to avoid any spurious callbacks
+      currentAudio.onplay = null
+      currentAudio.onended = null
+      currentAudio.onerror = null
       currentAudio.pause()
       currentAudio.currentTime = 0
     } catch {
@@ -147,9 +175,6 @@ function splitTextIntoChunks(text: string, maxLen = 150): string[] {
 }
 
 /**
- * Generate Google TTS URL (Returns sweet neural Thai female voice)
- */
-/**
  * Generate audio stream URL using our /api/tts proxy (works on any device, zero CORS/Referer issues)
  */
 function getAudioUrl(text: string): string {
@@ -157,7 +182,7 @@ function getAudioUrl(text: string): string {
 }
 
 /**
- * Fallback to Web Speech API when offline or if audio stream fails
+ * Fallback to Web Speech API only when offline or if audio stream truly fails
  */
 function speakViaWebSpeech(
   text: string,
@@ -179,11 +204,6 @@ function speakViaWebSpeech(
     // Ignore
   }
 
-  const utterance = new SpeechSynthesisUtterance(text)
-  activeUtterance = utterance
-  utterance.lang = 'th-TH'
-  utterance.volume = 1.0
-
   let voices = window.speechSynthesis.getVoices()
   if (!voices || voices.length === 0) {
     voices = cachedVoices
@@ -198,38 +218,52 @@ function speakViaWebSpeech(
       v.lang.toLowerCase().startsWith('th')
   )
 
-  let isKnownMale = false
-  if (thaiVoices.length > 0) {
-    // Specifically prioritize female voices (Premwadee, Achara, Google Thai Female)
-    const femaleVoice = thaiVoices.find((v) => {
-      const name = v.name.toLowerCase()
-      return (
-        name.includes('premwadee') ||
-        name.includes('achara') ||
-        name.includes('kanya') ||
-        (name.includes('google') && !name.includes('male'))
-      )
-    })
+  // Prioritize friendly female voices (Premwadee, Achara, Kanya, Google, Siri)
+  const femaleVoice = thaiVoices.find((v) => {
+    const name = v.name.toLowerCase()
+    return (
+      name.includes('premwadee') ||
+      name.includes('achara') ||
+      name.includes('kanya') ||
+      name.includes('narisa') ||
+      name.includes('siri') ||
+      (name.includes('google') && !name.includes('male'))
+    )
+  })
 
-    // Filter out known male voices (Pattara, Niwat)
-    const nonMaleVoice = thaiVoices.find((v) => {
-      const name = v.name.toLowerCase()
-      return !name.includes('pattara') && !name.includes('niwat') && !name.includes('male')
-    })
+  // Filter out known adult male voices (Pattara, Niwat)
+  const nonMaleVoice = thaiVoices.find((v) => {
+    const name = v.name.toLowerCase()
+    return !name.includes('pattara') && !name.includes('niwat') && !name.includes('male')
+  })
 
-    const preferredVoice = femaleVoice || nonMaleVoice || thaiVoices[0]
+  const preferredVoice = femaleVoice || nonMaleVoice
 
-    if (preferredVoice) {
-      utterance.voice = preferredVoice
-      const lowName = preferredVoice.name.toLowerCase()
-      if (lowName.includes('pattara') || lowName.includes('niwat') || lowName.includes('male')) {
-        isKnownMale = true
-      }
+  // When online, NEVER use harsh adult male voice (Pattara) as fallback; preserve the sweet female audio experience
+  if (!preferredVoice && thaiVoices.length > 0) {
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      console.warn('Skipping male WebSpeech fallback because device is online (sweet female TTS stream preferred).')
+      if (onEnd) onEnd()
+      return
     }
   }
 
-  // If only a male voice is installed on Windows, pitch it up to 1.35 to sound cute and friendly
-  utterance.pitch = isKnownMale ? 1.35 : 1.15
+  const selectedVoice = preferredVoice || thaiVoices[0]
+
+  const utterance = new SpeechSynthesisUtterance(text)
+  activeUtterance = utterance
+  utterance.lang = 'th-TH'
+  utterance.volume = 1.0
+
+  if (selectedVoice) {
+    utterance.voice = selectedVoice
+  }
+
+  const lowName = selectedVoice ? selectedVoice.name.toLowerCase() : ''
+  const isKnownMale = lowName.includes('pattara') || lowName.includes('niwat') || lowName.includes('male')
+
+  // If forced to use male voice offline, pitch up to 1.45 so it sounds like a cute anime mascot instead of adult male
+  utterance.pitch = isKnownMale ? 1.45 : 1.15
   utterance.rate = typeof customRate === 'number' ? customRate : 1.05
 
   const cleanup = () => {
@@ -282,8 +316,8 @@ export function speakThaiText(
   let chunkIndex = 0
   let hasStarted = false
 
-  const playNextChunk = () => {
-    // If user clicked another action, abort obsolete sequence
+  const playNextChunk = async () => {
+    // If user clicked another action, abort obsolete sequence immediately
     if (seqId !== currentSequenceId) return
 
     if (chunkIndex >= chunks.length) {
@@ -293,24 +327,30 @@ export function speakThaiText(
     }
 
     const chunk = chunks[chunkIndex]
-    const url = getAudioUrl(chunk)
 
-    // Check memory cache or create new Audio element
-    let audio = audioCache.get(chunk)
-    if (!audio) {
-      audio = new Audio(url)
-      // Cache small common phrases for instant replay
-      if (chunk.length < 50) {
-        audioCache.set(chunk, audio)
+    // Check blob cache first for instant 0ms latency playback, or fallback to direct URL
+    let audioUrl = audioBlobCache.get(chunk)
+    if (!audioUrl) {
+      try {
+        const fetchedUrl = await prefetchAudio(chunk)
+        if (seqId !== currentSequenceId) return
+        if (fetchedUrl) {
+          audioUrl = fetchedUrl
+        }
+      } catch {
+        // Fallback to direct URL below
       }
-    } else {
-      audio.currentTime = 0
     }
 
+    if (seqId !== currentSequenceId) return
+
+    const finalUrl = audioUrl || getAudioUrl(chunk)
+    const audio = new Audio(finalUrl)
     currentAudio = audio
     audio.playbackRate = typeof customRate === 'number' ? customRate : 1.15
 
     audio.onplay = () => {
+      if (seqId !== currentSequenceId) return
       if (!hasStarted) {
         hasStarted = true
         if (onStart) onStart()
@@ -318,28 +358,45 @@ export function speakThaiText(
     }
 
     audio.onended = () => {
+      if (seqId !== currentSequenceId) return
       chunkIndex++
       playNextChunk()
     }
 
     audio.onerror = () => {
-      // If online stream fails (e.g. offline device), seamlessly fallback to Web Speech
+      // If sequence has changed or audio was stopped, strictly ignore
+      if (seqId !== currentSequenceId || currentAudio !== audio) return
       console.warn('Online Thai audio stream unreachable, falling back to Web Speech API.')
       speakViaWebSpeech(normalized, onStart, onEnd, customRate)
     }
 
-    const playPromise = audio.play()
-    if (playPromise !== undefined) {
-      playPromise.catch((err) => {
-        // Auto-play was blocked or network interrupted: try fallback
-        console.warn('Audio play promise caught:', err.name)
-        if (err.name === 'NotAllowedError') {
-          // Awaiting user gesture
-          if (onEnd) onEnd()
-        } else {
+    try {
+      const playPromise = audio.play()
+      if (playPromise !== undefined) {
+        playPromise.catch((err: any) => {
+          // If sequence has changed or audio was stopped, strictly ignore
+          if (seqId !== currentSequenceId || currentAudio !== audio) return
+
+          // AbortError happens when audio is paused intentionally (e.g. stopSpeaking or new sound).
+          // NEVER fallback to Web Speech on pause/abort!
+          if (err && (err.name === 'AbortError' || String(err).includes('pause') || String(err).includes('interrupted'))) {
+            return
+          }
+
+          if (err && err.name === 'NotAllowedError') {
+            // Awaiting user gesture
+            if (onEnd) onEnd()
+            return
+          }
+
+          console.warn('Audio play caught:', err)
           speakViaWebSpeech(normalized, onStart, onEnd, customRate)
-        }
-      })
+        })
+      }
+    } catch (err: any) {
+      if (seqId !== currentSequenceId) return
+      if (err && err.name === 'AbortError') return
+      speakViaWebSpeech(normalized, onStart, onEnd, customRate)
     }
   }
 

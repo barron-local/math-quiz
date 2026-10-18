@@ -83,6 +83,40 @@ class SoundEffectsManager {
     this.playWebFirework(2, 850, 0.65)
     this.playConfettiPop(1300, 0.85)
   }
+
+  /**
+   * Cartoon snatch / yoink sound for Mysterious Hand (เสียงมือปริศนาดึงคำตอบหนี ฟึ่บ!)
+   */
+  public playYoink(delayMs = 0): void {
+    setTimeout(() => {
+      try {
+        if (typeof window === 'undefined') return
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+        if (!AudioCtx) return
+        const ctx = new AudioCtx()
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+
+        const now = ctx.currentTime
+        osc.type = 'sine'
+        // Playful comic pitch swoop up and down: "วึ้บ-ฟิ้ว!"
+        osc.frequency.setValueAtTime(280, now)
+        osc.frequency.exponentialRampToValueAtTime(680, now + 0.09)
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.32)
+
+        gain.gain.setValueAtTime(0.22, now)
+        gain.gain.linearRampToValueAtTime(0.32, now + 0.08)
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35)
+
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(now)
+        osc.stop(now + 0.35)
+      } catch {
+        // Fallback gracefully
+      }
+    }, delayMs)
+  }
 }
 
 export const soundEffects = new SoundEffectsManager()

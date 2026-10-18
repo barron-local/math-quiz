@@ -36,7 +36,8 @@ describe('quizSessionManager', () => {
       currentQuestion: mockQuestion,
       askedQuestions: ['1', '2', '3', '4', '5'],
       score: 4,
-      hasUsedLifeline: true,
+      lifelineUses: 1,
+      counterUses: 0,
       eliminatedChoices: [10, 13],
       timeLeft: 45,
     })
@@ -47,7 +48,8 @@ describe('quizSessionManager', () => {
     expect(loaded?.score).toBe(4)
     expect(loaded?.kidName).toBe('บอส')
     expect(loaded?.currentQuestion.correctAnswer).toBe(12)
-    expect(loaded?.hasUsedLifeline).toBe(true)
+    expect(loaded?.lifelineUses).toBe(1)
+    expect(loaded?.counterUses).toBe(0)
     expect(loaded?.eliminatedChoices).toEqual([10, 13])
     expect(loaded?.timeLeft).toBe(45)
   })
@@ -69,7 +71,8 @@ describe('quizSessionManager', () => {
       },
       askedQuestions: ['1', '2'],
       score: 1,
-      hasUsedLifeline: false,
+      lifelineUses: 0,
+      counterUses: 0,
       eliminatedChoices: [],
       timeLeft: 60,
     })

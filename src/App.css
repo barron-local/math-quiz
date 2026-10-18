@@ -1028,19 +1028,109 @@
 
 /* Mascot Interactive Speech Area */
 .mascot-status-area {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 22px;
   background-color: var(--notion-callout-bg);
-  border: 1px solid var(--notion-border);
-  border-radius: 14px;
-  padding: 14px 20px;
+  border: 2px solid var(--notion-border);
+  border-radius: 18px;
+  padding: 16px 20px;
   box-shadow: var(--shadow-subtle);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
 }
 
+/* 1. Halloween Theme */
+.mascot-status-area.theme-halloween {
+  background: linear-gradient(135deg, rgba(247, 103, 7, 0.08) 0%, rgba(112, 72, 232, 0.12) 100%), var(--notion-callout-bg);
+  border-color: #F76707;
+  box-shadow: 0 6px 22px rgba(247, 103, 7, 0.15), 0 0 0 1px rgba(112, 72, 232, 0.2);
+}
+
+/* 2. Christmas Theme */
+.mascot-status-area.theme-christmas {
+  background: linear-gradient(135deg, rgba(224, 49, 49, 0.07) 0%, rgba(43, 138, 62, 0.1) 100%), var(--notion-callout-bg);
+  border-color: #E03131;
+  box-shadow: 0 6px 22px rgba(224, 49, 49, 0.14), 0 0 0 1px rgba(43, 138, 62, 0.2);
+}
+
+/* 3. Space Galaxy Theme */
+.mascot-status-area.theme-space {
+  background: linear-gradient(135deg, rgba(76, 110, 245, 0.1) 0%, rgba(151, 117, 250, 0.14) 100%), var(--notion-callout-bg);
+  border-color: #4C6EF5;
+  box-shadow: 0 6px 22px rgba(76, 110, 245, 0.16), 0 0 0 1px rgba(151, 117, 250, 0.22);
+}
+
+/* 4. Candy Land Theme */
+.mascot-status-area.theme-candyland {
+  background: linear-gradient(135deg, rgba(240, 101, 149, 0.08) 0%, rgba(34, 184, 207, 0.1) 100%), var(--notion-callout-bg);
+  border-color: #F06595;
+  box-shadow: 0 6px 22px rgba(240, 101, 149, 0.14), 0 0 0 1px rgba(34, 184, 207, 0.18);
+}
+
+/* Background Ambient Layer */
+.theme-frame-decorations-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.theme-bg-ambient {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Corner Badges: Positioned neatly at corners without obstructing text */
+.theme-corner-badge {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.12));
+}
+
+.theme-corner-badge.corner-top-right {
+  top: -2px;
+  right: -2px;
+}
+
+.theme-corner-badge.corner-top-left {
+  top: -4px;
+  left: -4px;
+}
+
+/* Subtle micro-animations for theme decorations */
+.theme-anim-float-gentle {
+  animation: themeFloatGentle 3s ease-in-out infinite alternate;
+}
+
+@keyframes themeFloatGentle {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-3px); }
+}
+
+.theme-anim-wing-flap {
+  animation: themeWingFlap 1.8s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes themeWingFlap {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(-5deg) scale(1.05); }
+}
+
+/* Mascot mini and Speech Bubble Protected Layer */
 .mascot-mini {
+  position: relative;
+  z-index: 5;
   flex-shrink: 0;
   width: 86px;
   height: 86px;
@@ -1050,21 +1140,34 @@
 }
 
 .mascot-speech-bubble {
+  position: relative;
+  z-index: 5;
   flex: 1;
-  font-size: 17px;
+  background-color: var(--notion-bg);
+  border: 1.5px solid var(--notion-border);
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--notion-text);
   line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
 }
 
 .mascot-speech-bubble.bubble-correct {
   color: var(--notion-green);
+  border-color: var(--notion-green);
+  background-color: var(--notion-green-bg);
 }
 
 .mascot-speech-bubble.bubble-try {
   color: var(--notion-blue);
+  border-color: var(--notion-blue);
+  background-color: var(--notion-blue-bg);
 }
+
+
 
 /* Math formula card */
 .math-card {
@@ -1190,7 +1293,13 @@
   }
 }
 
+.choice-slot-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .choice-btn {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1475,7 +1584,7 @@
 .config-chip-btn {
   background-color: var(--notion-bg);
   border: 1.5px solid var(--notion-border);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 10px 8px;
   font-size: 14px;
   font-weight: 600;
@@ -1486,7 +1595,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
   text-align: center;
 }
 
@@ -1502,6 +1611,40 @@
   box-shadow: 0 2px 8px rgba(35, 131, 226, 0.25);
 }
 
+.chip-main-text {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.config-options-row .config-chip-btn {
+  padding: 12px 6px;
+}
+
+.config-type-card {
+  padding: 10px 10px;
+  gap: 5px;
+}
+
+.chip-example-badge {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  background-color: var(--notion-hover);
+  padding: 2px 7px;
+  border-radius: 6px;
+  color: var(--notion-text-muted);
+}
+
+.config-chip-btn.active .chip-example-badge {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.config-voice-card {
+  padding: 11px 12px;
+}
+
 .chip-desc {
   font-size: 11px;
   font-weight: 500;
@@ -1509,39 +1652,83 @@
 }
 
 .custom-count-wrapper {
-  margin-top: 4px;
+  margin-top: 6px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
   background-color: var(--notion-bg);
-  border: 1px dashed var(--notion-blue);
-  border-radius: 8px;
-  padding: 8px 12px;
+  border: 1.5px solid var(--notion-blue);
+  border-radius: 10px;
+  padding: 8px 14px;
+  gap: 12px;
 }
 
-.custom-count-label {
-  font-size: 13px;
+.custom-count-title {
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--notion-blue);
+  color: var(--notion-text);
   white-space: nowrap;
 }
 
+.custom-stepper-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepper-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid var(--notion-border);
+  background-color: var(--notion-hover);
+  color: var(--notion-text);
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  line-height: 1;
+}
+
+.stepper-btn:hover {
+  background-color: var(--notion-blue);
+  border-color: var(--notion-blue);
+  color: #ffffff;
+}
+
+.stepper-btn:active {
+  transform: scale(0.92);
+}
+
 .custom-count-input {
-  width: 90px;
-  padding: 6px 10px;
+  width: 56px;
+  height: 32px;
+  padding: 2px 6px;
   font-size: 16px;
   font-weight: 700;
   font-family: var(--font-mono);
   border: 1.5px solid var(--notion-border);
-  border-radius: 6px;
+  border-radius: 8px;
   outline: none;
   background: var(--notion-bg);
   color: var(--notion-text);
   text-align: center;
+  transition: border-color 0.15s ease;
 }
 
 .custom-count-input:focus {
   border-color: var(--notion-blue);
+}
+
+.custom-count-unit {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--notion-text-muted);
+  margin-left: 2px;
 }
 
 .custom-count-hint {
@@ -1788,6 +1975,9 @@
   bottom: 24px;
   left: 24px;
   z-index: 99;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .skill-btn {
@@ -1799,16 +1989,41 @@
   border-radius: 40px;
   padding: 8px 18px 8px 8px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(35, 131, 226, 0.28), 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 6px 18px rgba(35, 131, 226, 0.2), 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   user-select: none;
   backdrop-filter: blur(8px);
 }
 
+.skill-btn-counter {
+  border-color: #F59F00;
+  box-shadow: 0 6px 18px rgba(245, 159, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.skill-btn-counter .skill-icon-gem {
+  background: linear-gradient(135deg, #F59F00 0%, #D9480F 100%);
+  box-shadow: 0 3px 10px rgba(245, 159, 0, 0.45);
+}
+
+.skill-btn-counter .skill-badge {
+  background-color: #F59F00;
+}
+
 .skill-btn:hover:not(:disabled) {
-  transform: translateY(-4px) scale(1.04);
-  box-shadow: 0 12px 28px rgba(35, 131, 226, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(35, 131, 226, 0.35);
   border-color: #1a73e8;
+}
+
+.skill-btn-counter:hover:not(:disabled) {
+  box-shadow: 0 8px 22px rgba(245, 159, 0, 0.35);
+  border-color: #F59F00;
+}
+
+.skill-btn.skill-active {
+  background: rgba(245, 159, 0, 0.12);
+  border-color: #D9480F;
+  box-shadow: 0 4px 16px rgba(217, 72, 15, 0.35);
 }
 
 .skill-btn:active:not(:disabled) {
@@ -1827,6 +2042,7 @@
   box-shadow: 0 3px 10px rgba(35, 131, 226, 0.45);
   flex-shrink: 0;
   position: relative;
+  font-size: 20px;
 }
 
 .skill-icon-gem svg {
@@ -1891,6 +2107,207 @@
   color: var(--notion-text-muted);
 }
 
+/* ===================================================
+   Inline Visual Counter Styles (นิ้วช่วยนับใต้โจทย์)
+   =================================================== */
+.inline-visual-counter {
+  margin: 12px 0 6px;
+  background: var(--notion-callout-bg);
+  border: 1.5px solid rgba(245, 159, 0, 0.45);
+  border-radius: 16px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 16px rgba(245, 159, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: popIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.inline-counter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px dashed rgba(245, 159, 0, 0.3);
+  padding-bottom: 8px;
+}
+
+.inline-counter-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inline-counter-badge-icon {
+  font-size: 16px;
+}
+
+.inline-counter-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #D9480F;
+}
+
+.inline-counter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline-counter-reset-btn {
+  background: var(--notion-bg);
+  border: 1px solid var(--notion-border);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--notion-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inline-counter-reset-btn:hover {
+  background: var(--notion-hover);
+  color: var(--notion-text);
+}
+
+.inline-counter-close-btn {
+  background: none;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--notion-text-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.inline-counter-close-btn:hover {
+  background: var(--notion-hover);
+  color: var(--notion-red);
+}
+
+.inline-counter-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.inline-counter-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--notion-bg);
+  border: 1px solid var(--notion-border);
+  border-radius: 12px;
+  padding: 8px 10px;
+  min-width: 80px;
+}
+
+.inline-section-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--notion-text-muted);
+}
+
+.inline-counter-items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 170px;
+}
+
+.inline-counter-apple-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1.5px solid #F1F3F5;
+  border-radius: 8px;
+  padding: 2px 4px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+
+.inline-counter-apple-btn:hover {
+  transform: translateY(-2px) scale(1.12);
+  border-color: #FA5252;
+}
+
+.inline-counter-apple-btn:active {
+  transform: scale(0.92);
+}
+
+.inline-counter-apple-btn.is-tapped {
+  background: #E6FCF5;
+  border-color: #20C997;
+  transform: scale(0.95);
+  box-shadow: inset 0 2px 4px rgba(32, 201, 151, 0.25);
+}
+
+.inline-counter-apple-btn.is-tapped .apple-badge {
+  color: #0CA678;
+  font-weight: 800;
+}
+
+.apple-emoji {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.apple-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--notion-text-muted);
+  font-family: var(--font-mono);
+  margin-top: 1px;
+}
+
+.inline-counter-op {
+  font-size: 20px;
+  font-weight: 800;
+  color: #D9480F;
+  font-family: var(--font-mono);
+  padding: 0 4px;
+}
+
+.inline-counter-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: var(--notion-bg);
+  border-radius: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--notion-border);
+}
+
+.inline-summary-text {
+  font-size: 12px;
+  color: var(--notion-text);
+}
+
+.inline-summary-text strong {
+  color: #0CA678;
+  font-size: 13.5px;
+}
+
+.inline-hint-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #D9480F;
+}
+
 @media (max-width: 600px) {
   .skill-floating-pod {
     bottom: 16px;
@@ -1919,15 +2336,207 @@
 
 /* Choice eliminated / faded state */
 .choice-btn.choice-eliminated {
-  opacity: 0.25;
+  opacity: 0.18;
   text-decoration: line-through;
   pointer-events: none;
   background-color: var(--notion-hover);
   border-color: var(--notion-border);
   color: var(--notion-text-light);
   box-shadow: none;
-  transform: scale(0.96);
+  transform: scale(0.95);
   filter: grayscale(1);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* ===================================================
+   Mysterious Hand (มือปริศนา) Snatch & Drag Animations
+   =================================================== */
+
+/* Card yanked to the right by Mysterious Hand */
+.choice-btn.card-snatched-right {
+  animation: cardYoinkRight 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  z-index: 20;
+  border-color: #2383E2 !important;
+  box-shadow: 0 8px 24px rgba(35, 131, 226, 0.28) !important;
+  pointer-events: none;
+}
+
+@keyframes cardYoinkRight {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  22% {
+    /* Clamped / Squeezed by hand */
+    transform: scale(0.95) rotate(-2deg);
+  }
+  34% {
+    /* Wind up / tension pull */
+    transform: scale(0.97) translateX(-14px) rotate(-4deg);
+  }
+  50% {
+    /* Snatch starts */
+    transform: translateX(40px) translateY(-10px) rotate(8deg);
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    /* Flew off-screen */
+    transform: translateX(260px) translateY(-40px) rotate(32deg) scale(0.85);
+    opacity: 0;
+  }
+}
+
+/* Card yanked to the left by Mysterious Hand */
+.choice-btn.card-snatched-left {
+  animation: cardYoinkLeft 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  z-index: 20;
+  border-color: #2383E2 !important;
+  box-shadow: 0 8px 24px rgba(35, 131, 226, 0.28) !important;
+  pointer-events: none;
+}
+
+@keyframes cardYoinkLeft {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  22% {
+    transform: scale(0.95) rotate(2deg);
+  }
+  34% {
+    transform: scale(0.97) translateX(14px) rotate(4deg);
+  }
+  50% {
+    transform: translateX(-40px) translateY(-10px) rotate(-8deg);
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(-260px) translateY(-40px) rotate(-32deg) scale(0.85);
+    opacity: 0;
+  }
+}
+
+/* Mysterious Hand positioning & swoop motion */
+.mysterious-hand-wrapper {
+  position: absolute;
+  top: 50%;
+  pointer-events: none;
+  z-index: 35;
+}
+
+.mysterious-hand-wrapper.hand-right {
+  right: -28px;
+  transform: translateY(-50%);
+  animation: handSwoopRight 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.mysterious-hand-wrapper.hand-left {
+  left: -28px;
+  transform: translateY(-50%);
+  animation: handSwoopLeft 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes handSwoopRight {
+  0% {
+    transform: translate(140px, -50%) rotate(25deg);
+    opacity: 0;
+  }
+  22% {
+    /* Hand arrives and clamps card */
+    transform: translate(0px, -50%) rotate(0deg);
+    opacity: 1;
+  }
+  34% {
+    /* Tension pullback */
+    transform: translate(-14px, -52%) rotate(-4deg);
+  }
+  50% {
+    transform: translate(40px, -60%) rotate(8deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(260px, -80%) rotate(32deg) scale(0.85);
+    opacity: 0;
+  }
+}
+
+@keyframes handSwoopLeft {
+  0% {
+    transform: translate(-140px, -50%) rotate(-25deg);
+    opacity: 0;
+  }
+  22% {
+    transform: translate(0px, -50%) rotate(0deg);
+    opacity: 1;
+  }
+  34% {
+    transform: translate(14px, -52%) rotate(4deg);
+  }
+  50% {
+    transform: translate(-40px, -60%) rotate(-8deg);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-260px, -80%) rotate(-32deg) scale(0.85);
+    opacity: 0;
+  }
+}
+
+.mysterious-hand-svg {
+  width: 140px;
+  height: 95px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.22));
+}
+
+@media (max-width: 480px) {
+  .mysterious-hand-svg {
+    width: 110px;
+    height: 75px;
+  }
+  .mysterious-hand-wrapper.hand-right {
+    right: -18px;
+  }
+  .mysterious-hand-wrapper.hand-left {
+    left: -18px;
+  }
+}
+
+.hand-speed-lines {
+  position: absolute;
+  top: 15px;
+  width: 85px;
+  height: 50px;
+  animation: speedLinesFlash 0.35s ease-out 0.28s forwards;
+  opacity: 0;
+}
+
+.hand-right .hand-speed-lines {
+  left: -40px;
+}
+
+.hand-left .hand-speed-lines {
+  right: -40px;
+}
+
+@keyframes speedLinesFlash {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1.4);
+  }
 }
 
 /* Theme Toggle Button (Inside header action bar) */
@@ -2102,31 +2711,34 @@
 .mascot-customize-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background-color: var(--notion-callout-bg);
-  border: 1px solid var(--notion-border);
+  gap: 7px;
+  background-color: var(--notion-bg);
+  border: 1.5px solid var(--notion-border);
   border-radius: 20px;
   padding: 8px 16px;
-  font-size: 14px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--notion-text);
   cursor: pointer;
-  margin-top: 6px;
-  margin-bottom: 14px;
   box-shadow: var(--shadow-subtle);
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   outline: none;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  min-height: 40px;
 }
 
 .mascot-customize-pill:hover {
   background-color: var(--notion-hover);
-  border-color: var(--notion-border-hover);
-  transform: translateY(-1px);
+  border-color: var(--notion-blue);
+  color: var(--notion-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .mascot-customize-pill:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 
 .mascot-customize-pill svg {
@@ -2569,6 +3181,56 @@
   box-shadow: var(--shadow-subtle);
 }
 
+/* Hand Style Picker in Customizer Modal */
+.hand-style-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.hand-style-btn {
+  background-color: var(--notion-bg);
+  border: 1.5px solid var(--notion-border);
+  border-radius: 10px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-align: center;
+}
+
+.hand-style-btn:hover {
+  background-color: var(--notion-hover);
+  border-color: var(--notion-blue);
+  transform: translateY(-2px);
+}
+
+.hand-style-btn.active {
+  background-color: var(--notion-blue-bg);
+  border-color: var(--notion-blue);
+  box-shadow: 0 4px 12px rgba(35, 131, 226, 0.18);
+}
+
+.hand-style-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.hand-style-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--notion-text);
+}
+
+.hand-style-desc {
+  font-size: 11px;
+  color: var(--notion-text-muted);
+}
+
 /* Responsive Breakpoints for Mobile & Tablet */
 @media (max-width: 640px) {
   .mascot-modal-backdrop {
@@ -2747,6 +3409,324 @@
     gap: 8px;
   }
 }
+
+/* ===================================================
+   Home Customization Pills Row (Mascot & Theme)
+   =================================================== */
+.home-custom-pills-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.theme-select-home-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: var(--notion-bg);
+  border: 1.5px solid var(--notion-border);
+  color: var(--notion-text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-subtle);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+  min-height: 40px;
+}
+
+.theme-select-home-pill:hover {
+  background-color: var(--notion-hover);
+  border-color: var(--notion-blue);
+  color: var(--notion-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.theme-home-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ===================================================
+   Theme Selector Modal Dialog
+   =================================================== */
+.theme-picker-modal {
+  background-color: var(--notion-bg);
+  border-radius: 18px;
+  width: 92%;
+  max-width: 500px;
+  max-height: 88vh;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+  border: 1.5px solid var(--notion-border);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.theme-picker-header {
+  padding: 16px 20px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--notion-border);
+  background-color: var(--notion-callout-bg);
+}
+
+.theme-header-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.theme-picker-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--notion-text);
+}
+
+.theme-picker-desc {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--notion-text-muted);
+}
+
+/* Live Preview Stage inside Theme Modal */
+.theme-preview-stage-wrapper {
+  padding: 14px 18px 10px;
+  background-color: var(--notion-hover);
+  border-bottom: 1px solid var(--notion-border);
+}
+
+.theme-preview-card.mascot-status-area {
+  margin-bottom: 6px;
+  padding: 10px 14px;
+  gap: 12px;
+  border-radius: 16px;
+  min-height: 80px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.theme-preview-card .mascot-mini {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.theme-preview-card .mascot-speech-bubble {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-left: 0;
+  max-width: none;
+}
+
+.theme-preview-bubble-text {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--notion-text);
+}
+
+.themes-selector-grid {
+  padding: 10px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--notion-border) transparent;
+}
+
+.themes-selector-grid::-webkit-scrollbar {
+  width: 5px;
+}
+
+.themes-selector-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.themes-selector-grid::-webkit-scrollbar-thumb {
+  background-color: var(--notion-border);
+  border-radius: 10px;
+}
+
+.themes-selector-grid::-webkit-scrollbar-thumb:hover {
+  background-color: var(--notion-text-muted);
+}
+
+.theme-card-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--notion-bg);
+  border: 1.5px solid var(--notion-border);
+  border-radius: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-sizing: border-box;
+}
+
+.theme-card-option:hover {
+  border-color: var(--notion-blue);
+  background-color: var(--notion-hover);
+  transform: translateY(-1px);
+}
+
+.theme-card-option.active {
+  border-color: var(--notion-blue);
+  background-color: var(--notion-blue-bg);
+  box-shadow: 0 4px 14px rgba(35, 131, 226, 0.16);
+}
+
+/* Individual card accents */
+.theme-card-halloween.active {
+  border-color: #F76707;
+  background-color: rgba(247, 103, 7, 0.1);
+  box-shadow: 0 4px 14px rgba(247, 103, 7, 0.2);
+}
+
+.theme-card-christmas.active {
+  border-color: #E03131;
+  background-color: rgba(224, 49, 49, 0.1);
+  box-shadow: 0 4px 14px rgba(224, 49, 49, 0.18);
+}
+
+.theme-card-space.active {
+  border-color: #4C6EF5;
+  background-color: rgba(76, 110, 245, 0.1);
+  box-shadow: 0 4px 14px rgba(76, 110, 245, 0.2);
+}
+
+.theme-card-candyland.active {
+  border-color: #F06595;
+  background-color: rgba(240, 101, 149, 0.1);
+  box-shadow: 0 4px 14px rgba(240, 101, 149, 0.2);
+}
+
+.theme-card-icon-bubble {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background-color: var(--notion-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.theme-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.theme-card-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1px;
+}
+
+.theme-card-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--notion-text);
+}
+
+.theme-active-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: var(--notion-blue);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.theme-card-halloween .theme-active-tag {
+  background-color: #F76707;
+}
+
+.theme-card-christmas .theme-active-tag {
+  background-color: #E03131;
+}
+
+.theme-card-space .theme-active-tag {
+  background-color: #4C6EF5;
+}
+
+.theme-card-candyland .theme-active-tag {
+  background-color: #F06595;
+}
+
+.theme-card-tagline {
+  font-size: 12px;
+  color: var(--notion-text-muted);
+}
+
+.theme-card-indicator {
+  flex-shrink: 0;
+}
+
+.theme-check-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--notion-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-card-halloween .theme-check-circle {
+  background-color: #F76707;
+}
+
+.theme-card-christmas .theme-check-circle {
+  background-color: #E03131;
+}
+
+.theme-card-space .theme-check-circle {
+  background-color: #4C6EF5;
+}
+
+.theme-card-candyland .theme-check-circle {
+  background-color: #F06595;
+}
+
+.theme-empty-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--notion-border);
+}
+
+.theme-picker-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--notion-border);
+  background-color: var(--notion-callout-bg);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.theme-confirm-btn {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
 
 
 

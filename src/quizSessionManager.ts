@@ -8,7 +8,8 @@ export interface ActiveQuizSession {
   currentQuestion: Question
   askedQuestions: string[]
   score: number
-  hasUsedLifeline: boolean
+  lifelineUses: number
+  counterUses: number
   eliminatedChoices: number[]
   timeLeft: number
   savedAt: number
