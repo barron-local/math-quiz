@@ -310,7 +310,7 @@ export default function App() {
     if (gameState === 'playing' && !isAnswered && timeLeft === 10 && !hasWarnedTimeRef.current && isVoiceEnabled) {
       hasWarnedTimeRef.current = true
       setIsSpeaking(true)
-      const warningText = 'เหลือเวลาอีก 10 วินาทีแล้วน้าา'
+      const warningText = 'เหลือเวลาอีก 10 วินาที'
       speakThaiText(
         warningText,
         () => setIsSpeaking(true),
