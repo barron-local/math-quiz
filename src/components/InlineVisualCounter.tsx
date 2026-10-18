@@ -15,7 +15,6 @@ export const InlineVisualCounter: React.FC<InlineVisualCounterProps> = ({
   num3,
   onClose,
 }) => {
-  // Set of tapped item keys, e.g. "g1-0", "g2-1"
   const [tappedKeys, setTappedKeys] = useState<Set<string>>(new Set())
 
   const handleTap = (key: string) => {
@@ -25,7 +24,6 @@ export const InlineVisualCounter: React.FC<InlineVisualCounterProps> = ({
         next.delete(key)
       } else {
         next.add(key)
-        // Soft, friendly audio pop using Web Audio API
         try {
           if (typeof window !== 'undefined') {
             const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
@@ -112,18 +110,15 @@ export const InlineVisualCounter: React.FC<InlineVisualCounterProps> = ({
       </div>
 
       <div className="inline-counter-body">
-        {/* Group 1 */}
         <div className="inline-counter-section">
           <span className="inline-section-label">มี {num1} ลูก</span>
           {renderItemRow(num1, 'g1')}
         </div>
 
-        {/* Operator Divider */}
         <div className="inline-counter-op" aria-hidden="true">
           <span>{operator}</span>
         </div>
 
-        {/* Group 2 */}
         <div className="inline-counter-section">
           <span className="inline-section-label">
             {isSub ? `หักออก ${num2} ลูก` : `เพิ่มอีก ${num2} ลูก`}
@@ -131,7 +126,6 @@ export const InlineVisualCounter: React.FC<InlineVisualCounterProps> = ({
           {renderItemRow(num2, 'g2', isSub)}
         </div>
 
-        {/* Group 3 if 3-number addition */}
         {typeof num3 === 'number' && (
           <>
             <div className="inline-counter-op" aria-hidden="true">

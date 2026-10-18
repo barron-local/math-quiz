@@ -2334,18 +2334,26 @@
 }
 
 
-/* Choice eliminated / faded state */
+/* Choice eliminated: Clean dashed placeholder slot with text completely hidden */
 .choice-btn.choice-eliminated {
-  opacity: 0.18;
-  text-decoration: line-through;
+  opacity: 1;
   pointer-events: none;
-  background-color: var(--notion-hover);
-  border-color: var(--notion-border);
-  color: var(--notion-text-light);
-  box-shadow: none;
-  transform: scale(0.95);
-  filter: grayscale(1);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  background-color: rgba(0, 0, 0, 0.02);
+  border: 2px dashed rgba(0, 0, 0, 0.12);
+  color: transparent !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  transform: none;
+  cursor: default;
+  user-select: none;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+[data-theme='dark'] .choice-btn.choice-eliminated,
+.theme-space .choice-btn.choice-eliminated,
+.theme-halloween .choice-btn.choice-eliminated {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 /* ===================================================

@@ -203,7 +203,6 @@ export default function App() {
   const [counterUses, setCounterUses] = useState(() => {
     return initialSession?.counterUses ?? 0
   })
-  // Track whether lifeline was used on this specific question
   const [usedLifelineOnCurrentQ, setUsedLifelineOnCurrentQ] = useState(false)
   const [showVisualCounter, setShowVisualCounter] = useState(false)
   const [eliminatedChoices, setEliminatedChoices] = useState<number[]>(() => {
@@ -511,10 +510,8 @@ export default function App() {
     }, 850)
   }
 
-  // Dynamic Skill quota: 1 use per 10 questions (e.g. 10 questions = 1 use, 20 questions = 2 uses)
   const maxSkillUses = Math.max(1, Math.round(totalQuestions / 10))
 
-  // Handle special booster lifeline (50-50: cut 2 incorrect choices with mysterious cartoon hand)
   const handleUseLifeline = () => {
     if (
       lifelineUses >= maxSkillUses ||
@@ -526,19 +523,16 @@ export default function App() {
     )
       return
 
-    // Find all incorrect choices in current question
     const incorrectChoices = currentQuestion.choices.filter(
       (c) => c !== currentQuestion.correctAnswer
     )
 
-    // Pick 2 random incorrect choices to eliminate
     const shuffledIncorrect = [...incorrectChoices].sort(() => Math.random() - 0.5)
     const toEliminate = shuffledIncorrect.slice(0, 2)
     if (toEliminate.length < 2) return
 
     const [firstChoice, secondChoice] = toEliminate
 
-    // Immediately stop pending question speech & any active voice playback!
     if (questionSpeechTimerRef.current) {
       clearTimeout(questionSpeechTimerRef.current)
       questionSpeechTimerRef.current = null
@@ -554,8 +548,6 @@ export default function App() {
     setUsedLifelineOnCurrentQ(true)
     setMascotMood('cheer')
 
-    // Determine direction for each choice based on its position in the 2x2 grid
-    // index 0 (top-left), index 1 (top-right), index 2 (bottom-left), index 3 (bottom-right)
     const getSideForChoice = (choiceVal: number): 'left' | 'right' => {
       const idx = currentQuestion.choices.indexOf(choiceVal)
       return idx % 2 === 0 ? 'left' : 'right'
@@ -564,12 +556,9 @@ export default function App() {
     const firstSide = getSideForChoice(firstChoice)
     const secondSide = getSideForChoice(secondChoice)
 
-    // Staggered Snatch Animation (Gentle & fun pace for kids):
-    // 1. Hand 1 swoops in and snatches the first incorrect choice!
     soundEffects.playYoink(70)
     setSnatchingMap({ [firstChoice]: { side: firstSide, active: true } })
 
-    // 2. Hand 2 swoops in and snatches the second incorrect choice!
     setTimeout(() => {
       soundEffects.playYoink(70)
       setSnatchingMap((prev) => ({
@@ -578,18 +567,15 @@ export default function App() {
       }))
     }, 450)
 
-    // 3. Mark both as eliminated once snatching animations finish
     setTimeout(() => {
       setEliminatedChoices(toEliminate)
       setSnatchingMap({})
     }, 1280)
   }
 
-  // Handle special booster skill: Visual Counters (ลูกคิดวิเศษ & นิ้วช่วยนับ)
   const handleUseVisualCounter = () => {
     if (isAnswered || !currentQuestion || isDemoRunning) return
     if (!showVisualCounter) {
-      // If not yet opened on this question, check quota
       if (counterUses >= maxSkillUses) return
       setShowVisualCounter(true)
       setCounterUses((prev) => prev + 1)
@@ -1519,7 +1505,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Inline Visual Counter Panel (นิ้วช่วยนับใต้โจทย์ แสดงแอปเปิลให้นับได้โดยตรง) */}
             {showVisualCounter && (
               <InlineVisualCounter
                 num1={currentQuestion.num1}
@@ -1633,9 +1618,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Floating Skill Boosters: 50-50 Lifeline & Visual Counters Button */}
           <aside className="skill-floating-pod pop-in" aria-label="สกิลพิเศษ">
-            {/* Skill 1: Cut 2 choices */}
             {(() => {
               const remainingLifeline = Math.max(0, maxSkillUses - lifelineUses)
               const isLifelineDepleted = remainingLifeline === 0
@@ -1671,7 +1654,6 @@ export default function App() {
               )
             })()}
 
-            {/* Skill 2: Visual Counters (ลูกคิดวิเศษ & นิ้วช่วยนับ) */}
             {(() => {
               const remainingCounter = Math.max(0, maxSkillUses - counterUses)
               const isCounterDepleted = remainingCounter === 0 && !showVisualCounter
