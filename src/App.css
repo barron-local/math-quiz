@@ -2354,7 +2354,7 @@
 
 /* Card yanked to the right by Mysterious Hand */
 .choice-btn.card-snatched-right {
-  animation: cardYoinkRight 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: cardYoinkRight 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   z-index: 20;
   border-color: #2383E2 !important;
   box-shadow: 0 8px 24px rgba(35, 131, 226, 0.28) !important;
@@ -2389,7 +2389,7 @@
 
 /* Card yanked to the left by Mysterious Hand */
 .choice-btn.card-snatched-left {
-  animation: cardYoinkLeft 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: cardYoinkLeft 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   z-index: 20;
   border-color: #2383E2 !important;
   box-shadow: 0 8px 24px rgba(35, 131, 226, 0.28) !important;
@@ -2429,13 +2429,13 @@
 .mysterious-hand-wrapper.hand-right {
   right: -28px;
   transform: translateY(-50%);
-  animation: handSwoopRight 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: handSwoopRight 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .mysterious-hand-wrapper.hand-left {
   left: -28px;
   transform: translateY(-50%);
-  animation: handSwoopLeft 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: handSwoopLeft 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes handSwoopRight {

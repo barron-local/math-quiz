@@ -310,7 +310,7 @@ export default function App() {
     if (gameState === 'playing' && !isAnswered && timeLeft === 10 && !hasWarnedTimeRef.current && isVoiceEnabled) {
       hasWarnedTimeRef.current = true
       setIsSpeaking(true)
-      const warningText = `เหลือเวลาอีกสิบวินาทีแล้วน้อง${kidName || 'คนเก่ง'} สู้ๆ นะ!`
+      const warningText = 'เหลือเวลาอีก 10 วินาทีแล้วน้าา'
       speakThaiText(
         warningText,
         () => setIsSpeaking(true),
@@ -564,7 +564,7 @@ export default function App() {
     const firstSide = getSideForChoice(firstChoice)
     const secondSide = getSideForChoice(secondChoice)
 
-    // Staggered Snatch Animation:
+    // Staggered Snatch Animation (Gentle & fun pace for kids):
     // 1. Hand 1 swoops in and snatches the first incorrect choice!
     soundEffects.playYoink(70)
     setSnatchingMap({ [firstChoice]: { side: firstSide, active: true } })
@@ -576,13 +576,13 @@ export default function App() {
         ...prev,
         [secondChoice]: { side: secondSide, active: true },
       }))
-    }, 280)
+    }, 450)
 
     // 3. Mark both as eliminated once snatching animations finish
     setTimeout(() => {
       setEliminatedChoices(toEliminate)
       setSnatchingMap({})
-    }, 850)
+    }, 1280)
   }
 
   // Handle special booster skill: Visual Counters (ลูกคิดวิเศษ & นิ้วช่วยนับ)
