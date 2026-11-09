@@ -8,7 +8,7 @@ import {
   DEFAULT_MASCOT_CONFIG,
 } from '../mascotTypes'
 import { KidMascot } from './KidMascot'
-import { type HandStyle } from './MysteriousHand'
+import { MysteriousHand, HandPreviewIcon, type HandStyle } from './MysteriousHand'
 
 interface MascotCustomizerModalProps {
   isOpen: boolean
@@ -30,21 +30,28 @@ export const MascotCustomizerModal: React.FC<MascotCustomizerModalProps> = ({
   const [config, setConfig] = useState<MascotConfig>(currentConfig)
   const [previewMood, setPreviewMood] = useState<'happy' | 'celebrate' | 'cheer' | 'think'>('happy')
   const [isPoked, setIsPoked] = useState(false)
+  const [selectedHandStyle, setSelectedHandStyle] = useState<HandStyle>(handStyle)
+  const [isSnatchingPreview, setIsSnatchingPreview] = useState(false)
+  const [previewKey, setPreviewKey] = useState(0)
 
   // Sync state if opened with updated config
   React.useEffect(() => {
     if (isOpen) {
       setConfig(currentConfig)
       setPreviewMood('happy')
+      setSelectedHandStyle(handStyle)
     }
-  }, [isOpen, currentConfig])
+  }, [isOpen, currentConfig, handStyle])
 
   if (!isOpen) return null
 
   const handleSelectType = (type: MascotType) => {
+    const opt = MASCOT_OPTIONS.find((o) => o.id === type)
     setConfig((prev) => ({
       ...prev,
       type,
+      skinColor: opt ? opt.defaultSkin : prev.skinColor,
+      shirtColor: opt ? opt.defaultShirt : prev.shirtColor,
     }))
   }
 
@@ -84,6 +91,23 @@ export const MascotCustomizerModal: React.FC<MascotCustomizerModalProps> = ({
     setTimeout(() => setIsPoked(false), 550)
   }
 
+  const triggerHandSnatchPreview = () => {
+    setIsSnatchingPreview(false)
+    setTimeout(() => {
+      setPreviewKey((k) => k + 1)
+      setIsSnatchingPreview(true)
+      setTimeout(() => {
+        setIsSnatchingPreview(false)
+      }, 1250)
+    }, 40)
+  }
+
+  const handleSelectHandStyle = (style: HandStyle) => {
+    setSelectedHandStyle(style)
+    onSelectHandStyle?.(style)
+    triggerHandSnatchPreview()
+  }
+
   const activeOption = MASCOT_OPTIONS.find((o) => o.id === config.type) || MASCOT_OPTIONS[0]
 
   return (
@@ -98,7 +122,6 @@ export const MascotCustomizerModal: React.FC<MascotCustomizerModalProps> = ({
         {/* Modal Header in Notion Style */}
         <div className="mascot-modal-header">
           <div className="mascot-modal-title-group">
-            <span className="notion-tag-pill">ตั้งค่าตัวละคร</span>
             <h2 id="customizer-title" className="mascot-modal-title">
               ห้องแต่งตัวมาสคอต
             </h2>
@@ -246,11 +269,11 @@ export const MascotCustomizerModal: React.FC<MascotCustomizerModalProps> = ({
                 <span className="section-step-num">2</span>
                 <div>
                   <h3 className="custom-section-title">
-                    {config.type === 'cat' || config.type === 'bear' || config.type === 'bunny'
-                      ? 'สีขนและสีตัว'
-                      : config.type === 'robot'
+                    {config.type === 'robot'
                       ? 'สีบอดี้หุ่นยนต์'
-                      : 'สีผิว'}
+                      : config.type === 'boy' || config.type === 'girl'
+                      ? 'สีผิว'
+                      : 'สีขนและสีตัว'}
                   </h3>
                   <p className="custom-section-desc">แตะเลือกสีที่ชอบ</p>
                 </div>
@@ -328,26 +351,115 @@ export const MascotCustomizerModal: React.FC<MascotCustomizerModalProps> = ({
                 </div>
               </div>
 
+              {/* Hand Style Cards with Miniature Hand Visual Preview */}
               <div className="hand-style-options-grid">
                 {[
-                  { id: 'cartoon-glove' as HandStyle, icon: '🧤', name: 'ถุงมือการ์ตูน', desc: 'สีขาวจอมซน' },
-                  { id: 'monster-paw' as HandStyle, icon: '🐾', name: 'อุ้งเท้ามอนสเตอร์', desc: 'ขนนุ่มสีม่วง' },
-                  { id: 'robot-claw' as HandStyle, icon: '🤖', name: 'ก้ามปูหุ่นยนต์', desc: 'จักรกลงับไว' },
+                  {
+                    id: 'cartoon-glove' as HandStyle,
+                    icon: '🧤',
+                    name: 'ถุงมือการ์ตูน',
+                    desc: 'สีขาวจอมซน',
+                  },
+                  {
+                    id: 'monster-paw' as HandStyle,
+                    icon: '🐾',
+                    name: 'อุ้งเท้ามอนสเตอร์',
+                    desc: 'ขนนุ่มสีม่วง',
+                  },
+                  {
+                    id: 'robot-claw' as HandStyle,
+                    icon: '🤖',
+                    name: 'ก้ามปูหุ่นยนต์',
+                    desc: 'จักรกลงับไว',
+                  },
                 ].map((item) => {
-                  const isSelected = (handStyle || 'cartoon-glove') === item.id
+                  const isSelected = selectedHandStyle === item.id
                   return (
                     <button
                       key={item.id}
                       type="button"
                       className={`hand-style-btn ${isSelected ? 'active' : ''}`}
-                      onClick={() => onSelectHandStyle?.(item.id)}
+                      onClick={() => handleSelectHandStyle(item.id)}
+                      aria-pressed={isSelected}
                     >
-                      <span className="hand-style-icon" aria-hidden="true">{item.icon}</span>
+                      <div className="hand-style-thumb">
+                        <HandPreviewIcon style={item.id} width={54} height={36} />
+                      </div>
+                      <span className="hand-style-icon" aria-hidden="true">
+                        {item.icon}
+                      </span>
                       <span className="hand-style-name">{item.name}</span>
                       <span className="hand-style-desc">{item.desc}</span>
+                      {isSelected && (
+                        <span className="hand-style-check" aria-hidden="true">
+                          <svg
+                            width="10"
+                            height="10"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </span>
+                      )}
                     </button>
                   )
                 })}
+              </div>
+
+              {/* Interactive Live Snatch Preview Sandbox */}
+              <div className="hand-preview-sandbox">
+                <div className="hand-preview-sandbox-header">
+                  <span className="sandbox-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    ตัวอย่างตอนดึงคำตอบหนี
+                  </span>
+                </div>
+
+                <div className="hand-preview-stage-area">
+                  <div className="hand-preview-choice-container">
+                    <div
+                      key={previewKey}
+                      className={`preview-mock-choice ${isSnatchingPreview ? 'card-snatched-right' : ''}`}
+                    >
+                      <span className="choice-mock-num">24</span>
+                      <span className="choice-mock-label">ตัวเลือกผิด</span>
+
+                      {isSnatchingPreview && (
+                        <MysteriousHand side="right" style={selectedHandStyle} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="hand-preview-replay-btn"
+                  onClick={() => triggerHandSnatchPreview()}
+                  disabled={isSnatchingPreview}
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                  </svg>
+                  <span>{isSnatchingPreview ? 'กำลังดึงคำตอบ...' : 'แตะเพื่อทดสอบดึงอีกครั้ง'}</span>
+                </button>
               </div>
             </section>
           </div>

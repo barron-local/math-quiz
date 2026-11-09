@@ -1,4 +1,16 @@
-export type MascotType = 'boy' | 'girl' | 'cat' | 'bear' | 'bunny' | 'robot'
+export type MascotType =
+  | 'boy'
+  | 'girl'
+  | 'cat'
+  | 'bear'
+  | 'bunny'
+  | 'robot'
+  | 'dog'
+  | 'panda'
+  | 'dino'
+  | 'fox'
+  | 'frog'
+  | 'unicorn'
 
 export interface MascotConfig {
   type: MascotType
@@ -57,6 +69,48 @@ export const MASCOT_OPTIONS: MascotOption[] = [
     defaultSkin: '#CFD8DC',
     defaultShirt: '#12B886',
   },
+  {
+    id: 'dog',
+    name: 'น้องตูบ',
+    tag: 'เจ้าตูบเพื่อนซี้',
+    defaultSkin: '#F5B041',
+    defaultShirt: '#40C057',
+  },
+  {
+    id: 'panda',
+    name: 'น้องแพนด้า',
+    tag: 'หมีแพนด้าจอมซน',
+    defaultSkin: '#FFFFFF',
+    defaultShirt: '#15AABF',
+  },
+  {
+    id: 'dino',
+    name: 'น้องไดโน่',
+    tag: 'ไดโนเสาร์ตัวจิ๋ว',
+    defaultSkin: '#51CF66',
+    defaultShirt: '#FF922B',
+  },
+  {
+    id: 'fox',
+    name: 'น้องฟ็อกซี่',
+    tag: 'จิ้งจอกน้อยเจ้าปัญญา',
+    defaultSkin: '#F76707',
+    defaultShirt: '#748FFC',
+  },
+  {
+    id: 'frog',
+    name: 'น้องกบเคโระ',
+    tag: 'กบน้อยอารมณ์ดี',
+    defaultSkin: '#69DB7C',
+    defaultShirt: '#FCC419',
+  },
+  {
+    id: 'unicorn',
+    name: 'น้องยูนิ',
+    tag: 'ยูนิคอร์นมหัศจรรย์',
+    defaultSkin: '#FFF0F6',
+    defaultShirt: '#DA77F2',
+  },
 ]
 
 export const PRESET_SKIN_COLORS = [
@@ -64,10 +118,16 @@ export const PRESET_SKIN_COLORS = [
   { name: 'ผิวสองสี', color: '#F3C088' },
   { name: 'ผิวแทน', color: '#D69B60' },
   { name: 'ผิวเข้ม', color: '#8D5524' },
+  { name: 'ขาวบริสุทธิ์', color: '#FFFFFF' },
   { name: 'ขาวปุยฝ้าย', color: '#F8F9FA' },
   { name: 'ครีมทอง', color: '#FFE082' },
+  { name: 'คาราเมล', color: '#F5B041' },
+  { name: 'ส้มจิ้งจอก', color: '#F76707' },
+  { name: 'เขียวไดโน่', color: '#51CF66' },
+  { name: 'เขียวแอปเปิ้ล', color: '#69DB7C' },
   { name: 'ช็อกโกแลต', color: '#845338' },
   { name: 'ชมพูพาสเทล', color: '#FFD1DC' },
+  { name: 'ชมพูหวานใส', color: '#FFF0F6' },
   { name: 'ฟ้ามิ้นต์', color: '#B2EBF2' },
   { name: 'ม่วงลาเวนเดอร์', color: '#E0BBE4' },
   { name: 'เทาโรบอท', color: '#CFD8DC' },
@@ -79,9 +139,12 @@ export const PRESET_SHIRT_COLORS = [
   { name: 'ส้มสดใส', color: '#FF922B' },
   { name: 'เหลืองสว่าง', color: '#FAB005' },
   { name: 'เขียวมรกต', color: '#2F9E44' },
+  { name: 'เขียวสดชื่น', color: '#40C057' },
   { name: 'มิ้นต์สดชื่น', color: '#12B886' },
+  { name: 'ฟ้าสดใส', color: '#15AABF' },
   { name: 'ชมพูหวาน', color: '#F06595' },
   { name: 'ม่วงแฟนตาซี', color: '#845EF7' },
+  { name: 'ม่วงลาเวนเดอร์', color: '#DA77F2' },
   { name: 'ฟ้าน้ำทะเล', color: '#20C997' },
   { name: 'คอรัลพีช', color: '#FF6B6B' },
   { name: 'สเลทเท่ๆ', color: '#495057' },
